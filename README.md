@@ -10,11 +10,11 @@ A pokemon inspired game written in C & C++ played in the terminal.
 
 #### Make
 
-`make`
+Type `make` in the terminal
 
 #### Clean
 
-'make clean'
+Type `make clean` in the terminal
 
 #### Running
 
