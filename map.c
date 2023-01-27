@@ -3,9 +3,8 @@
 #include <time.h>
 #define W 21 //width of terminal or rows
 #define H 80 // height of terminal or columns
-
-//  At least two paths pass through your map, one oriented N-S, the other E-W; these will intersect somewhere in your map. Additional paths are acceptable according to your taste. Paths are represented
-// using hashes (’#’).
+#define Red "\33[0:31m\\]"
+#define Reset "\33[0m\\]" 
 
 // Your map should have a Pokemon Center and a Pokéemart, Represented by one or more ’C’ and ’M’, ´
 // respectively. I make my Pokemon Centers and Pokémarts 2 × 2.
@@ -26,25 +25,47 @@
 
 
 int main(){
-    char chars[10] = {'%','#'};
-    int ranX;
-    int ranY;
+    char chars[10] = {'%','#','C','M'};
+    int ranX, ranY, ranP; 
     srand(time(0));
-    ranX = rand() % 21 + 1;
-    ranY = rand() % 80 + 1;
-    printf("%d\n", ranX);
-    printf("%d\n", ranY);
+    ranX = rand() % 19 + 1;
+    ranY = rand() % 40 + 1;
+    ranP = rand() % 70 + 1; //for place
+  
     for (int i = 0; i <= W; i++){
         for (int j = 0; j <= H; j++){
-           if (i==0 || i==W || j==0 || j==H){
+            if (j == H && i == ranX || j == 0 && i == ranX){
+            printf("%c", chars[1]);
+            } 
+            else if (i == W && j == ranY || i == 0 && j == ranY){
+            printf("%c", chars[1]);
+            } 
+           else if (i==0 || i==W || j==0 || j==H){
+            // printf("\033[0;31m"); //prints red
             printf("%c", chars[0]);     
            }           
             else if (i==ranX){
+                // printf("\033[0m"); //resets color
                 printf("%c", chars[1]);
             }
             else if (j==ranY){
             printf("%c", chars[1]);
-            }         
+            }     
+                    //if row is 2 or 1 above ranX, and if the counter is 1 below (to the left of) ranP, place C in next two row spots.
+            else if (i-2 == ranX && (ranP - j == 1 || ranP == j) || i-1 == ranX && (ranP - j == 1 || ranP == j)){
+                printf("%c", chars[2]);
+            }    
+             else if (i+2 == ranX && (ranP - j == 1 || ranP == j) || i+1 == ranX && (ranP - j == 1 || ranP == j)){
+                printf("%c", chars[3]);
+            } 
+            
+                    
+            
+            
+            //if row is 2 below ranX, and if the counter is 1 below (to the left of) ranP, place C in next two row spots.
+            //if row is 1 below ranY, and if the counter is 1 below (to the left of) ranP, place C in next two row spots.
+
+            
         else{
             printf(" ");
         }
