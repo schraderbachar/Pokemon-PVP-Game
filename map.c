@@ -6,31 +6,35 @@
 #define Red "\33[0:31m\\]"
 #define Reset "\33[0m\\]" 
 
-// Your map should have a Pokemon Center and a Pokéemart, Represented by one or more ’C’ and ’M’, ´
-// respectively. I make my Pokemon Centers and Pokémarts 2 × 2.
 // 1
-// • Your Pokemon Center and Pokémart, should be reachable from the path without having to go through ´
-// tall grass.
-// • Your map should contain at least two regions of tall grass (represented with colons)
-// • Your map should contain at least one region of water (represented with tildes)
-// • The outermost cells of the map are immovable boulders (represented using percent signs), except that
-// there is one exit on each border. Your N-S path goes between the top and bottom exit, while the E-W
-// path goes between the left and right exits.2
-// • Your map should contain at least two clearings (regions of short grass). Clearings are represented
-// using periods.
 // • Other option terrain includes rocks and boulders (’%’), trees (’ˆ’), and whatever else you think would
 // be interesting.
 
 
-
-
 int main(){
-    char chars[10] = {'%','#','C','M'};
-    int ranX, ranY, ranP; 
+    char chars[10] = {'%','#','C','M',':','~','^'};
+    int ranX, ranY, ranP, ranTX, ranTY, ranFX, ranFY; 
     srand(time(0));
-    ranX = rand() % 19 + 1;
-    ranY = rand() % 40 + 1;
-    ranP = rand() % 70 + 1; //for place
+    ranX = rand() % 17 + 4;
+    ranY = rand() % 40 + 4;
+    ranP = rand() % 70 + 4; //for place
+    ranTX = rand() % 7 + 1; // for tall grass
+    ranTY = rand() % 18 + 4;// for tall grass
+    ranFX = rand() % 16 + 10;// for forests
+    ranFY = rand() % 10 + 5;// for forests
+    // make sure ranPs aren't close to the tall grass
+    if (ranP - ranTX <= 5){
+        ranTX += 7;
+    } 
+    if (ranP - ranTY <= 5){
+        ranTY += 7;
+    }
+    if (ranX > 17){ //too close to bottom border for my comfort
+        ranX = 17;
+    }
+
+    printf("\n %d %d \n", ranX, ranY);
+    printf("\n %d %d \n", ranFX, ranFY);
   
     for (int i = 0; i <= W; i++){
         for (int j = 0; j <= H; j++){
@@ -54,21 +58,28 @@ int main(){
                     //if row is 2 or 1 above ranX, and if the counter is 1 below (to the left of) ranP, place C in next two row spots.
             else if (i-2 == ranX && (ranP - j == 1 || ranP == j) || i-1 == ranX && (ranP - j == 1 || ranP == j)){
                 printf("%c", chars[2]);
+                
             }    
              else if (i+2 == ranX && (ranP - j == 1 || ranP == j) || i+1 == ranX && (ranP - j == 1 || ranP == j)){
                 printf("%c", chars[3]);
             } 
+            else if (j >= ranTX && j <= ranTX + 5 && i >= ranTX && i <= ranTX + 5 || j >= (H - ranTY - 5) && j <= (H - ranTY) && i >= (W - ranTY) && i <= (W - ranTY + 5)){
+                printf("%c",chars[4]);
+            }
+            else if (j >= ranFX && j <= ranFX + 4 && i >= ranFX && i <= ranFX + 4 || j >= (H - ranFY - 4) && j <= (H - ranFY) && i >= (W - ranFY) && i <= (W - ranFY + 4)){
+                if (abs(j - ranFX) >= 2 && abs(j - ranFX) < 4){
+                    printf("%c",chars[5]);
+                }
+                else{
+                    printf("%c",chars[6]); 
+                }
+               
+            }
+              
             
-                    
-            
-            
-            //if row is 2 below ranX, and if the counter is 1 below (to the left of) ranP, place C in next two row spots.
-            //if row is 1 below ranY, and if the counter is 1 below (to the left of) ranP, place C in next two row spots.
-
-            
-        else{
-            printf(" ");
-        }
+            else{
+                printf(".");
+            }
              
         }
         printf("\n");
