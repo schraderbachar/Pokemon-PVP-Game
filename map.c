@@ -32,9 +32,6 @@ int main(){
     if (ranX > 17){ //too close to bottom border for my comfort
         ranX = 17;
     }
-
-    printf("\n %d %d \n", ranX, ranY);
-    printf("\n %d %d \n", ranFX, ranFY);
   
     for (int i = 0; i <= W; i++){
         for (int j = 0; j <= H; j++){
@@ -67,13 +64,16 @@ int main(){
                 printf("%c",chars[4]);
             }
             else if (j >= ranFX && j <= ranFX + 4 && i >= ranFX && i <= ranFX + 4 || j >= (H - ranFY - 4) && j <= (H - ranFY) && i >= (W - ranFY) && i <= (W - ranFY + 4)){
-                if (abs(j - ranFX) >= 2 && abs(j - ranFX) < 4){
+                if (abs(j - ranFX) >= 2 && abs(j - ranFX) < 4 || abs(j - (H - ranFY - 4) >= 2 && abs(j - (H - ranFY) < 4))){
                     printf("%c",chars[5]);
                 }
                 else{
                     printf("%c",chars[6]); 
                 }
                
+            }
+            else if (i >= 10 && i <= 15 && j >= 57 && j <= 63){
+                printf("%c", chars[0]);
             }
               
             
