@@ -3,12 +3,6 @@
 #include <time.h>
 #define W 21 //width of terminal or rows
 #define H 80 // height of terminal or columns
-#define Red "\33[0:31m\\]"
-#define Reset "\33[0m\\]" 
-
-// 1
-// • Other option terrain includes rocks and boulders (’%’), trees (’ˆ’), and whatever else you think would
-// be interesting.
 
 
 int main(){
@@ -35,10 +29,10 @@ int main(){
   
     for (int i = 0; i <= W; i++){
         for (int j = 0; j <= H; j++){
-            if (j == H && i == ranX || j == 0 && i == ranX){
+            if ((j == H && i == ranX) || (j == 0 && i == ranX)){
             printf("%c", chars[1]);
             } 
-            else if (i == W && j == ranY || i == 0 && j == ranY){
+            else if ((i == W && j == ranY) || (i == 0 && j == ranY)){
             printf("%c", chars[1]);
             } 
            else if (i==0 || i==W || j==0 || j==H){
@@ -53,18 +47,18 @@ int main(){
             printf("%c", chars[1]);
             }     
                     //if row is 2 or 1 above ranX, and if the counter is 1 below (to the left of) ranP, place C in next two row spots.
-            else if (i-2 == ranX && (ranP - j == 1 || ranP == j) || i-1 == ranX && (ranP - j == 1 || ranP == j)){
+            else if ((i-2 == ranX && (ranP - j == 1 || ranP == j)) || (i-1 == ranX && (ranP - j == 1 || ranP == j))){
                 printf("%c", chars[2]);
                 
             }    
-             else if (i+2 == ranX && (ranP - j == 1 || ranP == j) || i+1 == ranX && (ranP - j == 1 || ranP == j)){
+             else if ((i+2 == ranX && (ranP - j == 1 || ranP == j)) ||(i+1 == ranX && (ranP - j == 1 || ranP == j))){
                 printf("%c", chars[3]);
             } 
-            else if (j >= ranTX && j <= ranTX + 5 && i >= ranTX && i <= ranTX + 5 || j >= (H - ranTY - 5) && j <= (H - ranTY) && i >= (W - ranTY) && i <= (W - ranTY + 5)){
+            else if ((j >= ranTX && j <= ranTX + 5 && i >= ranTX && i <= ranTX + 5) || (j >= (H - ranTY - 5) && j <= (H - ranTY) && i >= (W - ranTY) && i <= (W - ranTY + 5))){
                 printf("%c",chars[4]);
             }
-            else if (j >= ranFX && j <= ranFX + 4 && i >= ranFX && i <= ranFX + 4 || j >= (H - ranFY - 4) && j <= (H - ranFY) && i >= (W - ranFY) && i <= (W - ranFY + 4)){
-                if (abs(j - ranFX) >= 2 && abs(j - ranFX) < 4 || abs(j - (H - ranFY - 4) >= 2 && abs(j - (H - ranFY) < 4))){
+            else if ((j >= ranFX && j <= ranFX + 4 && i >= ranFX && i <= ranFX + 4) || (j >= (H - ranFY - 4) && j <= (H - ranFY) && i >= (W - ranFY) && i <= (W - ranFY + 4))){
+                if ((abs(j - ranFX) >= 2 && abs(j - ranFX) < 4) || (abs(j - (H - ranFY - 4) >= 2 && abs(j - (H - ranFY) < 4)))){
                     printf("%c",chars[5]);
                 }
                 else{

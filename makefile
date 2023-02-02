@@ -8,16 +8,16 @@ TERM = "S2023"
 CFLAGS = -Wall -Werror -ggdb -funroll-loops -DTERM=$(TERM)
 CXXFLAGS = -Wall -Werror -ggdb -funroll-loops -DTERM=$(TERM)
 
-LDFLAGS = -lncurses
+LDFLAGS = 
 
-BIN = map
-OBJS = map.o
+BIN = poke327
+OBJS = poke327.o heap.o
 
 all: $(BIN) etags
 
 $(BIN): $(OBJS)
 	@$(ECHO) Linking $@
-	@$(CXX) $^ -o $@ $(LDFLAGS)
+	@$(CC) $^ -o $@ $(LDFLAGS)
 
 -include $(OBJS:.o=.d)
 
