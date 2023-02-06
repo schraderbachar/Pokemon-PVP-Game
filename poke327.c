@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <machine/endian.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <limits.h>
@@ -64,6 +63,8 @@ typedef struct map {
   uint8_t height[MAP_Y][MAP_X];
   uint8_t n, s, e, w;
 } map_t;
+
+map_t *maps[MAP_Y][MAP_X];
 
 typedef struct queue_node {
   int x, y;
@@ -752,9 +753,36 @@ int main(int argc, char *argv[])
 
   printf("Using seed: %u\n", seed);
   srand(seed);
+  int x = 200;
+  int y = 200;
 
+ map_t **maps = malloc(401 * sizeof(map_t *));
+for (int i = 0; i < 401; i++) {
+  maps[i] = malloc(401 * sizeof(map_t));
+  for (int j = 0; j < 401; j++) {
+    maps[i][j].n = 0;
+    maps[i][j].s = 0;
+    maps[i][j].e = 0;
+    maps[i][j].w = 0;
+  }
+}
+
+   // check if the map at the given x and y is NULL
+  if (maps[y][x].n == 0 && maps[y][x].s == 0 &&
+    maps[y][x].e == 0 && maps[y][x].w == 0) {
+  // use the map at the given x and y for d
+  d = maps[y][x];
   new_map(&d);
   print_map(&d);
+  printf("North %d ", d.n);
+  printf("South %d\n", d.s);
+}
+else {
+  print_map(&d);
+}
+
+
+  
   
   return 0;
 }

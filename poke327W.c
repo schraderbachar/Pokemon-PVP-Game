@@ -3,12 +3,26 @@
 #include <time.h>
 #define W 21 //width of terminal or rows
 #define H 80 // height of terminal or columns
+#define CENTER 200
+#define WIDTH 401
+#define mapxy(x, y) (m->map[y][x])
 
+typedef struct map {
+  int x,y;
+} map_t;
 
-int main(){
+map_t *mapArray[WIDTH][WIDTH];
+
+// prints given map at xLoc, yLoc
+//TODO need to have directions passed to get gates between worlds.
+void print_map(map_t *m,int xLoc, int yLoc){
+     if (m[xLoc][yLoc] == NULL){
+        // Map does not exist, create it
+        m[xLoc][yLoc] = (map_t *)malloc(sizeof(map_t));
+    }
+    //print the address stored in the pointer m
     char chars[10] = {'%','#','C','M',':','~','^'};
     int ranX, ranY, ranP, ranTX, ranTY, ranFX, ranFY; 
-    srand(time(0));
     ranX = rand() % 17 + 4;
     ranY = rand() % 40 + 4;
     ranP = rand() % 70 + 4; //for place
@@ -17,6 +31,13 @@ int main(){
     ranFX = rand() % 16 + 10;// for forests
     ranFY = rand() % 10 + 5;// for forests
     // make sure ranPs aren't close to the tall grass
+    int prev_y = m->y;
+    if (yLoc > 201){
+        prev_y = m->y;
+        printf("prev Y gate: %d \n", prev_y);
+    }
+    
+    
     if (ranP - ranTX <= 5){
         ranTX += 7;
     } 
@@ -26,7 +47,14 @@ int main(){
     if (ranX > 17){ //too close to bottom border for my comfort
         ranX = 17;
     }
-  
+    m->x = ranX;
+    m->y = ranY;
+    printf("current y gate: %d \n", m->y);
+    
+    
+    printf("You are visiting map %d , %d \n", xLoc,yLoc);
+    printf("North and south gate: %d\n", ranY);
+    //TODO check north and south gate from this one, and pass that into the current map. Connecet the paths between border and new ranX / ranY
     for (int i = 0; i <= W; i++){
         for (int j = 0; j <= H; j++){
             if ((j == H && i == ranX) || (j == 0 && i == ranX)){
@@ -78,5 +106,36 @@ int main(){
         }
         printf("\n");
     }
+}
+
+int main(){
+    map_t map;
+    srand(time(0));
+    mapArray[CENTER][CENTER] = (map_t *)malloc(sizeof(map_t));
+    print_map(mapArray[CENTER][CENTER],200,200);
+    // char move;
+    // int xLoc, yLoc;
+    // printf("enter n,w,s,e to go 1 map directly in that direction. Enter f num num where num is -200 to 200. Enter q to quit.");
+    // scanf("%c %d %d", &move, &xLoc, &yLoc);
+    // char move = 'x';
+    int xLoc = 200;
+    int yLoc = 201;
+    // 
+ 
+   
+    print_map(mapArray[xLoc][yLoc],xLoc,yLoc);
+    print_map(mapArray[CENTER][CENTER],200,200);
+    // yLoc = 202;
+    // // 
+ 
+    // if (mapArray[xLoc][yLoc] == NULL){
+    //     // Map does not exist, create it
+    //     map = *(mapArray[xLoc][yLoc] = (map_t *)malloc(sizeof(map_t)));
+    // }
+    // print_map(&map,xLoc,yLoc);
+    // printf("enter n,w,s,e to go 1 map directly in that direction. Enter f num num where num is -200 to 200. Enter q to quit.");
+    // scanf("%c", &move);
+    
+    
     return 0;
 }
