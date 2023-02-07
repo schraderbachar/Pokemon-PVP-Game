@@ -792,7 +792,7 @@ static int place_trees(map_t *m)
 static int new_map(map_t *m)
 {
   smooth_height(m);
-  map_terrain(m, 1 + rand() % (MAP_X - 2), 1 + rand() % (MAP_X - 2), 1 + rand() % (MAP_Y - 2), 1 + rand() % (MAP_Y - 2));
+  map_terrain(m, m->n, m->s, m->e, m->w);
   place_boulders(m);
   place_trees(m);
   build_paths(m);
@@ -858,7 +858,6 @@ static void print_map(map_t *m)
 
 int main(int argc, char *argv[])
 {
-  map_t d;
   struct timeval tv;
   uint32_t seed;
 
@@ -891,7 +890,6 @@ int main(int argc, char *argv[])
       printf("invalid coordinates: please re run program.");
       return 0;
     }
-    // use random values for north and south at the start
 
     // generate prob of a center
     int prob = ((-45 * (abs(x - 200)) / 200) + 50) / 100;
@@ -909,76 +907,133 @@ int main(int argc, char *argv[])
       should_place_centers = 0; // don't place the centers
     }
 
-    // TODO edge cases should have no gates
-
     // check if the map at the given x and y has not been visited
     if (world.world[y][x] == NULL)
     {
-      world.world[x][y] = malloc(sizeof(*world.world[x][y]));
+      world.world[y][x] = malloc(sizeof(*world.world[y][x]));
+      world.cur_map = world.world[y][x];
+      world.cur_map->n = 1 + rand() % (MAP_X - 2);
+      world.cur_map->s = 1 + rand() % (MAP_X - 2);
+      world.cur_map->e = 1 + rand() % (MAP_Y - 2);
+      world.cur_map->w = 1 + rand() % (MAP_Y - 2);
+      // check if neighbors have been visited
+      if (world.world[y + 1][x] != NULL)
+      { // the map above has been visited
+        world.cur_map->n = world.world[y + 1][x]->s;
+      }
+      if (world.world[y - 1][x] != NULL)
+      { // the map below has been visited
+        world.cur_map->s = world.world[y - 1][x]->n;
+      }
+      if (world.world[y][x + 1] != NULL)
+      { // the map to the right has been visited
+        world.cur_map->w = world.world[y][x + 1]->e;
+      }
+      if (world.world[y][x - 1] != NULL)
+      { // map to left has been visted
+        world.cur_map->e = world.world[y][x - 1]->w;
+      }
+      new_map(world.cur_map);
+      if (y == 400)
+      {
+        for (int i = 0; i < 80; i++)
+        {
+          if (world.cur_map->map[0][i] == ter_path)
+          {
+            world.cur_map->map[0][i] = ter_boulder;
+          }
+        }
+      }
+      if (y == 0)
+      {
+        for (int i = 0; i < 80; i++)
+        {
+          if (world.cur_map->map[20][i] == ter_path)
+          {
+            printf("hit\n");
+            world.cur_map->map[20][i] = ter_boulder;
+          }
+        }
+      }
+      if (x == 400)
+      {
+        for (int i = 0; i < 21; i++)
+        {
+          if (world.cur_map->map[i][79] == ter_path)
+          {
+            world.cur_map->map[i][79] = ter_boulder;
+          }
+        }
+      }
+      if (x == 0)
+      {
+        for (int i = 0; i < 21; i++)
+        {
+          if (world.cur_map->map[i][0] == ter_path)
+          {
+            world.cur_map->map[i][0] = ter_boulder;
+          }
+        }
+      }
+      print_map(world.cur_map);
+    }
+    else
+    {
       world.cur_map = world.world[y][x];
       // check if neighbors have been visited
       if (world.world[y + 1][x] != NULL)
       { // the map above has been visited
-        printf("here\n");
-        d.n = world.world[y + 1][x]->s;
+        world.cur_map->s = world.world[y][x]->n;
       }
       if (world.world[y - 1][x] != NULL)
       { // the map below has been visited
-        d.s = world.cur_map->n;
+        world.cur_map->n = world.world[y - 1][x]->s;
       }
       if (world.world[y][x + 1] != NULL)
       { // the map to the right has been visited
-        d.e = world.cur_map->w;
+        world.cur_map->w = world.world[y][x + 1]->e;
       }
       if (world.world[y][x - 1] != NULL)
       { // map to left has been visted
-        d.w = world.cur_map->e;
+        world.cur_map->e = world.world[y][x - 1]->w;
       }
-      new_map(&d);
-      print_map(&d);
+      print_map(world.cur_map);
     }
-    else
-    {
-      // check if neighbors have been visited
-      if (world.world[y + 1][x] != NULL)
-      { // the map above has been visited
-        printf("here");
-        d.n = world.world[y][x]->s;
-      }
-      if (world.world[y - 1][x] != NULL)
-      { // the map below has been visited
-        d.s = world.cur_map->n;
-      }
-      if (world.world[y][x + 1] != NULL)
-      { // the map to the right has been visited
-        d.e = world.cur_map->w;
-      }
-      if (world.world[y][x - 1] != NULL)
-      { // map to left has been visted
-        d.w = world.cur_map->e;
-      }
-      print_map(&d);
-    }
-    printf("Enter a letter and two numbers: (q to quit). If you just enter a letter, you have to enter it twice\n");
-    scanf("%c %d %d", &letter, &y, &x); //& bc I want to change whats in that
+    int coordY, coordx;
 
+    printf("Enter a letter and two numbers\n");
+    scanf("%c\n", &letter);
     if (letter == 'n')
     {
       y += 1;
+      printf("coordinates: %d %d\n", y - 200, x - 200);
     }
     if (letter == 's')
     {
-      printf("went south");
       y -= 1;
-      printf("Y: %d\n", y);
+      printf("coordinates: %d %d\n", y - 200, x - 200);
     }
     if (letter == 'e')
     {
       x += 1;
+      printf("coordinates: %d %d\n", y - 200, x - 200);
     }
     if (letter == 'w')
     {
       x -= 1;
+      printf("coordinates: %d %d \n", y - 200, x - 200);
+    }
+    if (letter == 'f')
+    {
+      scanf("%d %d", &y, &x);
+      printf("coordinates: %d %d\n", y, x);
+      y += 200;
+      x += 200;
+    }
+    if (letter != 'q' || letter != 'f' || letter != 'n' || letter != 's' || letter != 'e' || letter != 'w')
+    {
+      printf("unexpected input, please enter 1 letter (n,s,w,e,f or q). If you enter f, please enter two more numbers");
+      return 0;
     }
   }
 
