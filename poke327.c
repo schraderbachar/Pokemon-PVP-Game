@@ -916,25 +916,27 @@ int main(int argc, char *argv[])
       should_place_centers = 0; // don't place the centers
     }
 
+    // TODO edge cases should have no gates
+
     // check if the map at the given x and y has not been visited
     if (visited[y][x] == 0)
     {
       // check if neighbors have been visited
       if (visited[y + 1][x] == 1)
-      { // north one
-        d.s = maps[y + 1][x].n;
+      { // the map above has been visited
+        d.n = maps[y + 1][x].s;
       }
       if (visited[y - 1][x] == 1)
-      { // south one=
-        d.n = maps[y - 1][x].s;
+      { // the map below has been visited
+        d.s = maps[y - 1][x].n;
       }
       if (visited[y][x + 1] == 1)
-      { // east one
-        d.w = maps[y][x + 1].e;
+      { // the map to the right has been visited
+        d.e = maps[y][x + 1].w;
       }
       if (visited[y][x - 1] == 1)
-      { // west one
-        d.e = maps[y][x - 1].w;
+      { // map to left has been visited
+        d.w = maps[y][x - 1].e;
       }
       visited[y][x] = 1;
       new_map(&d);
@@ -948,33 +950,36 @@ int main(int argc, char *argv[])
     {
       // check if neighbors have been visited
       if (visited[y + 1][x] == 1)
-      { // north one
+      { // the map above has been visited
         d.n = maps[y + 1][x].s;
       }
       if (visited[y - 1][x] == 1)
-      { // south one
+      { // the map below has been visited
         d.s = maps[y - 1][x].n;
       }
       if (visited[y][x + 1] == 1)
-      { // east one
-        d.w = maps[y][x].e;
+      { // the map to the right has been visited
+        d.e = maps[y][x + 1].w;
       }
       if (visited[y][x - 1] == 1)
-      { // west one
-        d.e = maps[y][x - 1].w;
+      { // map to left has been visited
+        d.w = maps[y][x - 1].e;
       }
       new_map(&d);
       print_map(&d);
     }
     printf("Enter a letter and two numbers: (q to quit). If you just enter a letter, you have to enter it twice\n");
-    scanf("%c %d %d", &letter, &y, &x);
+    scanf("%c %d %d", &letter, &y, &x); //& bc I want to change whats in that
+
     if (letter == 'n')
     {
       y += 1;
     }
     if (letter == 's')
     {
+      printf("went south");
       y -= 1;
+      printf("Y: %d\n", y);
     }
     if (letter == 'e')
     {
