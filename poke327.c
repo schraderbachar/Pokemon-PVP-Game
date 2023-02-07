@@ -17,14 +17,16 @@
   _tmp;                          \
 })
 
-typedef struct path {
+typedef struct path
+{
   heap_node_t *hn;
   uint8_t pos[2];
   uint8_t from[2];
   int32_t cost;
 } path_t;
 
-typedef enum dim {
+typedef enum dim
+{
   dim_x,
   dim_y,
   num_dims
@@ -32,19 +34,20 @@ typedef enum dim {
 
 typedef uint8_t pair_t[num_dims];
 
-#define MAP_X              80
-#define MAP_Y              21
-#define MIN_TREES          10
-#define MIN_BOULDERS       10
-#define TREE_PROB          95
-#define BOULDER_PROB       95
+#define MAP_X 80
+#define MAP_Y 21
+#define MIN_TREES 10
+#define MIN_BOULDERS 10
+#define TREE_PROB 95
+#define BOULDER_PROB 95
 
 #define mappair(pair) (m->map[pair[dim_y]][pair[dim_x]])
 #define mapxy(x, y) (m->map[y][x])
 #define heightpair(pair) (m->height[pair[dim_y]][pair[dim_x]])
 #define heightxy(x, y) (m->height[y][x])
 
-typedef enum __attribute__ ((__packed__)) terrain_type {
+typedef enum __attribute__((__packed__)) terrain_type
+{
   ter_debug,
   ter_boulder,
   ter_tree,
@@ -58,21 +61,27 @@ typedef enum __attribute__ ((__packed__)) terrain_type {
   ter_water
 } terrain_type_t;
 
-typedef struct map {
+typedef struct map
+{
   terrain_type_t map[MAP_Y][MAP_X];
   uint8_t height[MAP_Y][MAP_X];
   uint8_t n, s, e, w;
 } map_t;
 
-map_t *maps[MAP_Y][MAP_X];
+map_t *maps[401][401];
+int visited[401][401];
 
-typedef struct queue_node {
+int should_place_centers;
+
+typedef struct queue_node
+{
   int x, y;
   struct queue_node *next;
 } queue_node_t;
 
-static int32_t path_cmp(const void *key, const void *with) {
-  return ((path_t *) key)->cost - ((path_t *) with)->cost;
+static int32_t path_cmp(const void *key, const void *with)
+{
+  return ((path_t *)key)->cost - ((path_t *)with)->cost;
 }
 
 static int32_t edge_penalty(uint8_t x, uint8_t y)
@@ -87,18 +96,23 @@ static void dijkstra_path(map_t *m, pair_t from, pair_t to)
   heap_t h;
   uint32_t x, y;
 
-  if (!initialized) {
-    for (y = 0; y < MAP_Y; y++) {
-      for (x = 0; x < MAP_X; x++) {
+  if (!initialized)
+  {
+    for (y = 0; y < MAP_Y; y++)
+    {
+      for (x = 0; x < MAP_X; x++)
+      {
         path[y][x].pos[dim_y] = y;
         path[y][x].pos[dim_x] = x;
       }
     }
     initialized = 1;
   }
-  
-  for (y = 0; y < MAP_Y; y++) {
-    for (x = 0; x < MAP_X; x++) {
+
+  for (y = 0; y < MAP_Y; y++)
+  {
+    for (x = 0; x < MAP_X; x++)
+    {
       path[y][x].cost = INT_MAX;
     }
   }
@@ -107,19 +121,24 @@ static void dijkstra_path(map_t *m, pair_t from, pair_t to)
 
   heap_init(&h, path_cmp, NULL);
 
-  for (y = 1; y < MAP_Y - 1; y++) {
-    for (x = 1; x < MAP_X - 1; x++) {
+  for (y = 1; y < MAP_Y - 1; y++)
+  {
+    for (x = 1; x < MAP_X - 1; x++)
+    {
       path[y][x].hn = heap_insert(&h, &path[y][x]);
     }
   }
 
-  while ((p = heap_remove_min(&h))) {
+  while ((p = heap_remove_min(&h)))
+  {
     p->hn = NULL;
 
-    if ((p->pos[dim_y] == to[dim_y]) && p->pos[dim_x] == to[dim_x]) {
+    if ((p->pos[dim_y] == to[dim_y]) && p->pos[dim_x] == to[dim_x])
+    {
       for (x = to[dim_x], y = to[dim_y];
            (x != from[dim_x]) || (y != from[dim_y]);
-           p = &path[y][x], x = p->from[dim_x], y = p->from[dim_y]) {
+           p = &path[y][x], x = p->from[dim_x], y = p->from[dim_y])
+      {
         mapxy(x, y) = ter_path;
         heightxy(x, y) = 0;
       }
@@ -127,53 +146,61 @@ static void dijkstra_path(map_t *m, pair_t from, pair_t to)
       return;
     }
 
-    if ((path[p->pos[dim_y] - 1][p->pos[dim_x]    ].hn) &&
-        (path[p->pos[dim_y] - 1][p->pos[dim_x]    ].cost >
+    if ((path[p->pos[dim_y] - 1][p->pos[dim_x]].hn) &&
+        (path[p->pos[dim_y] - 1][p->pos[dim_x]].cost >
          ((p->cost + heightpair(p->pos)) *
-          edge_penalty(p->pos[dim_x], p->pos[dim_y] - 1)))) {
-      path[p->pos[dim_y] - 1][p->pos[dim_x]    ].cost =
-        ((p->cost + heightpair(p->pos)) *
-         edge_penalty(p->pos[dim_x], p->pos[dim_y] - 1));
-      path[p->pos[dim_y] - 1][p->pos[dim_x]    ].from[dim_y] = p->pos[dim_y];
-      path[p->pos[dim_y] - 1][p->pos[dim_x]    ].from[dim_x] = p->pos[dim_x];
+          edge_penalty(p->pos[dim_x], p->pos[dim_y] - 1))))
+    {
+      path[p->pos[dim_y] - 1][p->pos[dim_x]].cost =
+          ((p->cost + heightpair(p->pos)) *
+           edge_penalty(p->pos[dim_x], p->pos[dim_y] - 1));
+      path[p->pos[dim_y] - 1][p->pos[dim_x]].from[dim_y] = p->pos[dim_y];
+      path[p->pos[dim_y] - 1][p->pos[dim_x]].from[dim_x] = p->pos[dim_x];
       heap_decrease_key_no_replace(&h, path[p->pos[dim_y] - 1]
-                                           [p->pos[dim_x]    ].hn);
+                                           [p->pos[dim_x]]
+                                               .hn);
     }
-    if ((path[p->pos[dim_y]    ][p->pos[dim_x] - 1].hn) &&
-        (path[p->pos[dim_y]    ][p->pos[dim_x] - 1].cost >
+    if ((path[p->pos[dim_y]][p->pos[dim_x] - 1].hn) &&
+        (path[p->pos[dim_y]][p->pos[dim_x] - 1].cost >
          ((p->cost + heightpair(p->pos)) *
-          edge_penalty(p->pos[dim_x] - 1, p->pos[dim_y])))) {
+          edge_penalty(p->pos[dim_x] - 1, p->pos[dim_y]))))
+    {
       path[p->pos[dim_y]][p->pos[dim_x] - 1].cost =
-        ((p->cost + heightpair(p->pos)) *
-         edge_penalty(p->pos[dim_x] - 1, p->pos[dim_y]));
-      path[p->pos[dim_y]    ][p->pos[dim_x] - 1].from[dim_y] = p->pos[dim_y];
-      path[p->pos[dim_y]    ][p->pos[dim_x] - 1].from[dim_x] = p->pos[dim_x];
-      heap_decrease_key_no_replace(&h, path[p->pos[dim_y]    ]
-                                           [p->pos[dim_x] - 1].hn);
+          ((p->cost + heightpair(p->pos)) *
+           edge_penalty(p->pos[dim_x] - 1, p->pos[dim_y]));
+      path[p->pos[dim_y]][p->pos[dim_x] - 1].from[dim_y] = p->pos[dim_y];
+      path[p->pos[dim_y]][p->pos[dim_x] - 1].from[dim_x] = p->pos[dim_x];
+      heap_decrease_key_no_replace(&h, path[p->pos[dim_y]]
+                                           [p->pos[dim_x] - 1]
+                                               .hn);
     }
-    if ((path[p->pos[dim_y]    ][p->pos[dim_x] + 1].hn) &&
-        (path[p->pos[dim_y]    ][p->pos[dim_x] + 1].cost >
+    if ((path[p->pos[dim_y]][p->pos[dim_x] + 1].hn) &&
+        (path[p->pos[dim_y]][p->pos[dim_x] + 1].cost >
          ((p->cost + heightpair(p->pos)) *
-          edge_penalty(p->pos[dim_x] + 1, p->pos[dim_y])))) {
+          edge_penalty(p->pos[dim_x] + 1, p->pos[dim_y]))))
+    {
       path[p->pos[dim_y]][p->pos[dim_x] + 1].cost =
-        ((p->cost + heightpair(p->pos)) *
-         edge_penalty(p->pos[dim_x] + 1, p->pos[dim_y]));
-      path[p->pos[dim_y]    ][p->pos[dim_x] + 1].from[dim_y] = p->pos[dim_y];
-      path[p->pos[dim_y]    ][p->pos[dim_x] + 1].from[dim_x] = p->pos[dim_x];
-      heap_decrease_key_no_replace(&h, path[p->pos[dim_y]    ]
-                                           [p->pos[dim_x] + 1].hn);
+          ((p->cost + heightpair(p->pos)) *
+           edge_penalty(p->pos[dim_x] + 1, p->pos[dim_y]));
+      path[p->pos[dim_y]][p->pos[dim_x] + 1].from[dim_y] = p->pos[dim_y];
+      path[p->pos[dim_y]][p->pos[dim_x] + 1].from[dim_x] = p->pos[dim_x];
+      heap_decrease_key_no_replace(&h, path[p->pos[dim_y]]
+                                           [p->pos[dim_x] + 1]
+                                               .hn);
     }
-    if ((path[p->pos[dim_y] + 1][p->pos[dim_x]    ].hn) &&
-        (path[p->pos[dim_y] + 1][p->pos[dim_x]    ].cost >
+    if ((path[p->pos[dim_y] + 1][p->pos[dim_x]].hn) &&
+        (path[p->pos[dim_y] + 1][p->pos[dim_x]].cost >
          ((p->cost + heightpair(p->pos)) *
-          edge_penalty(p->pos[dim_x], p->pos[dim_y] + 1)))) {
-      path[p->pos[dim_y] + 1][p->pos[dim_x]    ].cost =
-        ((p->cost + heightpair(p->pos)) *
-         edge_penalty(p->pos[dim_x], p->pos[dim_y] + 1));
-      path[p->pos[dim_y] + 1][p->pos[dim_x]    ].from[dim_y] = p->pos[dim_y];
-      path[p->pos[dim_y] + 1][p->pos[dim_x]    ].from[dim_x] = p->pos[dim_x];
+          edge_penalty(p->pos[dim_x], p->pos[dim_y] + 1))))
+    {
+      path[p->pos[dim_y] + 1][p->pos[dim_x]].cost =
+          ((p->cost + heightpair(p->pos)) *
+           edge_penalty(p->pos[dim_x], p->pos[dim_y] + 1));
+      path[p->pos[dim_y] + 1][p->pos[dim_x]].from[dim_y] = p->pos[dim_y];
+      path[p->pos[dim_y] + 1][p->pos[dim_x]].from[dim_x] = p->pos[dim_x];
       heap_decrease_key_no_replace(&h, path[p->pos[dim_y] + 1]
-                                           [p->pos[dim_x]    ].hn);
+                                           [p->pos[dim_x]]
+                                               .hn);
     }
   }
 }
@@ -200,12 +227,11 @@ static int build_paths(map_t *m)
 }
 
 static int gaussian[5][5] = {
-  {  1,  4,  7,  4,  1 },
-  {  4, 16, 26, 16,  4 },
-  {  7, 26, 41, 26,  7 },
-  {  4, 16, 26, 16,  4 },
-  {  1,  4,  7,  4,  1 }
-};
+    {1, 4, 7, 4, 1},
+    {4, 16, 26, 16, 4},
+    {7, 26, 41, 26, 7},
+    {4, 16, 26, 16, 4},
+    {1, 4, 7, 4, 1}};
 static int smooth_height(map_t *m)
 {
   int32_t i, x, y;
@@ -214,19 +240,24 @@ static int smooth_height(map_t *m)
   /*  FILE *out;*/
   uint8_t height[MAP_Y][MAP_X];
 
-  memset(&height, 0, sizeof (height));
+  memset(&height, 0, sizeof(height));
 
   /* Seed with some values */
-  for (i = 1; i < 255; i += 20) {
-    do {
+  for (i = 1; i < 255; i += 20)
+  {
+    do
+    {
       x = rand() % MAP_X;
       y = rand() % MAP_Y;
     } while (height[y][x]);
     height[y][x] = i;
-    if (i == 1) {
-      head = tail = malloc(sizeof (*tail));
-    } else {
-      tail->next = malloc(sizeof (*tail));
+    if (i == 1)
+    {
+      head = tail = malloc(sizeof(*tail));
+    }
+    else
+    {
+      tail->next = malloc(sizeof(*tail));
       tail = tail->next;
     }
     tail->next = NULL;
@@ -240,72 +271,81 @@ static int smooth_height(map_t *m)
   fwrite(&height, sizeof (height), 1, out);
   fclose(out);
   */
-  
+
   /* Diffuse the vaules to fill the space */
-  while (head) {
+  while (head)
+  {
     x = head->x;
     y = head->y;
     i = height[y][x];
 
-    if (x - 1 >= 0 && y - 1 >= 0 && !height[y - 1][x - 1]) {
+    if (x - 1 >= 0 && y - 1 >= 0 && !height[y - 1][x - 1])
+    {
       height[y - 1][x - 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x - 1;
       tail->y = y - 1;
     }
-    if (x - 1 >= 0 && !height[y][x - 1]) {
+    if (x - 1 >= 0 && !height[y][x - 1])
+    {
       height[y][x - 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x - 1;
       tail->y = y;
     }
-    if (x - 1 >= 0 && y + 1 < MAP_Y && !height[y + 1][x - 1]) {
+    if (x - 1 >= 0 && y + 1 < MAP_Y && !height[y + 1][x - 1])
+    {
       height[y + 1][x - 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x - 1;
       tail->y = y + 1;
     }
-    if (y - 1 >= 0 && !height[y - 1][x]) {
+    if (y - 1 >= 0 && !height[y - 1][x])
+    {
       height[y - 1][x] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x;
       tail->y = y - 1;
     }
-    if (y + 1 < MAP_Y && !height[y + 1][x]) {
+    if (y + 1 < MAP_Y && !height[y + 1][x])
+    {
       height[y + 1][x] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x;
       tail->y = y + 1;
     }
-    if (x + 1 < MAP_X && y - 1 >= 0 && !height[y - 1][x + 1]) {
+    if (x + 1 < MAP_X && y - 1 >= 0 && !height[y - 1][x + 1])
+    {
       height[y - 1][x + 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x + 1;
       tail->y = y - 1;
     }
-    if (x + 1 < MAP_X && !height[y][x + 1]) {
+    if (x + 1 < MAP_X && !height[y][x + 1])
+    {
       height[y][x + 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x + 1;
       tail->y = y;
     }
-    if (x + 1 < MAP_X && y + 1 < MAP_Y && !height[y + 1][x + 1]) {
+    if (x + 1 < MAP_X && y + 1 < MAP_Y && !height[y + 1][x + 1])
+    {
       height[y + 1][x + 1] = i;
-      tail->next = malloc(sizeof (*tail));
+      tail->next = malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x + 1;
@@ -318,12 +358,17 @@ static int smooth_height(map_t *m)
   }
 
   /* And smooth it a bit with a gaussian convolution */
-  for (y = 0; y < MAP_Y; y++) {
-    for (x = 0; x < MAP_X; x++) {
-      for (s = t = p = 0; p < 5; p++) {
-        for (q = 0; q < 5; q++) {
+  for (y = 0; y < MAP_Y; y++)
+  {
+    for (x = 0; x < MAP_X; x++)
+    {
+      for (s = t = p = 0; p < 5; p++)
+      {
+        for (q = 0; q < 5; q++)
+        {
           if (y + (p - 2) >= 0 && y + (p - 2) < MAP_Y &&
-              x + (q - 2) >= 0 && x + (q - 2) < MAP_X) {
+              x + (q - 2) >= 0 && x + (q - 2) < MAP_X)
+          {
             s += gaussian[p][q];
             t += height[y + (p - 2)][x + (q - 2)] * gaussian[p][q];
           }
@@ -333,12 +378,17 @@ static int smooth_height(map_t *m)
     }
   }
   /* Let's do it again, until it's smooth like Kenny G. */
-  for (y = 0; y < MAP_Y; y++) {
-    for (x = 0; x < MAP_X; x++) {
-      for (s = t = p = 0; p < 5; p++) {
-        for (q = 0; q < 5; q++) {
+  for (y = 0; y < MAP_Y; y++)
+  {
+    for (x = 0; x < MAP_X; x++)
+    {
+      for (s = t = p = 0; p < 5; p++)
+      {
+        for (q = 0; q < 5; q++)
+        {
           if (y + (p - 2) >= 0 && y + (p - 2) < MAP_Y &&
-              x + (q - 2) >= 0 && x + (q - 2) < MAP_X) {
+              x + (q - 2) >= 0 && x + (q - 2) < MAP_X)
+          {
             s += gaussian[p][q];
             t += height[y + (p - 2)][x + (q - 2)] * gaussian[p][q];
           }
@@ -365,31 +415,33 @@ static int smooth_height(map_t *m)
 
 static void find_building_location(map_t *m, pair_t p)
 {
-  do {
+  do
+  {
     p[dim_x] = rand() % (MAP_X - 3) + 1;
     p[dim_y] = rand() % (MAP_Y - 3) + 1;
 
-    if ((((mapxy(p[dim_x] - 1, p[dim_y]    ) == ter_path)     &&
-          (mapxy(p[dim_x] - 1, p[dim_y] + 1) == ter_path))    ||
-         ((mapxy(p[dim_x] + 2, p[dim_y]    ) == ter_path)     &&
-          (mapxy(p[dim_x] + 2, p[dim_y] + 1) == ter_path))    ||
-         ((mapxy(p[dim_x]    , p[dim_y] - 1) == ter_path)     &&
-          (mapxy(p[dim_x] + 1, p[dim_y] - 1) == ter_path))    ||
-         ((mapxy(p[dim_x]    , p[dim_y] + 2) == ter_path)     &&
-          (mapxy(p[dim_x] + 1, p[dim_y] + 2) == ter_path)))   &&
-        (((mapxy(p[dim_x]    , p[dim_y]    ) != ter_mart)     &&
-          (mapxy(p[dim_x]    , p[dim_y]    ) != ter_center)   &&
-          (mapxy(p[dim_x] + 1, p[dim_y]    ) != ter_mart)     &&
-          (mapxy(p[dim_x] + 1, p[dim_y]    ) != ter_center)   &&
-          (mapxy(p[dim_x]    , p[dim_y] + 1) != ter_mart)     &&
-          (mapxy(p[dim_x]    , p[dim_y] + 1) != ter_center)   &&
-          (mapxy(p[dim_x] + 1, p[dim_y] + 1) != ter_mart)     &&
+    if ((((mapxy(p[dim_x] - 1, p[dim_y]) == ter_path) &&
+          (mapxy(p[dim_x] - 1, p[dim_y] + 1) == ter_path)) ||
+         ((mapxy(p[dim_x] + 2, p[dim_y]) == ter_path) &&
+          (mapxy(p[dim_x] + 2, p[dim_y] + 1) == ter_path)) ||
+         ((mapxy(p[dim_x], p[dim_y] - 1) == ter_path) &&
+          (mapxy(p[dim_x] + 1, p[dim_y] - 1) == ter_path)) ||
+         ((mapxy(p[dim_x], p[dim_y] + 2) == ter_path) &&
+          (mapxy(p[dim_x] + 1, p[dim_y] + 2) == ter_path))) &&
+        (((mapxy(p[dim_x], p[dim_y]) != ter_mart) &&
+          (mapxy(p[dim_x], p[dim_y]) != ter_center) &&
+          (mapxy(p[dim_x] + 1, p[dim_y]) != ter_mart) &&
+          (mapxy(p[dim_x] + 1, p[dim_y]) != ter_center) &&
+          (mapxy(p[dim_x], p[dim_y] + 1) != ter_mart) &&
+          (mapxy(p[dim_x], p[dim_y] + 1) != ter_center) &&
+          (mapxy(p[dim_x] + 1, p[dim_y] + 1) != ter_mart) &&
           (mapxy(p[dim_x] + 1, p[dim_y] + 1) != ter_center))) &&
-        (((mapxy(p[dim_x]    , p[dim_y]    ) != ter_path)     &&
-          (mapxy(p[dim_x] + 1, p[dim_y]    ) != ter_path)     &&
-          (mapxy(p[dim_x]    , p[dim_y] + 1) != ter_path)     &&
-          (mapxy(p[dim_x] + 1, p[dim_y] + 1) != ter_path)))) {
-          break;
+        (((mapxy(p[dim_x], p[dim_y]) != ter_path) &&
+          (mapxy(p[dim_x] + 1, p[dim_y]) != ter_path) &&
+          (mapxy(p[dim_x], p[dim_y] + 1) != ter_path) &&
+          (mapxy(p[dim_x] + 1, p[dim_y] + 1) != ter_path))))
+    {
+      break;
     }
   } while (1);
 }
@@ -400,22 +452,23 @@ static int place_pokemart(map_t *m)
 
   find_building_location(m, p);
 
-  mapxy(p[dim_x]    , p[dim_y]    ) = ter_mart;
-  mapxy(p[dim_x] + 1, p[dim_y]    ) = ter_mart;
-  mapxy(p[dim_x]    , p[dim_y] + 1) = ter_mart;
+  mapxy(p[dim_x], p[dim_y]) = ter_mart;
+  mapxy(p[dim_x] + 1, p[dim_y]) = ter_mart;
+  mapxy(p[dim_x], p[dim_y] + 1) = ter_mart;
   mapxy(p[dim_x] + 1, p[dim_y] + 1) = ter_mart;
 
   return 0;
 }
 
 static int place_center(map_t *m)
-{  pair_t p;
+{
+  pair_t p;
 
   find_building_location(m, p);
 
-  mapxy(p[dim_x]    , p[dim_y]    ) = ter_center;
-  mapxy(p[dim_x] + 1, p[dim_y]    ) = ter_center;
-  mapxy(p[dim_x]    , p[dim_y] + 1) = ter_center;
+  mapxy(p[dim_x], p[dim_y]) = ter_center;
+  mapxy(p[dim_x] + 1, p[dim_y]) = ter_center;
+  mapxy(p[dim_x], p[dim_y] + 1) = ter_center;
   mapxy(p[dim_x] + 1, p[dim_y] + 1) = ter_center;
 
   return 0;
@@ -428,40 +481,57 @@ static terrain_type_t border_type(map_t *m, int32_t x, int32_t y)
   int32_t p, q;
   int32_t r, t;
   int32_t miny, minx, maxy, maxx;
-  
-  r = t = 0;
-  
-  miny = y - 1 >= 0 ? y - 1 : 0;
-  maxy = y + 1 <= MAP_Y ? y + 1: MAP_Y;
-  minx = x - 1 >= 0 ? x - 1 : 0;
-  maxx = x + 1 <= MAP_X ? x + 1: MAP_X;
 
-  for (q = miny; q < maxy; q++) {
-    for (p = minx; p < maxx; p++) {
-      if (q != y || p != x) {
+  r = t = 0;
+
+  miny = y - 1 >= 0 ? y - 1 : 0;
+  maxy = y + 1 <= MAP_Y ? y + 1 : MAP_Y;
+  minx = x - 1 >= 0 ? x - 1 : 0;
+  maxx = x + 1 <= MAP_X ? x + 1 : MAP_X;
+
+  for (q = miny; q < maxy; q++)
+  {
+    for (p = minx; p < maxx; p++)
+    {
+      if (q != y || p != x)
+      {
         if (m->map[q][p] == ter_mountain ||
-            m->map[q][p] == ter_boulder) {
+            m->map[q][p] == ter_boulder)
+        {
           r++;
-        } else if (m->map[q][p] == ter_forest ||
-                   m->map[q][p] == ter_tree) {
+        }
+        else if (m->map[q][p] == ter_forest ||
+                 m->map[q][p] == ter_tree)
+        {
           t++;
         }
       }
     }
   }
-  
-  if (t == r) {
+
+  if (t == r)
+  {
     return rand() & 1 ? ter_boulder : ter_tree;
-  } else if (t > r) {
-    if (rand() % 10) {
+  }
+  else if (t > r)
+  {
+    if (rand() % 10)
+    {
       return ter_tree;
-    } else {
+    }
+    else
+    {
       return ter_boulder;
     }
-  } else {
-    if (rand() % 10) {
+  }
+  else
+  {
+    if (rand() % 10)
+    {
       return ter_boulder;
-    } else {
+    }
+    else
+    {
       return ter_tree;
     }
   }
@@ -475,7 +545,7 @@ static int map_terrain(map_t *m, uint8_t n, uint8_t s, uint8_t e, uint8_t w)
   int num_grass, num_clearing, num_mountain, num_forest, num_water, num_total;
   terrain_type_t type;
   int added_current = 0;
-  
+
   num_grass = rand() % 4 + 2;
   num_clearing = rand() % 4 + 2;
   num_mountain = rand() % 2 + 1;
@@ -483,30 +553,44 @@ static int map_terrain(map_t *m, uint8_t n, uint8_t s, uint8_t e, uint8_t w)
   num_water = rand() % 2 + 1;
   num_total = num_grass + num_clearing + num_mountain + num_forest + num_water;
 
-  memset(&m->map, 0, sizeof (m->map));
+  memset(&m->map, 0, sizeof(m->map));
 
   /* Seed with some values */
-  for (i = 0; i < num_total; i++) {
-    do {
+  for (i = 0; i < num_total; i++)
+  {
+    do
+    {
       x = rand() % MAP_X;
       y = rand() % MAP_Y;
     } while (m->map[y][x]);
-    if (i == 0) {
+    if (i == 0)
+    {
       type = ter_grass;
-    } else if (i == num_grass) {
+    }
+    else if (i == num_grass)
+    {
       type = ter_clearing;
-    } else if (i == num_grass + num_clearing) {
+    }
+    else if (i == num_grass + num_clearing)
+    {
       type = ter_mountain;
-    } else if (i == num_grass + num_clearing + num_mountain) {
+    }
+    else if (i == num_grass + num_clearing + num_mountain)
+    {
       type = ter_forest;
-    } else if (i == num_grass + num_clearing + num_mountain + num_forest) {
+    }
+    else if (i == num_grass + num_clearing + num_mountain + num_forest)
+    {
       type = ter_water;
     }
     m->map[y][x] = type;
-    if (i == 0) {
-      head = tail = malloc(sizeof (*tail));
-    } else {
-      tail->next = malloc(sizeof (*tail));
+    if (i == 0)
+    {
+      head = tail = malloc(sizeof(*tail));
+    }
+    else
+    {
+      tail->next = malloc(sizeof(*tail));
       tail = tail->next;
     }
     tail->next = NULL;
@@ -520,25 +604,30 @@ static int map_terrain(map_t *m, uint8_t n, uint8_t s, uint8_t e, uint8_t w)
   fwrite(&m->map, sizeof (m->map), 1, out);
   fclose(out);
   */
-  
+
   /* Diffuse the vaules to fill the space */
-  while (head) {
+  while (head)
+  {
     x = head->x;
     y = head->y;
     i = m->map[y][x];
-    
-    if (x - 1 >= 0 && !m->map[y][x - 1]) {
-      if ((rand() % 100) < 80) {
+
+    if (x - 1 >= 0 && !m->map[y][x - 1])
+    {
+      if ((rand() % 100) < 80)
+      {
         m->map[y][x - 1] = i;
-        tail->next = malloc(sizeof (*tail));
+        tail->next = malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x - 1;
         tail->y = y;
-      } else if (!added_current) {
+      }
+      else if (!added_current)
+      {
         added_current = 1;
         m->map[y][x] = i;
-        tail->next = malloc(sizeof (*tail));
+        tail->next = malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
@@ -546,18 +635,22 @@ static int map_terrain(map_t *m, uint8_t n, uint8_t s, uint8_t e, uint8_t w)
       }
     }
 
-    if (y - 1 >= 0 && !m->map[y - 1][x]) {
-      if ((rand() % 100) < 20) {
+    if (y - 1 >= 0 && !m->map[y - 1][x])
+    {
+      if ((rand() % 100) < 20)
+      {
         m->map[y - 1][x] = i;
-        tail->next = malloc(sizeof (*tail));
+        tail->next = malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
         tail->y = y - 1;
-      } else if (!added_current) {
+      }
+      else if (!added_current)
+      {
         added_current = 1;
         m->map[y][x] = i;
-        tail->next = malloc(sizeof (*tail));
+        tail->next = malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
@@ -565,18 +658,22 @@ static int map_terrain(map_t *m, uint8_t n, uint8_t s, uint8_t e, uint8_t w)
       }
     }
 
-    if (y + 1 < MAP_Y && !m->map[y + 1][x]) {
-      if ((rand() % 100) < 20) {
+    if (y + 1 < MAP_Y && !m->map[y + 1][x])
+    {
+      if ((rand() % 100) < 20)
+      {
         m->map[y + 1][x] = i;
-        tail->next = malloc(sizeof (*tail));
+        tail->next = malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
         tail->y = y + 1;
-      } else if (!added_current) {
+      }
+      else if (!added_current)
+      {
         added_current = 1;
         m->map[y][x] = i;
-        tail->next = malloc(sizeof (*tail));
+        tail->next = malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
@@ -584,18 +681,22 @@ static int map_terrain(map_t *m, uint8_t n, uint8_t s, uint8_t e, uint8_t w)
       }
     }
 
-    if (x + 1 < MAP_X && !m->map[y][x + 1]) {
-      if ((rand() % 100) < 80) {
+    if (x + 1 < MAP_X && !m->map[y][x + 1])
+    {
+      if ((rand() % 100) < 80)
+      {
         m->map[y][x + 1] = i;
-        tail->next = malloc(sizeof (*tail));
+        tail->next = malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x + 1;
         tail->y = y;
-      } else if (!added_current) {
+      }
+      else if (!added_current)
+      {
         added_current = 1;
         m->map[y][x] = i;
-        tail->next = malloc(sizeof (*tail));
+        tail->next = malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
@@ -615,11 +716,14 @@ static int map_terrain(map_t *m, uint8_t n, uint8_t s, uint8_t e, uint8_t w)
   fwrite(&m->map, sizeof (m->map), 1, out);
   fclose(out);
   */
-  
-  for (y = 0; y < MAP_Y; y++) {
-    for (x = 0; x < MAP_X; x++) {
+
+  for (y = 0; y < MAP_Y; y++)
+  {
+    for (x = 0; x < MAP_X; x++)
+    {
       if (y == 0 || y == MAP_Y - 1 ||
-          x == 0 || x == MAP_X - 1) {
+          x == 0 || x == MAP_X - 1)
+      {
         mapxy(x, y) = type = border_type(m, x, y);
       }
     }
@@ -630,14 +734,14 @@ static int map_terrain(map_t *m, uint8_t n, uint8_t s, uint8_t e, uint8_t w)
   m->e = e;
   m->w = w;
 
-  mapxy(n,         0        ) = ter_path;
-  mapxy(n,         1        ) = ter_path;
-  mapxy(s,         MAP_Y - 1) = ter_path;
-  mapxy(s,         MAP_Y - 2) = ter_path;
-  mapxy(0,         w        ) = ter_path;
-  mapxy(1,         w        ) = ter_path;
-  mapxy(MAP_X - 1, e        ) = ter_path;
-  mapxy(MAP_X - 2, e        ) = ter_path;
+  mapxy(n, 0) = ter_path;
+  mapxy(n, 1) = ter_path;
+  mapxy(s, MAP_Y - 1) = ter_path;
+  mapxy(s, MAP_Y - 2) = ter_path;
+  mapxy(0, w) = ter_path;
+  mapxy(1, w) = ter_path;
+  mapxy(MAP_X - 1, e) = ter_path;
+  mapxy(MAP_X - 2, e) = ter_path;
 
   return 0;
 }
@@ -647,10 +751,12 @@ static int place_boulders(map_t *m)
   int i;
   int x, y;
 
-  for (i = 0; i < MIN_BOULDERS || rand() % 100 < BOULDER_PROB; i++) {
+  for (i = 0; i < MIN_BOULDERS || rand() % 100 < BOULDER_PROB; i++)
+  {
     y = rand() % (MAP_Y - 2) + 1;
     x = rand() % (MAP_X - 2) + 1;
-    if (m->map[y][x] != ter_forest && m->map[y][x] != ter_path) {
+    if (m->map[y][x] != ter_forest && m->map[y][x] != ter_path)
+    {
       m->map[y][x] = ter_boulder;
     }
   }
@@ -662,13 +768,15 @@ static int place_trees(map_t *m)
 {
   int i;
   int x, y;
-  
-  for (i = 0; i < MIN_TREES || rand() % 100 < TREE_PROB; i++) {
+
+  for (i = 0; i < MIN_TREES || rand() % 100 < TREE_PROB; i++)
+  {
     y = rand() % (MAP_Y - 2) + 1;
     x = rand() % (MAP_X - 2) + 1;
     if (m->map[y][x] != ter_mountain &&
-        m->map[y][x] != ter_path     &&
-        m->map[y][x] != ter_water) {
+        m->map[y][x] != ter_path &&
+        m->map[y][x] != ter_water)
+    {
       m->map[y][x] = ter_tree;
     }
   }
@@ -678,15 +786,17 @@ static int place_trees(map_t *m)
 
 static int new_map(map_t *m)
 {
+
   smooth_height(m);
-  map_terrain(m,
-              1 + rand() % (MAP_X - 2), 1 + rand() % (MAP_X - 2),
-              1 + rand() % (MAP_Y - 2), 1 + rand() % (MAP_Y - 2));
+  map_terrain(m, m->n, m->s, m->e, m->w);
   place_boulders(m);
   place_trees(m);
   build_paths(m);
-  place_pokemart(m);
-  place_center(m);
+  if (should_place_centers == 1)
+  {
+    place_pokemart(m);
+    place_center(m);
+  }
 
   return 0;
 }
@@ -695,10 +805,13 @@ static void print_map(map_t *m)
 {
   int x, y;
   int default_reached = 0;
-  
-  for (y = 0; y < MAP_Y; y++) {
-    for (x = 0; x < MAP_X; x++) {
-      switch (m->map[y][x]) {
+
+  for (y = 0; y < MAP_Y; y++)
+  {
+    for (x = 0; x < MAP_X; x++)
+    {
+      switch (m->map[y][x])
+      {
       case ter_boulder:
       case ter_mountain:
         putchar('%');
@@ -733,7 +846,8 @@ static void print_map(map_t *m)
     putchar('\n');
   }
 
-  if (default_reached) {
+  if (default_reached)
+  {
     fprintf(stderr, "Default reached in %s\n", __FUNCTION__);
   }
 }
@@ -744,45 +858,133 @@ int main(int argc, char *argv[])
   struct timeval tv;
   uint32_t seed;
 
-  if (argc == 2) {
+  if (argc == 2)
+  {
     seed = atoi(argv[1]);
-  } else {
+  }
+  else
+  {
     gettimeofday(&tv, NULL);
     seed = (tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff;
   }
-
-  printf("Using seed: %u\n", seed);
   srand(seed);
+  char letter;
   int x = 200;
   int y = 200;
 
- map_t **maps = malloc(401 * sizeof(map_t *));
-for (int i = 0; i < 401; i++) {
-  maps[i] = malloc(401 * sizeof(map_t));
-  for (int j = 0; j < 401; j++) {
-    maps[i][j].n = 0;
-    maps[i][j].s = 0;
-    maps[i][j].e = 0;
-    maps[i][j].w = 0;
+  map_t **maps = malloc(401 * sizeof(map_t *));
+  for (int i = 0; i < 401; i++)
+  {
+    maps[i] = malloc(401 * sizeof(map_t));
+    for (int j = 0; j < 401; j++)
+    {
+      maps[i][j].n = 0;
+      maps[i][j].s = 0;
+      maps[i][j].e = 0;
+      maps[i][j].w = 0;
+      visited[i][j] = 0;
+    }
   }
-}
 
-   // check if the map at the given x and y is NULL
-  if (maps[y][x].n == 0 && maps[y][x].s == 0 &&
-    maps[y][x].e == 0 && maps[y][x].w == 0) {
-  // use the map at the given x and y for d
-  d = maps[y][x];
-  new_map(&d);
-  print_map(&d);
-  printf("North %d ", d.n);
-  printf("South %d\n", d.s);
-}
-else {
-  print_map(&d);
-}
+  while (letter != 'q')
+  {
+    if (x < 0 || x > 400 || y < 0 || y > 400)
+    {
+      printf("invalid coordinates: please re run program.");
+      return 0;
+    }
+    d = maps[y][x];
+    // use random values for north and south at the start
+    d.n = 1 + rand() % (MAP_X - 2);
+    d.s = 1 + rand() % (MAP_X - 2);
+    d.e = 1 + rand() % (MAP_Y - 2);
+    d.w = 1 + rand() % (MAP_Y - 2);
 
+    // generate prob of a center
+    int prob = ((-45 * (abs(x - 200)) / 200) + 50) / 100;
+    int spawn_pctg = 1 + rand() % 100; // from piazza post 119
+    if (spawn_pctg <= prob)
+    {
+      should_place_centers = 1; // should place centers
+    }
+    else if (x == 200 && y == 200)
+    {
+      should_place_centers = 1; // center map should have center
+    }
+    else
+    {
+      should_place_centers = 0; // don't place the centers
+    }
 
-  
-  
+    // check if the map at the given x and y has not been visited
+    if (visited[y][x] == 0)
+    {
+      // check if neighbors have been visited
+      if (visited[y + 1][x] == 1)
+      { // north one
+        d.s = maps[y + 1][x].n;
+      }
+      if (visited[y - 1][x] == 1)
+      { // south one=
+        d.n = maps[y - 1][x].s;
+      }
+      if (visited[y][x + 1] == 1)
+      { // east one
+        d.w = maps[y][x + 1].e;
+      }
+      if (visited[y][x - 1] == 1)
+      { // west one
+        d.e = maps[y][x - 1].w;
+      }
+      visited[y][x] = 1;
+      new_map(&d);
+      maps[y][x].n = d.n;
+      maps[y][x].s = d.s;
+      maps[y][x].e = d.e;
+      maps[y][x].w = d.w;
+      print_map(&d);
+    }
+    else
+    {
+      // check if neighbors have been visited
+      if (visited[y + 1][x] == 1)
+      { // north one
+        d.n = maps[y + 1][x].s;
+      }
+      if (visited[y - 1][x] == 1)
+      { // south one
+        d.s = maps[y - 1][x].n;
+      }
+      if (visited[y][x + 1] == 1)
+      { // east one
+        d.w = maps[y][x].e;
+      }
+      if (visited[y][x - 1] == 1)
+      { // west one
+        d.e = maps[y][x - 1].w;
+      }
+      new_map(&d);
+      print_map(&d);
+    }
+    printf("Enter a letter and two numbers: (q to quit). If you just enter a letter, you have to enter it twice\n");
+    scanf("%c %d %d", &letter, &y, &x);
+    if (letter == 'n')
+    {
+      y += 1;
+    }
+    if (letter == 's')
+    {
+      y -= 1;
+    }
+    if (letter == 'e')
+    {
+      x += 1;
+    }
+    if (letter == 'w')
+    {
+      x -= 1;
+    }
+  }
+
   return 0;
 }
