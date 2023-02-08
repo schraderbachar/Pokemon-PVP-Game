@@ -1,3 +1,45 @@
+commit 7c569c4d74842ab11bb340a78e60acb975eb861a (HEAD -> master, origin/master)
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date: Tue Feb 7 17:01:45 2023 -0600
+
+    gates pass, and edge cases work correctly
+
+commit a2aa164d5fe92f2524dd0bcf7b75c02502a691e4
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date: Tue Feb 7 13:44:28 2023 -0600
+
+    maps now save, but getting the gates doesn't work
+
+commit 8333093563f8c283ea58b1757af1dc400e48b6ae
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date: Tue Feb 7 10:13:08 2023 -0600
+
+    fixed the gates not connecting properly
+
+commit e1c146270445361dd81095ccb80c6114a398f574
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date: Mon Feb 6 21:53:17 2023 -0600
+
+    generates new maps, holds gates, has availability to do n,s,e,w, just need to have it not generate gates on edge cases
+
+commit 665f731bccf589dd74e85dbea5c3e1674af535f5
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date: Sun Feb 5 21:43:03 2023 -0600
+
+    gets array of pointers and sets them all to null at the start and then generates one
+
+commit 176a705ade8376ed168e56b5dd015aff1cfb7836
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date: Thu Feb 2 16:02:21 2023 -0600
+
+    added prev assignment solution for better scalability for my code
+
+commit 28729bfa9ef5f4516d366447b39bd487aab8abd5
+Author: schraderbachar <44781569+schraderbachar@users.noreply.github.com>
+Date: Sun Jan 29 16:09:37 2023 -0600
+
+    Update CHANGELOG.md
+
 commit 58538489a3c350835197e851590644798dd30284
 Author: schraderbachar <jj.schraderbachar@icloud.com>
 Date: Sun Jan 29 16:08:42 2023 -0600

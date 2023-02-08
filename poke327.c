@@ -1030,10 +1030,13 @@ int main(int argc, char *argv[])
       y += 200;
       x += 200;
     }
-    if (letter != 'q' || letter != 'f' || letter != 'n' || letter != 's' || letter != 'e' || letter != 'w')
+  }
+
+  for (int i = 0; i < 401; i++)
+  {
+    for (int j = 0; j < 401; j++)
     {
-      printf("unexpected input, please enter 1 letter (n,s,w,e,f or q). If you enter f, please enter two more numbers");
-      return 0;
+      free(world.world[i][j]);
     }
   }
 
