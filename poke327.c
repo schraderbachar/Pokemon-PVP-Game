@@ -491,7 +491,6 @@ static int place_player(map_t *m)
   find_building_location(m, p);
 
   mapxy(p[dim_x], p[dim_y]) = ter_player;
-
   return 0;
 }
 
@@ -822,7 +821,7 @@ static int new_map(map_t *m)
   return 0;
 }
 
-static void print_map(map_t *m)
+static void print_map(map_t *m, player_t *p)
 {
   int x, y;
   int default_reached = 0;
@@ -861,6 +860,8 @@ static void print_map(map_t *m)
         break;
       case ter_player:
         putchar('@');
+        p->x = x;
+        p->y = y;
         break;
       default:
         default_reached = 1;
@@ -880,6 +881,7 @@ int main(int argc, char *argv[])
 {
   struct timeval tv;
   uint32_t seed;
+  player_t player;
 
   if (argc == 2)
   {
@@ -902,6 +904,7 @@ int main(int argc, char *argv[])
       world.world[i][j] = NULL;
     }
   }
+  malloc(sizeof(player_t));
 
   while (letter != 'q')
   {
@@ -954,6 +957,18 @@ int main(int argc, char *argv[])
         world.cur_map->e = world.world[y][x - 1]->w;
       }
       new_map(world.cur_map);
+      // for (int i = 0; i < 401; i++)
+      // {
+      //   for (int j = 0; j < 401; j++)
+      //   {
+      //     if (world.cur_map->map[j][i] == ter_player)
+      //     {
+      //       // player.x = world.cur_map->map[x];
+      //       // player.y = j;
+      //       printf("player is at: %d %d\n", i, j);
+      //     }
+      //   }
+      // }
       if (y == 400)
       {
         for (int i = 0; i < 80; i++)
@@ -970,7 +985,6 @@ int main(int argc, char *argv[])
         {
           if (world.cur_map->map[20][i] == ter_path)
           {
-            printf("hit\n");
             world.cur_map->map[20][i] = ter_boulder;
           }
         }
@@ -995,7 +1009,8 @@ int main(int argc, char *argv[])
           }
         }
       }
-      print_map(world.cur_map);
+      print_map(world.cur_map, &player);
+      printf("x: %d y: %d\n", player.x, player.y);
     }
     else
     {
@@ -1017,7 +1032,8 @@ int main(int argc, char *argv[])
       { // map to left has been visted
         world.cur_map->e = world.world[y][x - 1]->w;
       }
-      print_map(world.cur_map);
+      print_map(world.cur_map, &player);
+      printf("x: %d y: %d\n", player.x, player.y);
     }
     int coordY, coordx;
 
