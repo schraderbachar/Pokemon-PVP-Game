@@ -34,6 +34,11 @@ typedef enum dim
 
 typedef uint8_t pair_t[num_dims];
 
+typedef struct player
+{
+  int x, y;
+} player_t;
+
 #define MAP_X 80
 #define MAP_Y 21
 #define MIN_TREES 10
@@ -58,7 +63,8 @@ typedef enum __attribute__((__packed__)) terrain_type
   ter_clearing,
   ter_mountain,
   ter_forest,
-  ter_water
+  ter_water,
+  ter_player,
 } terrain_type_t;
 
 typedef struct map
@@ -478,6 +484,16 @@ static int place_center(map_t *m)
 
   return 0;
 }
+static int place_player(map_t *m)
+{
+  pair_t p;
+
+  find_building_location(m, p);
+
+  mapxy(p[dim_x], p[dim_y]) = ter_player;
+
+  return 0;
+}
 
 /* Chooses tree or boulder for border cell.  Choice is biased by dominance *
  * of neighboring cells.                                                   */
@@ -801,6 +817,7 @@ static int new_map(map_t *m)
     place_pokemart(m);
     place_center(m);
   }
+  place_player(m);
 
   return 0;
 }
@@ -841,6 +858,9 @@ static void print_map(map_t *m)
         break;
       case ter_water:
         putchar('~');
+        break;
+      case ter_player:
+        putchar('@');
         break;
       default:
         default_reached = 1;
