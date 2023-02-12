@@ -51,6 +51,9 @@ typedef struct player
 #define heightpair(pair) (m->height[pair[dim_y]][pair[dim_x]])
 #define heightxy(x, y) (m->height[y][x])
 
+int hiker_cost = 0;
+int rival_cost = 0;
+
 typedef enum __attribute__((__packed__)) terrain_type
 {
   ter_debug,
@@ -71,6 +74,8 @@ typedef struct map
 {
   terrain_type_t map[MAP_Y][MAP_X];
   uint8_t height[MAP_Y][MAP_X];
+  int h_cost_map[MAP_Y][MAP_X];
+  int r_cost_map[MAP_Y][MAP_X];
   uint8_t n, s, e, w;
 } map_t;
 
@@ -212,6 +217,126 @@ static void dijkstra_path(map_t *m, pair_t from, pair_t to)
       heap_decrease_key_no_replace(&h, path[p->pos[dim_y] + 1]
                                            [p->pos[dim_x]]
                                                .hn);
+    }
+  }
+}
+
+static void dijkstra_cost_path(map_t *m, pair_t from, pair_t to)
+{
+  static path_t path[MAP_Y][MAP_X], *p;
+  static uint32_t initialized = 0;
+  heap_t h;
+  uint32_t x, y;
+
+  if (!initialized)
+  {
+    for (y = 0; y < MAP_Y; y++)
+    {
+      for (x = 0; x < MAP_X; x++)
+      {
+        path[y][x].pos[dim_y] = y;
+        path[y][x].pos[dim_x] = x;
+      }
+    }
+    initialized = 1;
+  }
+
+  for (y = 0; y < MAP_Y; y++)
+  {
+    for (x = 0; x < MAP_X; x++)
+    {
+      path[y][x].cost = INT_MAX;
+    }
+  }
+
+  path[from[dim_y]][from[dim_x]].cost = 0;
+
+  heap_init(&h, path_cmp, NULL);
+
+  for (y = 1; y < MAP_Y - 1; y++)
+  {
+    for (x = 1; x < MAP_X - 1; x++)
+    {
+      path[y][x].hn = heap_insert(&h, &path[y][x]);
+    }
+  }
+
+  while ((p = heap_remove_min(&h)))
+  {
+    p->hn = NULL;
+
+    if ((p->pos[dim_y] == to[dim_y]) && p->pos[dim_x] == to[dim_x])
+    {
+      for (x = to[dim_x], y = to[dim_y];
+           (x != from[dim_x]) || (y != from[dim_y]);
+           p = &path[y][x], x = p->from[dim_x], y = p->from[dim_y])
+      {
+        mapxy(x, y) = ter_path;
+        heightxy(x, y) = 0;
+      }
+      heap_delete(&h);
+      return;
+    }
+
+    if ((path[p->pos[dim_y] - 1][p->pos[dim_x]].hn) &&
+        (path[p->pos[dim_y] - 1][p->pos[dim_x]].cost >
+         ((p->cost + heightpair(p->pos)) *
+          edge_penalty(p->pos[dim_x], p->pos[dim_y] - 1))))
+    {
+      path[p->pos[dim_y] - 1][p->pos[dim_x]].cost =
+          ((p->cost + heightpair(p->pos)) *
+           edge_penalty(p->pos[dim_x], p->pos[dim_y] - 1));
+      path[p->pos[dim_y] - 1][p->pos[dim_x]].from[dim_y] = p->pos[dim_y];
+      path[p->pos[dim_y] - 1][p->pos[dim_x]].from[dim_x] = p->pos[dim_x];
+      heap_decrease_key_no_replace(&h, path[p->pos[dim_y] - 1]
+                                           [p->pos[dim_x]]
+                                               .hn);
+      printf("%d ", path[p->pos[dim_y] - 1][p->pos[dim_x]].cost % 100);
+    }
+    if ((path[p->pos[dim_y]][p->pos[dim_x] - 1].hn) &&
+        (path[p->pos[dim_y]][p->pos[dim_x] - 1].cost >
+         ((p->cost + heightpair(p->pos)) *
+          edge_penalty(p->pos[dim_x] - 1, p->pos[dim_y]))))
+    {
+      path[p->pos[dim_y]][p->pos[dim_x] - 1].cost =
+          ((p->cost + heightpair(p->pos)) *
+           edge_penalty(p->pos[dim_x] - 1, p->pos[dim_y]));
+      path[p->pos[dim_y]][p->pos[dim_x] - 1].from[dim_y] = p->pos[dim_y];
+      path[p->pos[dim_y]][p->pos[dim_x] - 1].from[dim_x] = p->pos[dim_x];
+      heap_decrease_key_no_replace(&h, path[p->pos[dim_y]]
+                                           [p->pos[dim_x] - 1]
+                                               .hn);
+      printf("%d ", path[p->pos[dim_y]][p->pos[dim_x] - 1].cost % 100);
+    }
+    if ((path[p->pos[dim_y]][p->pos[dim_x] + 1].hn) &&
+        (path[p->pos[dim_y]][p->pos[dim_x] + 1].cost >
+         ((p->cost + heightpair(p->pos)) *
+          edge_penalty(p->pos[dim_x] + 1, p->pos[dim_y]))))
+    {
+      path[p->pos[dim_y]][p->pos[dim_x] + 1].cost =
+          ((p->cost + heightpair(p->pos)) *
+           edge_penalty(p->pos[dim_x] + 1, p->pos[dim_y]));
+      path[p->pos[dim_y]][p->pos[dim_x] + 1].from[dim_y] = p->pos[dim_y];
+      path[p->pos[dim_y]][p->pos[dim_x] + 1].from[dim_x] = p->pos[dim_x];
+      heap_decrease_key_no_replace(&h, path[p->pos[dim_y]]
+                                           [p->pos[dim_x] + 1]
+                                               .hn);
+      printf("%d ", path[p->pos[dim_y]][p->pos[dim_x] + 1].cost % 100);
+    }
+    if ((path[p->pos[dim_y] + 1][p->pos[dim_x]].hn) &&
+        (path[p->pos[dim_y] + 1][p->pos[dim_x]].cost >
+         ((p->cost + heightpair(p->pos)) *
+          edge_penalty(p->pos[dim_x], p->pos[dim_y] + 1))))
+    {
+      path[p->pos[dim_y] + 1][p->pos[dim_x]].cost =
+          ((p->cost + heightpair(p->pos)) *
+           edge_penalty(p->pos[dim_x], p->pos[dim_y] + 1));
+      path[p->pos[dim_y] + 1][p->pos[dim_x]].from[dim_y] = p->pos[dim_y];
+      path[p->pos[dim_y] + 1][p->pos[dim_x]].from[dim_x] = p->pos[dim_x];
+      heap_decrease_key_no_replace(&h, path[p->pos[dim_y] + 1]
+                                           [p->pos[dim_x]]
+                                               .hn);
+      printf("%d ", path[p->pos[dim_y] + 1][p->pos[dim_x]].cost % 100);
     }
   }
 }
@@ -820,7 +945,34 @@ static int new_map(map_t *m)
 
   return 0;
 }
+static void print_h_cost_map(map_t *m, player_t *p)
+{
+  pair_t from, to;
 
+  int h_x = 1 + rand() % (MAP_X - 2);
+  int h_y = 1 + rand() % (MAP_Y - 2);
+  from[dim_x] = h_x;
+  to[dim_x] = p->x;
+  from[dim_y] = h_y;
+  to[dim_y] = p->y;
+
+  dijkstra_cost_path(m, from, to);
+
+  from[dim_y] = h_y;
+  to[dim_y] = p->y;
+  from[dim_x] = h_x;
+  to[dim_x] = p->x;
+
+  dijkstra_cost_path(m, from, to);
+}
+// static void print_r_cost_map(map_t *m)
+// {
+// }
+static void setCoordinates(int x, int y, player_t *p)
+{
+  p->x = x;
+  p->y = y;
+}
 static void print_map(map_t *m, player_t *p)
 {
   int x, y;
@@ -860,8 +1012,7 @@ static void print_map(map_t *m, player_t *p)
         break;
       case ter_player:
         putchar('@');
-        p->x = x;
-        p->y = y;
+        setCoordinates(x, y, p);
         break;
       default:
         default_reached = 1;
@@ -893,7 +1044,7 @@ int main(int argc, char *argv[])
     seed = (tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff;
   }
   srand(seed);
-  char letter;
+  char letter = 'x';
   int x = 200;
   int y = 200;
 
@@ -904,7 +1055,6 @@ int main(int argc, char *argv[])
       world.world[i][j] = NULL;
     }
   }
-  malloc(sizeof(player_t));
 
   while (letter != 'q')
   {
@@ -957,18 +1107,6 @@ int main(int argc, char *argv[])
         world.cur_map->e = world.world[y][x - 1]->w;
       }
       new_map(world.cur_map);
-      // for (int i = 0; i < 401; i++)
-      // {
-      //   for (int j = 0; j < 401; j++)
-      //   {
-      //     if (world.cur_map->map[j][i] == ter_player)
-      //     {
-      //       // player.x = world.cur_map->map[x];
-      //       // player.y = j;
-      //       printf("player is at: %d %d\n", i, j);
-      //     }
-      //   }
-      // }
       if (y == 400)
       {
         for (int i = 0; i < 80; i++)
@@ -1011,6 +1149,10 @@ int main(int argc, char *argv[])
       }
       print_map(world.cur_map, &player);
       printf("x: %d y: %d\n", player.x, player.y);
+      printf("hiker map below\n");
+      print_h_cost_map(world.cur_map, &player);
+      printf("\nrival map below\n");
+      // TODO print rival map
     }
     else
     {
@@ -1035,7 +1177,6 @@ int main(int argc, char *argv[])
       print_map(world.cur_map, &player);
       printf("x: %d y: %d\n", player.x, player.y);
     }
-    int coordY, coordx;
 
     printf("Enter a letter and two numbers\n");
     scanf("%c\n", &letter);
