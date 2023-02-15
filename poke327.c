@@ -12,6 +12,7 @@
 #include <time.h>
 #include "heap.h"
 #include "heap.c"
+
 #define tallgrass ':'
 #define clearing '.'
 #define boulder '%'
@@ -169,7 +170,6 @@ static void dijkstra_path(struct map *m, pair_t from, bool ishiker)
   static uint32_t initialized = 0;
   heap_t h;
   int x, y;
-  //   printf("0X%d  1Y%d\n",from[0],from[1]);
 
   if (!initialized)
   {
@@ -253,48 +253,33 @@ static void dijkstra_path(struct map *m, pair_t from, bool ishiker)
     {
 
       path[p->pos[0] - 1][p->pos[1]].cost = p->cost + p->traveltime;
-      // path[p->pos[0]-1][p->pos[1]].from[0] = p->pos[0];
-      // path[p->pos[0]-1][p->pos[1]].from[1] = p->pos[1];
       heap_decrease_key_no_replace(&h, path[p->pos[0] - 1][p->pos[1]].hn);
-      // printf("1st\n");
     }
     /*check below*/
     if (path[p->pos[0] + 1][p->pos[1]].hn && (path[p->pos[0] + 1][p->pos[1]].cost > (p->cost + p->traveltime)))
     {
-
       path[p->pos[0] + 1][p->pos[1]].cost = p->cost + p->traveltime;
-      // path[p->pos[0]+1][p->pos[1]].from[0] = p->pos[0];
-      // path[p->pos[0]+1][p->pos[1]].from[1] = p->pos[1];
       heap_decrease_key_no_replace(&h, path[p->pos[0] + 1][p->pos[1]].hn);
-      // printf("2st\n");
     }
     /*check right*/
     if (path[p->pos[0]][p->pos[1] + 1].hn && (path[p->pos[0]][p->pos[1] + 1].cost > (p->cost + p->traveltime)))
     {
 
       path[p->pos[0]][p->pos[1] + 1].cost = p->cost + p->traveltime;
-      // path[p->pos[0]][p->pos[1] + 1].from[0] = p->pos[0];
-      // path[p->pos[0]][p->pos[1] + 1].from[1] = p->pos[1];
       heap_decrease_key_no_replace(&h, path[p->pos[0]][p->pos[1] + 1].hn);
-      // printf("3st\n");
     }
     /*check left*/
     if (path[p->pos[0]][p->pos[1] - 1].hn && (path[p->pos[0]][p->pos[1] - 1].cost > (p->cost + p->traveltime)))
     {
 
       path[p->pos[0]][p->pos[1] - 1].cost = p->cost + p->traveltime;
-      // path[p->pos[0]][p->pos[1]-1].from[0] = p->pos[0];
-      // path[p->pos[0]][p->pos[1]-1].from[1] = p->pos[1];
       heap_decrease_key_no_replace(&h, path[p->pos[0]][p->pos[1] - 1].hn);
-      // printf("4st\n");
     }
     /*check top right*/
     if (path[p->pos[0] - 1][p->pos[1] + 1].hn && (path[p->pos[0] - 1][p->pos[1] + 1].cost > (p->cost + p->traveltime)))
     {
 
       path[p->pos[0] - 1][p->pos[1] + 1].cost = p->cost + p->traveltime;
-      // path[p->pos[0]-1][p->pos[1]+1].from[0] = p->pos[0];
-      // path[p->pos[0]-1][p->pos[1]+1].from[1] = p->pos[1];
       heap_decrease_key_no_replace(&h, path[p->pos[0] - 1][p->pos[1] + 1].hn);
       // printf("5st\n");
     }
@@ -303,8 +288,6 @@ static void dijkstra_path(struct map *m, pair_t from, bool ishiker)
     {
 
       path[p->pos[0] + 1][p->pos[1] + 1].cost = p->cost + p->traveltime;
-      // path[p->pos[0]+1][p->pos[1]+1].from[0] = p->pos[0];
-      // path[p->pos[0]+1][p->pos[1]+1].from[1] = p->pos[1];
       heap_decrease_key_no_replace(&h, path[p->pos[0] + 1][p->pos[1] + 1].hn);
       // printf("6st\n");
     }
@@ -313,20 +296,14 @@ static void dijkstra_path(struct map *m, pair_t from, bool ishiker)
     {
 
       path[p->pos[0] - 1][p->pos[1] - 1].cost = p->cost + p->traveltime;
-      // path[p->pos[0]-1][p->pos[1]-1].from[0] = p->pos[0];
-      // path[p->pos[0]-1][p->pos[1]-1].from[1] = p->pos[1];
       heap_decrease_key_no_replace(&h, path[p->pos[0] - 1][p->pos[1] - 1].hn);
-      // printf("7st\n");
     }
     /*check bottom left*/
     if (path[p->pos[0] + 1][p->pos[1] - 1].hn && (path[p->pos[0] + 1][p->pos[1] - 1].cost > (p->cost + p->traveltime)))
     {
 
       path[p->pos[0] + 1][p->pos[1] - 1].cost = p->cost + p->traveltime;
-      // path[p->pos[0]+1][p->pos[1]-1].from[0] = p->pos[0];
-      // path[p->pos[0]+1][p->pos[1]-1].from[1] = p->pos[1];
       heap_decrease_key_no_replace(&h, path[p->pos[0] + 1][p->pos[1] - 1].hn);
-      // printf("8st\n");
     }
   }
 
