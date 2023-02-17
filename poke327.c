@@ -11,7 +11,6 @@
 #include <unistd.h>
 #include <time.h>
 #include "heap.h"
-#include "heap.c"
 
 #define tallgrass ':'
 #define clearing '.'
