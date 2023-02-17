@@ -23,5 +23,3 @@ run the command `cd "<Full Directory Path here>/" && gcc map.c -o map && "<Full 
 where `<Full Directory Path here>` is the path of the folder in which the map.c file is stored
 
 Alternatively, if your IDE suppors it, you can just run the file by clicking the run button in the IDE with the file selected.
-
-when running the n,s,e,w commands, on the first one you have to enter it twice. So n (click enter) then n again. After that you should be good to just enter it once.
