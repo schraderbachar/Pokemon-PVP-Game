@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <sys/time.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include "heap.h"
 
@@ -38,6 +39,7 @@ typedef int16_t pair_t[num_dims];
 #define TREE_PROB 95
 #define BOULDER_PROB 95
 #define WORLD_SIZE 401
+#define MIN_NPC 8
 
 #define MOUNTAIN_SYMBOL '%'
 #define BOULDER_SYMBOL '0'
@@ -93,10 +95,11 @@ typedef enum __attribute__((__packed__)) movement_type
 {
   move_hiker,
   move_rival,
-  move_pace,
-  move_wander,
+  move_pacer,
+  move_wanderer,
   move_sentry,
-  move_explore,
+  move_explorer,
+  move_swimmer,
   move_pc,
   num_movement_types
 } movement_type_t;
@@ -221,11 +224,26 @@ void new_hiker()
   c->next_turn = 0;
   heap_insert(&world.cur_map->turn, c);
   world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c;
+}
+#define ter_cost(x, y, c) move_cost[c][m->map[y][x]]
 
-  printf("Hiker at %d,%d\n", pos[dim_x], pos[dim_y]);
+static int32_t hiker_cmp(const void *key, const void *with)
+{
+  return (world.hiker_dist[((path_t *)key)->pos[dim_y]]
+                          [((path_t *)key)->pos[dim_x]] -
+          world.hiker_dist[((path_t *)with)->pos[dim_y]]
+                          [((path_t *)with)->pos[dim_x]]);
 }
 
-static void move_hiker(character_t *c, pair_t dest)
+static int32_t rival_cmp(const void *key, const void *with)
+{
+  return (world.rival_dist[((path_t *)key)->pos[dim_y]]
+                          [((path_t *)key)->pos[dim_x]] -
+          world.rival_dist[((path_t *)with)->pos[dim_y]]
+                          [((path_t *)with)->pos[dim_x]]);
+}
+
+static void hiker_move(character_t *c, pair_t dest)
 {
   int min;
   int base;
@@ -256,7 +274,7 @@ static void move_hiker(character_t *c, pair_t dest)
   }
 }
 
-static void move_rival(character_t *c, pair_t dest)
+static void rival_move(character_t *c, pair_t dest)
 {
   int min;
   int base;
@@ -309,10 +327,11 @@ void new_rival()
   c->symbol = 'r';
   c->next_turn = 0;
   heap_insert(&world.cur_map->turn, c);
+  printf("rival at: %d %d", c->pos[dim_x], c->pos[dim_y]);
   world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c;
 }
 
-static void move_pacer(character_t *c, pair_t dest)
+static void pacer_move(character_t *c, pair_t dest)
 {
   terrain_type_t t;
 
@@ -338,7 +357,7 @@ static void move_pacer(character_t *c, pair_t dest)
     dest[dim_y] = c->pos[dim_y] + c->npc->dir[dim_y];
   }
 }
-static void move_wanderer(character_t *c, pair_t dest)
+static void wanderer_move(character_t *c, pair_t dest)
 {
   dest[dim_x] = c->pos[dim_x];
   dest[dim_y] = c->pos[dim_y];
@@ -362,12 +381,12 @@ static void move_wanderer(character_t *c, pair_t dest)
     dest[dim_y] = c->pos[dim_y] + c->npc->dir[dim_y];
   }
 }
-static void move_sentry(character_t *c, pair_t dest)
+static void sentry_move(character_t *c, pair_t dest)
 {
   dest[dim_x] = c->pos[dim_x];
   dest[dim_y] = c->pos[dim_y];
 }
-static void move_explorer(character_t *c, pair_t dest)
+static void explorer_move(character_t *c, pair_t dest)
 {
   dest[dim_x] = c->pos[dim_x];
   dest[dim_y] = c->pos[dim_y];
@@ -396,7 +415,7 @@ static void move_explorer(character_t *c, pair_t dest)
   }
 }
 
-static void move_swimmer(character_t *c, pair_t dest)
+static void swimmer_move(character_t *c, pair_t dest)
 {
   dest[dim_x] = c->pos[dim_x];
   dest[dim_y] = c->pos[dim_y];
@@ -420,7 +439,7 @@ static void move_swimmer(character_t *c, pair_t dest)
     dest[dim_y] = c->pos[dim_y] + c->npc->dir[dim_y];
   }
 }
-static void move_pc(character_t *c, pair_t dest)
+static void pc_move(character_t *c, pair_t dest)
 {
   dest[dim_x] = c->pos[dim_x];
   dest[dim_y] = c->pos[dim_y];
@@ -473,15 +492,60 @@ void new_other()
 }
 
 void (*move_func[num_movement_types])(character_t *, pair_t) = {
-    move_hiker,
-    move_rival,
-    move_pacer,
-    move_wanderer,
-    move_sentry,
-    move_explorer,
-    move_swimmer,
-    move_pc,
+    hiker_move,
+    rival_move,
+    pacer_move,
+    wanderer_move,
+    sentry_move,
+    explorer_move,
+    swimmer_move,
+    pc_move,
 };
+
+void put_players()
+{
+  new_hiker();
+  new_rival();
+  int num_players = 2;
+  do
+  {
+    int prob = rand() % 10;
+    if (prob == 0)
+    {
+      printf("in hiker \n");
+      new_hiker();
+    }
+    if (prob == 1)
+    {
+      printf("in rival \n");
+      new_rival();
+    }
+    else
+    {
+      printf("in other \n");
+      new_other();
+    }
+    num_players += 1;
+  } while (num_players < MIN_NPC);
+}
+
+int32_t cmp_char_turns(const void *key, const void *with)
+{
+  return ((character_t *)key)->next_turn - ((character_t *)with)->next_turn;
+}
+
+void del_npc(void *v)
+{
+  if (v == &world.pc)
+  {
+    free(world.pc.pc);
+  }
+  else
+  {
+    free(((character_t *)v)->npc);
+    free(v);
+  }
+}
 
 static void dijkstra_path(map_t *m, pair_t from, pair_t to)
 {
@@ -1278,208 +1342,26 @@ static int place_trees(map_t *m)
 
   return 0;
 }
-
-// New map expects cur_idx to refer to the index to be generated.  If that
-// map has already been generated then the only thing this does is set
-// cur_map.
-static int new_map()
-{
-  int d, p;
-  int e, w, n, s;
-
-  if (world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x]])
-  {
-    world.cur_map = world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x]];
-    return 0;
-  }
-
-  world.cur_map =
-      world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x]] =
-          malloc(sizeof(*world.cur_map));
-
-  smooth_height(world.cur_map);
-
-  if (!world.cur_idx[dim_y])
-  {
-    n = -1;
-  }
-  else if (world.world[world.cur_idx[dim_y] - 1][world.cur_idx[dim_x]])
-  {
-    n = world.world[world.cur_idx[dim_y] - 1][world.cur_idx[dim_x]]->s;
-  }
-  else
-  {
-    n = 1 + rand() % (MAP_X - 2);
-  }
-  if (world.cur_idx[dim_y] == WORLD_SIZE - 1)
-  {
-    s = -1;
-  }
-  else if (world.world[world.cur_idx[dim_y] + 1][world.cur_idx[dim_x]])
-  {
-    s = world.world[world.cur_idx[dim_y] + 1][world.cur_idx[dim_x]]->n;
-  }
-  else
-  {
-    s = 1 + rand() % (MAP_X - 2);
-  }
-  if (!world.cur_idx[dim_x])
-  {
-    w = -1;
-  }
-  else if (world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x] - 1])
-  {
-    w = world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x] - 1]->e;
-  }
-  else
-  {
-    w = 1 + rand() % (MAP_Y - 2);
-  }
-  if (world.cur_idx[dim_x] == WORLD_SIZE - 1)
-  {
-    e = -1;
-  }
-  else if (world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x] + 1])
-  {
-    e = world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x] + 1]->w;
-  }
-  else
-  {
-    e = 1 + rand() % (MAP_Y - 2);
-  }
-
-  map_terrain(world.cur_map, n, s, e, w);
-
-  place_boulders(world.cur_map);
-  place_trees(world.cur_map);
-  build_paths(world.cur_map);
-  d = (abs(world.cur_idx[dim_x] - (WORLD_SIZE / 2)) +
-       abs(world.cur_idx[dim_y] - (WORLD_SIZE / 2)));
-  p = d > 200 ? 5 : (50 - ((45 * d) / 200));
-  //  printf("d=%d, p=%d\n", d, p);
-  if ((rand() % 100) < p || !d)
-  {
-    place_pokemart(world.cur_map);
-  }
-  if ((rand() % 100) < p || !d)
-  {
-    place_center(world.cur_map);
-  }
-
-  return 0;
-}
-
-static void print_map()
-{
-  int x, y;
-  int default_reached = 0;
-
-  printf("\n\n\n");
-
-  for (y = 0; y < MAP_Y; y++)
-  {
-    for (x = 0; x < MAP_X; x++)
-    {
-      if (world.pc.pos[dim_y] == y &&
-          world.pc.pos[dim_x] == x)
-      {
-        putchar('@');
-      }
-      else
-      {
-        switch (world.cur_map->map[y][x])
-        {
-        case ter_boulder:
-          putchar(BOULDER_SYMBOL);
-          break;
-        case ter_mountain:
-          putchar(MOUNTAIN_SYMBOL);
-          break;
-        case ter_tree:
-          putchar(TREE_SYMBOL);
-          break;
-        case ter_forest:
-          putchar(FOREST_SYMBOL);
-          break;
-        case ter_path:
-          putchar(PATH_SYMBOL);
-          break;
-        case ter_gate:
-          putchar(GATE_SYMBOL);
-          break;
-        case ter_mart:
-          putchar(POKEMART_SYMBOL);
-          break;
-        case ter_center:
-          putchar(POKEMON_CENTER_SYMBOL);
-          break;
-        case ter_grass:
-          putchar(TALL_GRASS_SYMBOL);
-          break;
-        case ter_clearing:
-          putchar(SHORT_GRASS_SYMBOL);
-          break;
-        case ter_water:
-          putchar(WATER_SYMBOL);
-          break;
-        default:
-          putchar(ERROR_SYMBOL);
-          default_reached = 1;
-          break;
-        }
-      }
-    }
-    putchar('\n');
-  }
-
-  if (default_reached)
-  {
-    fprintf(stderr, "Default reached in %s\n", __FUNCTION__);
-  }
-}
-
-// The world is global because of its size, so init_world is parameterless
-void init_world()
-{
-  world.cur_idx[dim_x] = world.cur_idx[dim_y] = WORLD_SIZE / 2;
-  new_map();
-}
-
-void delete_world()
+void init_pc()
 {
   int x, y;
 
-  for (y = 0; y < WORLD_SIZE; y++)
+  do
   {
-    for (x = 0; x < WORLD_SIZE; x++)
-    {
-      if (world.world[y][x])
-      {
-        free(world.world[y][x]);
-        world.world[y][x] = NULL;
-      }
-    }
-  }
+    x = rand() % (MAP_X - 2) + 1;
+    y = rand() % (MAP_Y - 2) + 1;
+  } while (world.cur_map->map[y][x] != ter_path);
+
+  world.pc.pos[dim_x] = x;
+  world.pc.pos[dim_y] = y;
+  world.pc.symbol = '@';
+  world.pc.pc = malloc(sizeof(*world.pc.pc));
+
+  world.cur_map->cmap[y][x] = &world.pc;
+  world.pc.next_turn = 0;
+
+  heap_insert(&world.cur_map->turn, &world.pc);
 }
-
-#define ter_cost(x, y, c) move_cost[c][m->map[y][x]]
-
-static int32_t hiker_cmp(const void *key, const void *with)
-{
-  return (world.hiker_dist[((path_t *)key)->pos[dim_y]]
-                          [((path_t *)key)->pos[dim_x]] -
-          world.hiker_dist[((path_t *)with)->pos[dim_y]]
-                          [((path_t *)with)->pos[dim_x]]);
-}
-
-static int32_t rival_cmp(const void *key, const void *with)
-{
-  return (world.rival_dist[((path_t *)key)->pos[dim_y]]
-                          [((path_t *)key)->pos[dim_x]] -
-          world.rival_dist[((path_t *)with)->pos[dim_y]]
-                          [((path_t *)with)->pos[dim_x]]);
-}
-
 void pathfind(map_t *m)
 {
   heap_t h;
@@ -1732,52 +1614,210 @@ void pathfind(map_t *m)
   }
   heap_delete(&h);
 }
+// New map expects cur_idx to refer to the index to be generated.  If that
+// map has already been generated then the only thing this does is set
+// cur_map.
+static int new_map()
+{
+  int d, p;
+  int e, w, n, s;
 
-void init_pc()
+  if (world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x]])
+  {
+    world.cur_map = world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x]];
+    return 0;
+  }
+
+  world.cur_map =
+      world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x]] =
+          malloc(sizeof(*world.cur_map));
+
+  smooth_height(world.cur_map);
+
+  if (!world.cur_idx[dim_y])
+  {
+    n = -1;
+  }
+  else if (world.world[world.cur_idx[dim_y] - 1][world.cur_idx[dim_x]])
+  {
+    n = world.world[world.cur_idx[dim_y] - 1][world.cur_idx[dim_x]]->s;
+  }
+  else
+  {
+    n = 1 + rand() % (MAP_X - 2);
+  }
+  if (world.cur_idx[dim_y] == WORLD_SIZE - 1)
+  {
+    s = -1;
+  }
+  else if (world.world[world.cur_idx[dim_y] + 1][world.cur_idx[dim_x]])
+  {
+    s = world.world[world.cur_idx[dim_y] + 1][world.cur_idx[dim_x]]->n;
+  }
+  else
+  {
+    s = 1 + rand() % (MAP_X - 2);
+  }
+  if (!world.cur_idx[dim_x])
+  {
+    w = -1;
+  }
+  else if (world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x] - 1])
+  {
+    w = world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x] - 1]->e;
+  }
+  else
+  {
+    w = 1 + rand() % (MAP_Y - 2);
+  }
+  if (world.cur_idx[dim_x] == WORLD_SIZE - 1)
+  {
+    e = -1;
+  }
+  else if (world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x] + 1])
+  {
+    e = world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x] + 1]->w;
+  }
+  else
+  {
+    e = 1 + rand() % (MAP_Y - 2);
+  }
+
+  map_terrain(world.cur_map, n, s, e, w);
+
+  place_boulders(world.cur_map);
+  place_trees(world.cur_map);
+  build_paths(world.cur_map);
+  d = (abs(world.cur_idx[dim_x] - (WORLD_SIZE / 2)) +
+       abs(world.cur_idx[dim_y] - (WORLD_SIZE / 2)));
+  p = d > 200 ? 5 : (50 - ((45 * d) / 200));
+
+  if ((rand() % 100) < p || !d)
+  {
+    place_pokemart(world.cur_map);
+  }
+  if ((rand() % 100) < p || !d)
+  {
+    place_center(world.cur_map);
+  }
+
+  for (int y = 0; y < MAP_Y; y++)
+  {
+    for (int x = 0; x < MAP_X; x++)
+    {
+      world.cur_map->cmap[y][x] = NULL;
+    }
+  }
+  heap_init(&world.cur_map->turn, cmp_char_turns, del_npc);
+  init_pc();
+  pathfind(world.cur_map);
+  put_players();
+  return 0;
+}
+
+static void print_map()
+{
+  int x, y;
+  int default_reached = 0;
+
+  printf("\n\n\n");
+
+  for (y = 0; y < MAP_Y; y++)
+  {
+    for (x = 0; x < MAP_X; x++)
+    {
+      if (world.cur_map->cmap[y][x])
+      {
+        putchar(world.cur_map->cmap[y][x]->symbol);
+      }
+      else
+      {
+        switch (world.cur_map->map[y][x])
+        {
+        case ter_boulder:
+          /* Special-casing the border.  It needs to be boulder so hikers
+           * can't go there, but I like the look of the mountains better.
+           * The other option would be to add a border terrain, which is
+           * probably the better design decision, actually.
+           */
+          if (y == 0 || y == MAP_Y - 1 || x == 0 || x == MAP_X - 1)
+          {
+            putchar('%');
+          }
+          else
+          {
+            putchar('0');
+          }
+          break;
+        case ter_mountain:
+          putchar('%');
+          break;
+        case ter_tree:
+          putchar('4');
+          break;
+        case ter_forest:
+          putchar('^');
+          break;
+        case ter_path:
+          putchar('#');
+          break;
+        case ter_mart:
+          putchar('M');
+          break;
+        case ter_center:
+          putchar('C');
+          break;
+        case ter_grass:
+          putchar(':');
+          break;
+        case ter_clearing:
+          putchar('.');
+          break;
+        case ter_gate:
+          putchar('#');
+          break;
+        case ter_water:
+          putchar('~');
+          break;
+        default:
+          default_reached = 1;
+          break;
+        }
+      }
+    }
+    putchar('\n');
+  }
+
+  if (default_reached)
+  {
+    fprintf(stderr, "Default reached in %s\n", __FUNCTION__);
+  }
+}
+
+// The world is global because of its size, so init_world is parameterless
+void init_world()
+{
+  world.cur_idx[dim_x] = world.cur_idx[dim_y] = WORLD_SIZE / 2;
+  printf("he in init worldy\n");
+  new_map();
+}
+
+void delete_world()
 {
   int x, y;
 
-  do
+  heap_delete(&world.cur_map->turn);
+  for (y = 0; y < WORLD_SIZE; y++)
   {
-    x = rand() % (MAP_X - 2) + 1;
-    y = rand() % (MAP_Y - 2) + 1;
-  } while (world.cur_map->map[y][x] != ter_path);
-
-  world.pc.pos[dim_x] = x;
-  world.pc.pos[dim_y] = y;
-}
-
-void init_hiker()
-{
-  int x, y;
-
-  do
-  {
-    x = rand() % (MAP_X - 2) + 1;
-    y = rand() % (MAP_Y - 2) + 1;
-  } while (world.cur_map->map[y][x] != ter_path);
-
-  world.pc.pos[dim_x] = x;
-  world.pc.pos[dim_y] = y;
-}
-void init_rival()
-{
-}
-
-void init_pacer()
-{
-}
-void init_wanderer()
-{
-}
-void init_sentry()
-{
-}
-void init_explorer()
-{
-}
-void init_swimmer()
-{
+    for (x = 0; x < WORLD_SIZE; x++)
+    {
+      if (world.world[y][x])
+      {
+        free(world.world[y][x]);
+        world.world[y][x] = NULL;
+      }
+    }
+  }
 }
 
 void print_hiker_dist()
@@ -1822,12 +1862,41 @@ void print_rival_dist()
   }
 }
 
+void play()
+{
+  character_t *c;
+  pair_t d;
+
+  while (1)
+  {
+    c = heap_remove_min(&world.cur_map->turn);
+    if (c == &world.pc)
+    {
+      print_map();
+      usleep(250000);
+      c->next_turn += move_cost[char_pc][world.cur_map->map[c->pos[dim_y]]
+                                                           [c->pos[dim_x]]];
+    }
+    else
+    {
+      move_func[c->npc->mtype](c, d);
+      world.cur_map->cmap[c->pos[dim_y]][c->pos[dim_x]] = NULL;
+      world.cur_map->cmap[d[dim_y]][d[dim_x]] = c;
+      c->next_turn += move_cost[c->npc->ctype][world.cur_map->map[d[dim_y]]
+                                                                 [d[dim_x]]];
+      c->pos[dim_y] = d[dim_y];
+      c->pos[dim_x] = d[dim_x];
+    }
+    heap_insert(&world.cur_map->turn, c);
+  }
+}
+
 int main(int argc, char *argv[])
 {
   struct timeval tv;
   uint32_t seed;
-  char c;
-  int x, y;
+  // char c;
+  // int x, y;
 
   if (argc == 2)
   {
@@ -1841,88 +1910,88 @@ int main(int argc, char *argv[])
 
   printf("Using seed: %u\n", seed);
   srand(seed);
-
+  printf("hey\n");
   init_world();
-  init_pc();
-  pathfind(world.cur_map);
 
-  print_map();
+  // init_pc();
+  // printf("hey 1\n");
+  // pathfind(world.cur_map);
 
-  return 0;
+  // print_map();
 
-  do
-  {
-    print_map();
-    printf("Current position is %d%cx%d%c (%d,%d).  "
-           "Enter command: ",
-           abs(world.cur_idx[dim_x] - (WORLD_SIZE / 2)),
-           world.cur_idx[dim_x] - (WORLD_SIZE / 2) >= 0 ? 'E' : 'W',
-           abs(world.cur_idx[dim_y] - (WORLD_SIZE / 2)),
-           world.cur_idx[dim_y] - (WORLD_SIZE / 2) <= 0 ? 'N' : 'S',
-           world.cur_idx[dim_x] - (WORLD_SIZE / 2),
-           world.cur_idx[dim_y] - (WORLD_SIZE / 2));
-    if (scanf(" %c", &c) != 1)
-    {
-      /* To handle EOF */
-      putchar('\n');
-      break;
-    }
-    switch (c)
-    {
-    case 'n':
-      if (world.cur_idx[dim_y])
-      {
-        world.cur_idx[dim_y]--;
-        new_map();
-      }
-      break;
-    case 's':
-      if (world.cur_idx[dim_y] < WORLD_SIZE - 1)
-      {
-        world.cur_idx[dim_y]++;
-        new_map();
-      }
-      break;
-    case 'e':
-      if (world.cur_idx[dim_x] < WORLD_SIZE - 1)
-      {
-        world.cur_idx[dim_x]++;
-        new_map();
-      }
-      break;
-    case 'w':
-      if (world.cur_idx[dim_x])
-      {
-        world.cur_idx[dim_x]--;
-        new_map();
-      }
-      break;
-    case 'q':
-      break;
-    case 'f':
-      scanf(" %d %d", &x, &y);
-      if (x >= -(WORLD_SIZE / 2) && x <= WORLD_SIZE / 2 &&
-          y >= -(WORLD_SIZE / 2) && y <= WORLD_SIZE / 2)
-      {
-        world.cur_idx[dim_x] = x + (WORLD_SIZE / 2);
-        world.cur_idx[dim_y] = y + (WORLD_SIZE / 2);
-        new_map();
-      }
-      break;
-    case '?':
-    case 'h':
-      printf("Move with 'e'ast, 'w'est, 'n'orth, 's'outh or 'f'ly x y.\n"
-             "Quit with 'q'.  '?' and 'h' print this help message.\n");
-      break;
-    default:
-      fprintf(stderr, "%c: Invalid input.  Enter '?' for help.\n", c);
-      break;
-    }
-  } while (c != 'q');
-
+  // do
+  // {
+  //   print_map();
+  //   printf("Current position is %d%cx%d%c (%d,%d).  "
+  //          "Enter command: ",
+  //          abs(world.cur_idx[dim_x] - (WORLD_SIZE / 2)),
+  //          world.cur_idx[dim_x] - (WORLD_SIZE / 2) >= 0 ? 'E' : 'W',
+  //          abs(world.cur_idx[dim_y] - (WORLD_SIZE / 2)),
+  //          world.cur_idx[dim_y] - (WORLD_SIZE / 2) <= 0 ? 'N' : 'S',
+  //          world.cur_idx[dim_x] - (WORLD_SIZE / 2),
+  //          world.cur_idx[dim_y] - (WORLD_SIZE / 2));
+  //   if (scanf(" %c", &c) != 1)
+  //   {
+  //     /* To handle EOF */
+  //     putchar('\n');
+  //     break;
+  //   }
+  //   switch (c)
+  //   {
+  //   case 'n':
+  //     if (world.cur_idx[dim_y])
+  //     {
+  //       world.cur_idx[dim_y]--;
+  //       new_map();
+  //     }
+  //     break;
+  //   case 's':
+  //     if (world.cur_idx[dim_y] < WORLD_SIZE - 1)
+  //     {
+  //       world.cur_idx[dim_y]++;
+  //       new_map();
+  //     }
+  //     break;
+  //   case 'e':
+  //     if (world.cur_idx[dim_x] < WORLD_SIZE - 1)
+  //     {
+  //       world.cur_idx[dim_x]++;
+  //       new_map();
+  //     }
+  //     break;
+  //   case 'w':
+  //     if (world.cur_idx[dim_x])
+  //     {
+  //       world.cur_idx[dim_x]--;
+  //       new_map();
+  //     }
+  //     break;
+  //   case 'q':
+  //     break;
+  //   case 'f':
+  //     scanf(" %d %d", &x, &y);
+  //     if (x >= -(WORLD_SIZE / 2) && x <= WORLD_SIZE / 2 &&
+  //         y >= -(WORLD_SIZE / 2) && y <= WORLD_SIZE / 2)
+  //     {
+  //       world.cur_idx[dim_x] = x + (WORLD_SIZE / 2);
+  //       world.cur_idx[dim_y] = y + (WORLD_SIZE / 2);
+  //       new_map();
+  //     }
+  //     break;
+  //   case '?':
+  //   case 'h':
+  //     printf("Move with 'e'ast, 'w'est, 'n'orth, 's'outh or 'f'ly x y.\n"
+  //            "Quit with 'q'.  '?' and 'h' print this help message.\n");
+  //     break;
+  //   default:
+  //     fprintf(stderr, "%c: Invalid input.  Enter '?' for help.\n", c);
+  //     break;
+  //   }
+  // } while (c != 'q');
+  play();
   delete_world();
 
-  printf("But how are you going to be the very best if you quit?\n");
+  // printf("But how are you going to be the very best if you quit?\n");
 
   return 0;
 }
