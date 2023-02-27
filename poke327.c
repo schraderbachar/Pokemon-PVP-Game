@@ -74,6 +74,7 @@ typedef enum __attribute__((__packed__)) terrain_type
   ter_forest,
   ter_water,
   ter_gate,
+  ter_bridge,
   num_terrain_types,
   ter_debug
 } terrain_type_t;
@@ -598,6 +599,10 @@ static void dijkstra_path(map_t *m, pair_t from, pair_t to)
            p = &path[y][x], x = p->from[dim_x], y = p->from[dim_y])
       {
         mapxy(x, y) = ter_path;
+        if (m->map[y + 1][x] == ter_water || m->map[y - 1][x] == ter_water || m->map[y][x + 1] == ter_water || m->map[y][x - 1] == ter_water)
+        {
+          mapxy(x, y) = ter_bridge;
+        }
         heightxy(x, y) = 0;
       }
       heap_delete(&h);
@@ -1342,6 +1347,7 @@ static int place_trees(map_t *m)
 
   return 0;
 }
+
 void init_pc()
 {
   int x, y;
@@ -1362,6 +1368,7 @@ void init_pc()
 
   heap_insert(&world.cur_map->turn, &world.pc);
 }
+
 void pathfind(map_t *m)
 {
   heap_t h;
@@ -1779,6 +1786,9 @@ static void print_map()
         case ter_water:
           putchar('~');
           break;
+        case ter_bridge:
+          putchar('#');
+          break;
         default:
           default_reached = 1;
           break;
@@ -1872,6 +1882,7 @@ void play()
     c = heap_remove_min(&world.cur_map->turn);
     if (c == &world.pc)
     {
+      printf("hey\n");
       print_map();
       usleep(250000);
       c->next_turn += move_cost[char_pc][world.cur_map->map[c->pos[dim_y]]
@@ -1989,6 +2000,7 @@ int main(int argc, char *argv[])
   //   }
   // } while (c != 'q');
   play();
+
   delete_world();
 
   // printf("But how are you going to be the very best if you quit?\n");
