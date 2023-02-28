@@ -88,6 +88,7 @@ typedef enum __attribute__((__packed__)) character_type
   char_wanderer,
   char_sentry,
   char_explorer,
+  char_swimmer,
   char_other,
   num_character_types
 } character_type_t;
@@ -178,11 +179,16 @@ static pair_t all_dirs[8] = {
 /* Just to make the following table fit in 80 columns */
 #define IM INT_MAX
 int32_t move_cost[num_character_types][num_terrain_types] = {
-    //  boulder,tree,path,mart,center,grass,clearing,mountain,forest,water,gate
-    {IM, IM, 10, 10, 10, 20, 10, IM, IM, IM, 10},
-    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM},
-    {IM, IM, 10, 50, 50, 20, 10, IM, IM, IM, IM},
-    {IM, IM, IM, IM, IM, IM, IM, IM, IM, 7, IM},
+    //  boulder,tree,path,mart,center,grass,clearing,mountain,forest,water,gate,bridge
+    {IM, IM, 10, 10, 10, 20, 10, IM, IM, IM, 10, 10},
+    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
+    {IM, IM, 10, 50, 50, 20, 10, IM, IM, IM, IM, 10},
+    {IM, IM, IM, IM, IM, IM, IM, IM, IM, 7, IM, 10},
+    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
+    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
+    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
+    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
+    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
 };
 #undef IM
 
@@ -513,17 +519,14 @@ void put_players()
     int prob = rand() % 10;
     if (prob == 0)
     {
-      printf("in hiker \n");
       new_hiker();
     }
     if (prob == 1)
     {
-      printf("in rival \n");
       new_rival();
     }
     else
     {
-      printf("in other \n");
       new_other();
     }
     num_players += 1;
@@ -1876,29 +1879,32 @@ void play()
 {
   character_t *c;
   pair_t d;
-
+  int i = 0;
   while (1)
   {
     c = heap_remove_min(&world.cur_map->turn);
     if (c == &world.pc)
     {
-      printf("hey\n");
       print_map();
       usleep(250000);
+
       c->next_turn += move_cost[char_pc][world.cur_map->map[c->pos[dim_y]]
                                                            [c->pos[dim_x]]];
+      printf("%d\n", c->next_turn);
     }
     else
     {
       move_func[c->npc->mtype](c, d);
       world.cur_map->cmap[c->pos[dim_y]][c->pos[dim_x]] = NULL;
       world.cur_map->cmap[d[dim_y]][d[dim_x]] = c;
-      c->next_turn += move_cost[c->npc->ctype][world.cur_map->map[d[dim_y]]
-                                                                 [d[dim_x]]];
+      printf("%c | %d\n", c->symbol, c->npc->mtype);
+      c->next_turn += move_cost[c->npc->ctype][world.cur_map->map[d[dim_y]][d[dim_x]]];
       c->pos[dim_y] = d[dim_y];
       c->pos[dim_x] = d[dim_x];
     }
+
     heap_insert(&world.cur_map->turn, c);
+    i++;
   }
 }
 
