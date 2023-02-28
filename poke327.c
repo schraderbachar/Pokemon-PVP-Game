@@ -183,10 +183,10 @@ int32_t move_cost[num_character_types][num_terrain_types] = {
     {IM, IM, 10, 10, 10, 20, 10, IM, IM, IM, 10, 10},
     {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
     {IM, IM, 10, 50, 50, 20, 10, IM, IM, IM, IM, 10},
+    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
+    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
+    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
     {IM, IM, IM, IM, IM, IM, IM, IM, IM, 7, IM, 10},
-    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
-    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
-    {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
     {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
     {IM, IM, 10, 50, 50, 15, 10, 15, 15, IM, IM, 10},
 };
@@ -202,10 +202,30 @@ static int32_t edge_penalty(int8_t x, int8_t y)
   return (x == 1 || y == 1 || x == MAP_X - 2 || y == MAP_Y - 2) ? 2 : 1;
 }
 
-void rand_pos(pair_t pos)
+void rand_pos(pair_t pos, int isSwim)
 {
-  pos[dim_x] = (rand() % (MAP_X - 2)) + 1;
-  pos[dim_y] = (rand() % (MAP_Y - 2)) + 1;
+  int y;
+  int x;
+  if (isSwim == 0)
+  {
+    pos[dim_x] = (rand() % (MAP_X - 2)) + 1;
+    pos[dim_y] = (rand() % (MAP_Y - 2)) + 1;
+  }
+  else
+  {
+    for (y = 0; y < MAP_Y; y++)
+    {
+      for (x = 0; x < MAP_X; x++)
+      {
+        if (world.cur_map->map[y][x] == ter_water)
+        {
+          pos[dim_x] = x;
+          pos[dim_y] = y;
+          break;
+        }
+      }
+    }
+  }
 }
 
 void new_hiker()
@@ -215,7 +235,7 @@ void new_hiker()
 
   do
   {
-    rand_pos(pos);
+    rand_pos(pos, 0);
   } while (world.hiker_dist[pos[dim_y]][pos[dim_x]] == INT_MAX ||
            world.cur_map->cmap[pos[dim_y]][pos[dim_x]]);
 
@@ -318,7 +338,7 @@ void new_rival()
 
   do
   {
-    rand_pos(pos);
+    rand_pos(pos, 0);
   } while (world.rival_dist[pos[dim_y]][pos[dim_x]] == INT_MAX ||
            world.rival_dist[pos[dim_y]][pos[dim_x]] < 0 ||
            world.cur_map->cmap[pos[dim_y]][pos[dim_x]]);
@@ -334,7 +354,6 @@ void new_rival()
   c->symbol = 'r';
   c->next_turn = 0;
   heap_insert(&world.cur_map->turn, c);
-  printf("rival at: %d %d", c->pos[dim_x], c->pos[dim_y]);
   world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c;
 }
 
@@ -424,6 +443,7 @@ static void explorer_move(character_t *c, pair_t dest)
 
 static void swimmer_move(character_t *c, pair_t dest)
 {
+
   dest[dim_x] = c->pos[dim_x];
   dest[dim_y] = c->pos[dim_y];
 
@@ -459,15 +479,13 @@ void new_other()
 
   do
   {
-    rand_pos(pos);
+    rand_pos(pos, 0);
   } while (world.rival_dist[pos[dim_y]][pos[dim_x]] == INT_MAX ||
            world.rival_dist[pos[dim_y]][pos[dim_x]] < 0 ||
            world.cur_map->cmap[pos[dim_y]][pos[dim_x]]);
 
   c = malloc(sizeof(*c));
   c->npc = malloc(sizeof(*c->npc));
-  c->pos[dim_y] = pos[dim_y];
-  c->pos[dim_x] = pos[dim_x];
   c->npc->ctype = char_other;
   switch (rand() % 5)
   {
@@ -489,9 +507,13 @@ void new_other()
     break;
   case 4:
     c->npc->mtype = move_swimmer;
-    c->symbol = 'w';
+    c->symbol = 'm';
+    rand_pos(pos, 1);
+    printf("hey\n");
     break;
   }
+  c->pos[dim_y] = pos[dim_y];
+  c->pos[dim_x] = pos[dim_x];
   rand_dir(c->npc->dir);
   c->next_turn = 0;
   heap_insert(&world.cur_map->turn, c);
@@ -1811,7 +1833,6 @@ static void print_map()
 void init_world()
 {
   world.cur_idx[dim_x] = world.cur_idx[dim_y] = WORLD_SIZE / 2;
-  printf("he in init worldy\n");
   new_map();
 }
 
@@ -1890,14 +1911,12 @@ void play()
 
       c->next_turn += move_cost[char_pc][world.cur_map->map[c->pos[dim_y]]
                                                            [c->pos[dim_x]]];
-      printf("%d\n", c->next_turn);
     }
     else
     {
       move_func[c->npc->mtype](c, d);
       world.cur_map->cmap[c->pos[dim_y]][c->pos[dim_x]] = NULL;
       world.cur_map->cmap[d[dim_y]][d[dim_x]] = c;
-      printf("%c | %d\n", c->symbol, c->npc->mtype);
       c->next_turn += move_cost[c->npc->ctype][world.cur_map->map[d[dim_y]][d[dim_x]]];
       c->pos[dim_y] = d[dim_y];
       c->pos[dim_x] = d[dim_x];
@@ -1927,7 +1946,6 @@ int main(int argc, char *argv[])
 
   printf("Using seed: %u\n", seed);
   srand(seed);
-  printf("hey\n");
   init_world();
 
   // init_pc();
