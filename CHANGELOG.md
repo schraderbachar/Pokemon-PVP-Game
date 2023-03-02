@@ -1,4 +1,70 @@
-commit 720d4856fcc3bc1f8e02d5d1abf27b736e68c0e7 (HEAD -> master, origin/master)
+commit 7e19dfa5efaa546aaf36781c493b0de196edf588 (HEAD -> master, origin/master)
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Wed Mar 1 20:26:35 2023 -0600
+
+    turning in with swimmer bug
+
+commit 693579b8052671ce24106b07eabc6f9dfb91375d
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Tue Feb 28 16:18:09 2023 -0600
+
+    swimmers now spawn in water
+
+commit f43420668724a12de99a4ad7febaa85ca8a8a724
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Tue Feb 28 14:39:29 2023 -0600
+
+    got new maps to generate
+
+commit 59e862bca2bde48078f22d7791b537c51bd7a6b5
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Mon Feb 27 16:34:44 2023 -0600
+
+    added bridges
+
+commit 26b1f242d421878dbf2c2d1ccda3e2ef2aa55154
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Mon Feb 27 13:11:40 2023 -0600
+
+    got npcs to show up, only on one map tho (map doesnt continually generate) and swimmers aren't in correct space
+
+commit 511383df21271ea497a3de2f8998ad817bc29599
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Fri Feb 24 12:41:04 2023 -0600
+
+    got move functions coded, still need to work on swimmers tho
+
+commit 5cefecf231c2e7ed555c0b494e3a9fdbaf31c52b
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Thu Feb 23 15:32:41 2023 -0600
+
+    used instructors code for 1.4
+
+commit 9da83f28082cc58084e065d6b45377c2fffcc816
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Fri Feb 17 16:41:47 2023 -0600
+
+    updated readme
+
+commit a79bf3ba5752ad1bceef24a07d55d5d0544dba85
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Fri Feb 17 16:38:15 2023 -0600
+
+    got rid of double refrence of heap file. Works without giving me an error now
+
+commit 12035aaca9d170bf45fcc099da3bcb098197945f
+Author: schraderbachar <44781569+schraderbachar@users.noreply.github.com>
+Date:   Wed Feb 15 15:49:07 2023 -0600
+
+    Update CHANGELOG.md
+
+commit cb6d64cf913710e16c240e41c56fa7203e9b1393
+Author: schraderbachar <44781569+schraderbachar@users.noreply.github.com>
+Date:   Wed Feb 15 15:48:48 2023 -0600
+
+    Update CHANGELOG.md
+
+commit 720d4856fcc3bc1f8e02d5d1abf27b736e68c0e7
 Author: schraderbachar <jj.schraderbachar@icloud.com>
 Date:   Wed Feb 15 15:46:25 2023 -0600
 
