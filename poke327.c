@@ -213,18 +213,15 @@ void rand_pos(pair_t pos, int isSwim)
   }
   else
   {
-    for (y = 0; y < MAP_Y; y++)
+    x = (rand() % (MAP_X - 2)) + 1;
+    y = (rand() % (MAP_Y - 2)) + 1;
+    while (world.cur_map->map[y][x] != ter_water)
     {
-      for (x = 0; x < MAP_X; x++)
-      {
-        if (world.cur_map->map[y][x] == ter_water)
-        {
-          pos[dim_x] = x;
-          pos[dim_y] = y;
-          break;
-        }
-      }
+      x = (rand() % (MAP_X - 2)) + 1;
+      y = (rand() % (MAP_Y - 2)) + 1;
     }
+    pos[dim_x] = x;
+    pos[dim_y] = y;
   }
 }
 
@@ -509,7 +506,6 @@ void new_other()
     c->npc->mtype = move_swimmer;
     c->symbol = 'm';
     rand_pos(pos, 1);
-    printf("hey\n");
     break;
   }
   c->pos[dim_y] = pos[dim_y];
