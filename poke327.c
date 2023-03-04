@@ -1683,9 +1683,6 @@ static void print_map()
     int x, y;
     int default_reached = 0;
     refresh();
-    addch('\n');
-    addch('\n');
-    addch('\n');
 
     for (y = 0; y < MAP_Y; y++)
     {
@@ -2107,13 +2104,16 @@ void game_loop()
         //    print_character(c);
         if (c == &world.pc)
         {
-            mvprintw(0, 0, "Input a char\n");
-            char input = scanw("");
-            if (input == 'q')
-            {
-                quit = 1;
-            }
             print_map();
+            mvprintw(0, 0, "Input a char, 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game");
+            char input = getch();
+            mvprintw(1, 0, "%c", input);
+            mvprintw(1, 0, "\n\n\n");
+            mvprintw(2, 0, "%c", input);
+            if (input == 'q' || input == 'Q')
+            {
+                break;
+            }
             usleep(25000);
             c->next_turn += move_cost[char_pc][world.cur_map->map[c->pos[dim_y]]
                                                                  [c->pos[dim_x]]];
