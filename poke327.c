@@ -113,6 +113,7 @@ typedef enum __attribute__((__packed__)) character_type
 
 typedef struct pc
 {
+    pair_t dir;
 } pc_t;
 
 typedef struct npc
@@ -548,10 +549,36 @@ static void move_swimmer_func(character_t *c, pair_t dest)
     }
 }
 
+// static void pc_dir(character_t *c, int x, int y)
+// {
+//     c->pc->dir[dim_x] = x;
+//     c->pc->dir[dim_y] = y;
+// }
+
 static void move_pc_func(character_t *c, pair_t dest)
 {
-    dest[dim_x] = c->pos[dim_x];
-    dest[dim_y] = c->pos[dim_y];
+    terrain_type_t t;
+
+    t = world.cur_map->map[c->pos[dim_y] + c->pc->dir[dim_y]]
+                          [c->pos[dim_x] + c->pc->dir[dim_x]];
+    printf("%d", c->pos[dim_x]);
+
+    if ((t != ter_boulder && t != ter_gate) ||
+        world.cur_map->cmap[c->pos[dim_y] + c->pc->dir[dim_y]]
+                           [c->pos[dim_x] + c->pc->dir[dim_x]])
+    {
+        dest[dim_x] = c->pos[dim_x] + c->pc->dir[dim_x];
+        dest[dim_y] = c->pos[dim_y] + c->pc->dir[dim_y];
+        ;
+    }
+
+    if ((t == ter_path || t == ter_grass || t == ter_clearing) &&
+        !world.cur_map->cmap[c->pos[dim_y] + c->npc->dir[dim_y]]
+                            [c->pos[dim_x] + c->npc->dir[dim_x]])
+    {
+        dest[dim_x] = c->pos[dim_x] + c->pc->dir[dim_x];
+        dest[dim_y] = c->pos[dim_y] + c->pc->dir[dim_y];
+    }
 }
 
 void (*move_func[num_movement_types])(character_t *, pair_t) = {
@@ -767,6 +794,66 @@ void init_pc()
     world.pc.seq_num = world.char_seq_num++;
 
     heap_insert(&world.cur_map->turn, &world.pc);
+}
+
+void move_u_left_pc(int x, int y)
+{
+    world.pc.pos[dim_x] = x;
+    world.pc.pos[dim_y] = y;
+    world.cur_map->cmap[y][x] = &world.pc;
+    world.cur_map->cmap[y + 1][x + 1] = NULL;
+}
+void move_u_pc(int x, int y)
+{
+    world.pc.pos[dim_x] = x;
+    world.pc.pos[dim_y] = y;
+    world.cur_map->cmap[y][x] = &world.pc;
+    world.cur_map->cmap[y + 1][x] = NULL;
+}
+void move_u_right_pc(int x, int y)
+{
+    world.pc.pos[dim_x] = x;
+    world.pc.pos[dim_y] = y;
+    world.cur_map->cmap[y][x] = &world.pc;
+    world.cur_map->cmap[y + 1][x - 1] = NULL;
+}
+void move_right_pc(int x, int y)
+{
+    world.pc.pos[dim_x] = x;
+    world.pc.pos[dim_y] = y;
+    world.cur_map->cmap[y][x] = &world.pc;
+    world.cur_map->cmap[y][x - 1] = NULL;
+}
+void move_l_right_pc(int x, int y)
+{
+    world.pc.pos[dim_x] = x;
+    world.pc.pos[dim_y] = y;
+    world.cur_map->cmap[y][x] = &world.pc;
+    world.cur_map->cmap[y - 1][x - 1] = NULL;
+}
+
+void move_l_pc(int x, int y)
+{
+    world.pc.pos[dim_x] = x;
+    world.pc.pos[dim_y] = y;
+    world.cur_map->cmap[y][x] = &world.pc;
+    world.cur_map->cmap[y - 1][x] = NULL;
+}
+
+void move_l_left_pc(int x, int y)
+{
+    world.pc.pos[dim_x] = x;
+    world.pc.pos[dim_y] = y;
+    world.cur_map->cmap[y][x] = &world.pc;
+    world.cur_map->cmap[y - 1][x + 1] = NULL;
+}
+
+void move_left_pc(int x, int y)
+{
+    world.pc.pos[dim_x] = x;
+    world.pc.pos[dim_y] = y;
+    world.cur_map->cmap[y][x] = &world.pc;
+    world.cur_map->cmap[y][x + 1] = NULL;
 }
 
 static int32_t path_cmp(const void *key, const void *with)
@@ -2104,17 +2191,62 @@ void game_loop()
         //    print_character(c);
         if (c == &world.pc)
         {
+            mvprintw(21, 0, "Input a char, 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n");
             print_map();
-            mvprintw(0, 0, "Input a char, 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game");
             char input = getch();
-            mvprintw(1, 0, "%c", input);
-            mvprintw(1, 0, "\n\n\n");
-            mvprintw(2, 0, "%c", input);
-            if (input == 'q' || input == 'Q')
+            switch (input)
             {
+            case 'q':
+            case 'Q':
+                quit = 1;
+                break;
+            case '7':
+            case 'y':
+                // up and left
+                move_u_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] - 1));
+                break;
+            case '8':
+            case 'k':
+                // up
+                move_u_pc((world.pc.pos[dim_x]), (world.pc.pos[dim_y] - 1));
+                break;
+            case '9':
+            case 'u':
+                // up and right
+                move_u_right_pc((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y] - 1));
+                break;
+            case '6':
+            case 'l':
+                // right
+                move_right_pc((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y]));
+                break;
+            case '3':
+            case 'n':
+                // low right
+                move_l_right_pc((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y] + 1));
+                break;
+            case '2':
+            case 'j':
+                // down
+                move_l_pc((world.pc.pos[dim_x]), (world.pc.pos[dim_y] + 1));
+                break;
+            case '1':
+            case 'b':
+                // lower left
+                move_l_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] + 1));
+                break;
+            case '4':
+            case 'h':
+                // left
+                move_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y]));
+                break;
+            case '5':
+                break;
+            default:
+                mvprintw(21, 0, "That wasn't a valid input. 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n");
+                input = getch();
                 break;
             }
-            usleep(25000);
             c->next_turn += move_cost[char_pc][world.cur_map->map[c->pos[dim_y]]
                                                                  [c->pos[dim_x]]];
         }
@@ -2153,8 +2285,6 @@ int main(int argc, char *argv[])
     init_world();
     game_loop();
     delete_world();
-
-    printf("But how are you going to be the very best if you quit?\n");
 
     return 0;
 }
