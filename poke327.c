@@ -121,6 +121,7 @@ typedef struct npc
     character_type_t ctype;
     movement_type_t mtype;
     pair_t dir;
+    int defeated;
 } npc_t;
 
 typedef struct character
@@ -1769,6 +1770,14 @@ static void print_map()
     int x, y;
     int default_reached = 0;
     refresh();
+    start_color();
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_BLUE, COLOR_BLUE);
+    init_pair(3, COLOR_GREEN, COLOR_GREEN);
+    init_pair(4, COLOR_RED, COLOR_RED);
+    init_pair(5, COLOR_MAGENTA, COLOR_MAGENTA);
+    init_pair(6, COLOR_CYAN, COLOR_MAGENTA);
+    init_pair(7, COLOR_MAGENTA, COLOR_WHITE);
 
     for (y = 0; y < MAP_Y; y++)
     {
@@ -1783,19 +1792,27 @@ static void print_map()
                 switch (world.cur_map->map[y][x])
                 {
                 case ter_boulder:
+                    attron(COLOR_PAIR(4));
                     mvaddch(y, x, '0');
+                    attroff(COLOR_PAIR(4));
                     break;
                 case ter_mountain:
                     mvaddch(y, x, '%');
                     break;
                 case ter_tree:
+                    attron(COLOR_PAIR(3));
                     mvaddch(y, x, '4');
+                    attroff(COLOR_PAIR(3));
                     break;
                 case ter_forest:
+                    attron(COLOR_PAIR(3));
                     mvaddch(y, x, '^');
+                    attroff(COLOR_PAIR(3));
                     break;
                 case ter_path:
+                    attron(COLOR_PAIR(5));
                     mvaddch(y, x, '#');
+                    attroff(COLOR_PAIR(5));
                     break;
                 case ter_gate:
                     mvaddch(y, x, '#');
@@ -1807,13 +1824,19 @@ static void print_map()
                     mvaddch(y, x, 'C');
                     break;
                 case ter_grass:
+                    attron(COLOR_PAIR(7));
                     mvaddch(y, x, ':');
+                    attron(COLOR_PAIR(7));
                     break;
                 case ter_clearing:
+                    attron(COLOR_PAIR(6));
                     mvaddch(y, x, '.');
+                    attron(COLOR_PAIR(6));
                     break;
                 case ter_water:
+                    attron(COLOR_PAIR(2));
                     mvaddch(y, x, '~');
+                    attroff(COLOR_PAIR(2));
                     break;
                 default:
                     mvaddch(y, x, '&');
@@ -1848,7 +1871,7 @@ void enter_pokemart(int x, int y)
     world.pc.pos[dim_x] = x;
     world.pc.pos[dim_y] = y;
 
-    if (world.pc.pos[dim_y] + 1 == ter_center || world.pc.pos[dim_x] + 1 == ter_center || world.pc.pos[dim_y] - 1 == ter_center || world.pc.pos[dim_x] - 1 == ter_center)
+    if (world.pc.pos[dim_y] + 1 == ter_center || world.pc.pos[dim_x] + 1 == ter_center || world.pc.pos[dim_y] - 1 == ter_center || world.pc.pos[dim_x] - 1 == ter_center || world.pc.pos[dim_y] + 1 == ter_mart || world.pc.pos[dim_x] + 1 == ter_mart || world.pc.pos[dim_y] - 1 == ter_mart || world.pc.pos[dim_x] - 1 == ter_mart)
     {
         mvprintw(21, 0, "Place holder for pokemart / pokecenter. Press \'<\' to escape\n");
         int esc = 0;
@@ -1867,7 +1890,35 @@ void enter_pokemart(int x, int y)
         }
     }
 }
-
+void print_trainers()
+{
+    int y, x;
+    int esc = 0;
+    while (!esc)
+    {
+        for (y = 0; y < MAP_Y; y++)
+        {
+            for (x = 0; x < MAP_X; x++)
+            {
+                if (world.cur_map->cmap[y][x])
+                {
+                    mvprintw(21, 0, " %c at: %d %d\n", world.cur_map->cmap[y][x]->symbol, y, x);
+                }
+            }
+        }
+        int input = getch();
+        switch (input)
+        {
+        case 0551:
+            esc = 1;
+            break;
+        default:
+            mvprintw(21, 0, "%c not valid Press \'<\' to escape", input);
+            esc = 1;
+            break;
+        }
+    }
+}
 void delete_world()
 {
     int x, y;
@@ -2198,11 +2249,11 @@ void print_rival_dist()
     }
 }
 
-void print_character(character_t *c)
-{
-    wprintw(world.w, "%c: <%d,%d> %d (%d)\n", c->symbol, c->pos[dim_x],
-            c->pos[dim_y], c->next_turn, c->seq_num);
-}
+// void print_character(character_t *c)
+// {
+//     mvprintw(21, 0, world.w, "%c: <%d,%d> %d (%d)\n", c->symbol, c->pos[dim_x],
+//              c->pos[dim_y], c->next_turn, c->seq_num);
+// }
 
 void game_loop()
 {
@@ -2218,6 +2269,7 @@ void game_loop()
         {
             mvprintw(21, 0, "Input a char, 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n");
             print_map();
+
             char input = getch();
 
             switch (input)
@@ -2229,6 +2281,10 @@ void game_loop()
             case '7':
             case 'y':
                 // up and left
+                // if (world.pc.pos[dim_x] - 1 != ter_gate && world.pc.pos[dim_y] - 1 != ter_gate)
+                // {
+                //     move_u_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] - 1));
+                // }
                 move_u_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] - 1));
                 break;
             case '8':
@@ -2272,6 +2328,9 @@ void game_loop()
                 enter_pokemart(world.pc.pos[dim_x], world.pc.pos[dim_y]);
                 print_map();
                 break;
+            case 't':
+                print_trainers();
+                break;
             default:
                 mvprintw(21, 0, "%c wasn't a valid input. 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n", input);
                 input = getch();
@@ -2285,10 +2344,13 @@ void game_loop()
             move_func[c->npc->mtype](c, d);
             world.cur_map->cmap[c->pos[dim_y]][c->pos[dim_x]] = NULL;
             world.cur_map->cmap[d[dim_y]][d[dim_x]] = c;
-            c->next_turn += move_cost[c->npc->ctype][world.cur_map->map[d[dim_y]]
-                                                                       [d[dim_x]]];
+            c->next_turn += move_cost[c->npc->ctype][world.cur_map->map[d[dim_y]][d[dim_x]]];
             c->pos[dim_y] = d[dim_y];
             c->pos[dim_x] = d[dim_x];
+            if (c->pos[dim_x] == world.pc.pos[dim_x])
+            {
+                mvprintw(21, 0, "battle");
+            }
         }
         heap_insert(&world.cur_map->turn, c);
     }
