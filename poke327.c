@@ -855,7 +855,6 @@ void move_left_pc(int x, int y)
     world.cur_map->cmap[y][x] = &world.pc;
     world.cur_map->cmap[y][x + 1] = NULL;
 }
-
 static int32_t path_cmp(const void *key, const void *with)
 {
     return ((path_t *)key)->cost - ((path_t *)with)->cost;
@@ -1838,9 +1837,35 @@ void init_world()
 {
     initscr();
     world.w = newwin(MAP_Y, MAP_X, 0, 0);
+    keypad(world.w, TRUE);
     world.cur_idx[dim_x] = world.cur_idx[dim_y] = WORLD_SIZE / 2;
     world.char_seq_num = 0;
     new_map();
+}
+
+void enter_pokemart(int x, int y)
+{
+    world.pc.pos[dim_x] = x;
+    world.pc.pos[dim_y] = y;
+
+    if (world.pc.pos[dim_y] + 1 == ter_center || world.pc.pos[dim_x] + 1 == ter_center || world.pc.pos[dim_y] - 1 == ter_center || world.pc.pos[dim_x] - 1 == ter_center)
+    {
+        mvprintw(21, 0, "Place holder for pokemart / pokecenter. Press \'<\' to escape\n");
+        int esc = 0;
+        while (!esc)
+        {
+            char input = getch();
+            switch (input)
+            {
+            case '<':
+                esc = 1;
+                break;
+            default:
+                mvprintw(21, 0, "%c not valid Press \'<\' to escape", input);
+                break;
+            }
+        }
+    }
 }
 
 void delete_world()
@@ -2194,6 +2219,7 @@ void game_loop()
             mvprintw(21, 0, "Input a char, 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n");
             print_map();
             char input = getch();
+
             switch (input)
             {
             case 'q':
@@ -2242,8 +2268,12 @@ void game_loop()
                 break;
             case '5':
                 break;
+            case '>':
+                enter_pokemart(world.pc.pos[dim_x], world.pc.pos[dim_y]);
+                print_map();
+                break;
             default:
-                mvprintw(21, 0, "That wasn't a valid input. 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n");
+                mvprintw(21, 0, "%c wasn't a valid input. 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n", input);
                 input = getch();
                 break;
             }
