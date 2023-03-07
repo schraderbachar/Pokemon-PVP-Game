@@ -1906,8 +1906,10 @@ void enter_pokemart(int x, int y)
     world.pc.pos[dim_x] = x;
     world.pc.pos[dim_y] = y;
 
-    if (world.pc.pos[dim_y] + 1 == ter_center || world.pc.pos[dim_x] + 1 == ter_center || world.pc.pos[dim_y] - 1 == ter_center || world.pc.pos[dim_x] - 1 == ter_center || world.pc.pos[dim_y] + 1 == ter_mart || world.pc.pos[dim_x] + 1 == ter_mart || world.pc.pos[dim_y] - 1 == ter_mart || world.pc.pos[dim_x] - 1 == ter_mart)
+    if (world.cur_map->map[y][x] == ter_mart || world.cur_map->map[y][x] == ter_center)
     {
+        clear();
+        refresh();
         mvprintw(0, 0, "Place holder for pokemart / pokecenter. Press \'<\' to escape\n");
         int esc = 0;
         while (!esc)
