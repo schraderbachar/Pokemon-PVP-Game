@@ -1934,11 +1934,26 @@ void print_trainers()
     {
         for (x = 0; x < MAP_X; x++)
         {
-            if (world.cur_map->cmap[y][x])
+            if (world.cur_map->cmap[y][x] && world.cur_map->cmap[y][x]->symbol != PC_SYMBOL)
             {
-
-                sprintf(p[index], "%c at: %d %d\n", world.cur_map->cmap[y][x]->symbol, y - world.pc.pos[y], x - world.pc.pos[y]);
-
+                if (y - world.pc.pos[y] < 0 && x - world.pc.pos[x] < 0)
+                {
+                    sprintf(p[index], "%c at: %d north %d west\n", world.cur_map->cmap[y][x]->symbol, y - world.pc.pos[y], x - world.pc.pos[y]);
+                }
+                if (y - world.pc.pos[y] >= 0 && x - world.pc.pos[x] >= 0)
+                {
+                    sprintf(p[index], "%c at: %d south %d east\n", world.cur_map->cmap[y][x]->symbol, y - world.pc.pos[y], x - world.pc.pos[y]);
+                }
+                // positive y, negative x
+                if (y - world.pc.pos[y] >= 0 && x - world.pc.pos[x] < 0)
+                {
+                    sprintf(p[index], "%c at: %d south %d west\n", world.cur_map->cmap[y][x]->symbol, y - world.pc.pos[y], x - world.pc.pos[y]);
+                }
+                // negative y, positive x
+                if (y - world.pc.pos[y] >= 0 && x - world.pc.pos[x] >= 0)
+                {
+                    sprintf(p[index], "%c at: %d north %d east\n", world.cur_map->cmap[y][x]->symbol, y - world.pc.pos[y], x - world.pc.pos[y]);
+                }
                 index += 1;
             }
         }
