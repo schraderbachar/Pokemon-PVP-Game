@@ -796,29 +796,28 @@ int valid_move(int newX, int newY)
     switch (world.cur_map->map[newY][newX])
     {
     case ter_boulder:
-        mvprintw(0, 0, "That boulder move is invalid at: %d. Please try again\n", newX);
+        mvprintw(0, 0, "That boulder move is invalid at: %d %d. Please try again\n", newY, newX);
         return 0;
         break;
     case ter_forest:
-        mvprintw(0, 0, "That forest move move to: %d is invalid. Please try again\n", newX);
+        mvprintw(0, 0, "That forest move move to: %d %d is invalid. Please try again\n", newY, newX);
 
         return 0;
         break;
     case ter_tree:
-        mvprintw(0, 0, "That tree move move to: %d is invalid. Please try again\n", newX);
+        mvprintw(0, 0, "That tree move move to: %d %d is invalid. Please try again\n", newY, newX);
         return 0;
         break;
     case ter_mountain:
-        mvprintw(0, 0, "That mountain move to: %d is invalid. Please try again\n", newX);
+        mvprintw(0, 0, "That mountain move to: %d %d is invalid. Please try again\n", newY, newX);
         return 0;
         break;
     case ter_water:
-        mvprintw(0, 0, "That water move move to: %d is invalid. Please try again\n", newX);
+        mvprintw(0, 0, "That water move move to: %d %d is invalid. Please try again\n", newY, newX);
         return 0;
         break;
     case ter_gate:
-        mvprintw(0, 0, "That gate move move to: %d is invalid. Please try again\n", newX);
-
+        mvprintw(0, 0, "That gate move move to: %d %d is invalid. Please try again\n", newY, newX);
         return 0;
         break;
     default:
@@ -828,8 +827,13 @@ int valid_move(int newX, int newY)
     return 1;
 }
 
+void battle(character_t *c, int x, int y)
+{
+}
+
 void move_u_left_pc(int x, int y)
 {
+
     world.pc.pos[dim_x] = x;
     world.pc.pos[dim_y] = y;
     world.cur_map->cmap[y][x] = &world.pc;
@@ -2317,12 +2321,6 @@ void print_rival_dist()
     }
 }
 
-// void print_character(character_t *c)
-// {
-//     mvprintw(21, 0, world.w, "%c: <%d,%d> %d (%d)\n", c->symbol, c->pos[dim_x],
-//              c->pos[dim_y], c->next_turn, c->seq_num);
-// }
-
 void game_loop()
 {
     character_t *c;
@@ -2332,7 +2330,6 @@ void game_loop()
     while (!quit)
     {
         c = heap_remove_min(&world.cur_map->turn);
-        //    print_character(c);
         if (c == &world.pc)
         {
             mvprintw(21, 0, "Input a char, 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n");
@@ -2465,6 +2462,7 @@ void game_loop()
                 input = getch();
                 break;
             }
+            // battle(c, c->pos[dim_x], c->pos[dim_y]);
             c->next_turn += move_cost[char_pc][world.cur_map->map[c->pos[dim_y]]
                                                                  [c->pos[dim_x]]];
         }
@@ -2477,6 +2475,26 @@ void game_loop()
             c->next_turn += move_cost[c->npc->ctype][world.cur_map->map[d[dim_y]][d[dim_x]]];
             c->pos[dim_y] = d[dim_y];
             c->pos[dim_x] = d[dim_x];
+            int escp = 0;
+            if (world.pc.pos[dim_x] == c->pos[dim_x] && world.pc.pos[dim_y] == c->pos[dim_y] && c->npc->defeated == 0)
+            {
+                clear();
+                refresh();
+                c->npc->defeated = 1;
+                mvprintw(0, 0, "Battle occurs! Press esc to exit");
+                int input = getch();
+                while (!escp)
+                {
+                    if (input == KEY_ESC)
+                    {
+                        escp = 1;
+                    }
+                    else
+                    {
+                        mvprintw(0, 0, "%c invalid. Press esc to exit\n", input);
+                    }
+                }
+            }
         }
         heap_insert(&world.cur_map->turn, c);
     }
