@@ -65,6 +65,7 @@ typedef int16_t pair_t[num_dims];
 #define PACER_SYMBOL 'p'
 #define SWIMMER_SYMBOL 'm'
 #define WANDERER_SYMBOL 'w'
+#define KEY_ESC 27
 
 #define mappair(pair) (m->map[pair[dim_y]][pair[dim_x]])
 #define mapxy(x, y) (m->map[y][x])
@@ -550,12 +551,6 @@ static void move_swimmer_func(character_t *c, pair_t dest)
     }
 }
 
-// static void pc_dir(character_t *c, int x, int y)
-// {
-//     c->pc->dir[dim_x] = x;
-//     c->pc->dir[dim_y] = y;
-// }
-
 static void move_pc_func(character_t *c, pair_t dest)
 {
     terrain_type_t t;
@@ -793,8 +788,44 @@ void init_pc()
     world.pc.next_turn = 0;
 
     world.pc.seq_num = world.char_seq_num++;
-
     heap_insert(&world.cur_map->turn, &world.pc);
+}
+int valid_move(int newX, int newY)
+{
+    // x direction
+    switch (world.cur_map->map[newY][newX])
+    {
+    case ter_boulder:
+        mvprintw(0, 0, "That boulder move is invalid at: %d. Please try again\n", newX);
+        return 0;
+        break;
+    case ter_forest:
+        mvprintw(0, 0, "That forest move move to: %d is invalid. Please try again\n", newX);
+
+        return 0;
+        break;
+    case ter_tree:
+        mvprintw(0, 0, "That tree move move to: %d is invalid. Please try again\n", newX);
+        return 0;
+        break;
+    case ter_mountain:
+        mvprintw(0, 0, "That mountain move to: %d is invalid. Please try again\n", newX);
+        return 0;
+        break;
+    case ter_water:
+        mvprintw(0, 0, "That water move move to: %d is invalid. Please try again\n", newX);
+        return 0;
+        break;
+    case ter_gate:
+        mvprintw(0, 0, "That gate move move to: %d is invalid. Please try again\n", newX);
+
+        return 0;
+        break;
+    default:
+        return 1;
+        break;
+    }
+    return 1;
 }
 
 void move_u_left_pc(int x, int y)
@@ -1873,7 +1904,7 @@ void enter_pokemart(int x, int y)
 
     if (world.pc.pos[dim_y] + 1 == ter_center || world.pc.pos[dim_x] + 1 == ter_center || world.pc.pos[dim_y] - 1 == ter_center || world.pc.pos[dim_x] - 1 == ter_center || world.pc.pos[dim_y] + 1 == ter_mart || world.pc.pos[dim_x] + 1 == ter_mart || world.pc.pos[dim_y] - 1 == ter_mart || world.pc.pos[dim_x] - 1 == ter_mart)
     {
-        mvprintw(21, 0, "Place holder for pokemart / pokecenter. Press \'<\' to escape\n");
+        mvprintw(0, 0, "Place holder for pokemart / pokecenter. Press \'<\' to escape\n");
         int esc = 0;
         while (!esc)
         {
@@ -1884,7 +1915,7 @@ void enter_pokemart(int x, int y)
                 esc = 1;
                 break;
             default:
-                mvprintw(21, 0, "%c not valid Press \'<\' to escape", input);
+                mvprintw(0, 0, "%c not valid Press \'<\' to escape", input);
                 break;
             }
         }
@@ -1909,12 +1940,11 @@ void print_trainers()
         int input = getch();
         switch (input)
         {
-        case 0551:
+        case KEY_ESC:
             esc = 1;
             break;
         default:
-            mvprintw(21, 0, "%c not valid Press \'<\' to escape", input);
-            esc = 1;
+            mvprintw(0, 0, "%c not valid Press escape key to escape\n", input);
             break;
         }
     }
@@ -2281,46 +2311,107 @@ void game_loop()
             case '7':
             case 'y':
                 // up and left
-                // if (world.pc.pos[dim_x] - 1 != ter_gate && world.pc.pos[dim_y] - 1 != ter_gate)
-                // {
-                //     move_u_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] - 1));
-                // }
-                move_u_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] - 1));
+                if (valid_move((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] - 1)))
+                {
+                    move_u_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] - 1));
+                }
+                else
+                {
+                    input = getch();
+                }
+
                 break;
             case '8':
             case 'k':
                 // up
-                move_u_pc((world.pc.pos[dim_x]), (world.pc.pos[dim_y] - 1));
+                if (valid_move((world.pc.pos[dim_x]), (world.pc.pos[dim_y] - 1)))
+                {
+                    move_u_pc((world.pc.pos[dim_x]), (world.pc.pos[dim_y] - 1));
+                }
+                else
+                {
+                    input = getch();
+                }
+
                 break;
             case '9':
             case 'u':
                 // up and right
-                move_u_right_pc((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y] - 1));
+                if (valid_move((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y] - 1)))
+                {
+                    move_u_right_pc((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y] - 1));
+                }
+                else
+                {
+                    input = getch();
+                }
+
                 break;
             case '6':
             case 'l':
                 // right
-                move_right_pc((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y]));
+
+                if (valid_move((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y])))
+                {
+                    move_right_pc((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y]));
+                }
+                else
+                {
+                    input = getch();
+                }
+
                 break;
             case '3':
             case 'n':
                 // low right
-                move_l_right_pc((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y] + 1));
+                if (valid_move((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y] + 1)))
+                {
+                    move_l_right_pc((world.pc.pos[dim_x] + 1), (world.pc.pos[dim_y] + 1));
+                }
+                else
+                {
+                    input = getch();
+                }
+
                 break;
             case '2':
             case 'j':
                 // down
-                move_l_pc((world.pc.pos[dim_x]), (world.pc.pos[dim_y] + 1));
+                if (valid_move((world.pc.pos[dim_x]), (world.pc.pos[dim_y] + 1)))
+                {
+                    move_l_pc((world.pc.pos[dim_x]), (world.pc.pos[dim_y] + 1));
+                }
+                else
+                {
+                    input = getch();
+                }
+
                 break;
             case '1':
             case 'b':
                 // lower left
-                move_l_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] + 1));
+                if (valid_move((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] + 1)))
+                {
+                    move_l_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y] + 1));
+                }
+                else
+                {
+                    input = getch();
+                }
+
                 break;
             case '4':
             case 'h':
                 // left
-                move_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y]));
+                if (valid_move((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y])))
+                {
+                    move_left_pc((world.pc.pos[dim_x] - 1), (world.pc.pos[dim_y]));
+                }
+                else
+                {
+                    input = getch();
+                }
+
                 break;
             case '5':
                 break;
@@ -2347,10 +2438,6 @@ void game_loop()
             c->next_turn += move_cost[c->npc->ctype][world.cur_map->map[d[dim_y]][d[dim_x]]];
             c->pos[dim_y] = d[dim_y];
             c->pos[dim_x] = d[dim_x];
-            if (c->pos[dim_x] == world.pc.pos[dim_x])
-            {
-                mvprintw(21, 0, "battle");
-            }
         }
         heap_insert(&world.cur_map->turn, c);
     }
