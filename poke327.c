@@ -41,7 +41,7 @@ typedef int16_t pair_t[num_dims];
 #define BOULDER_PROB 95
 #define WORLD_SIZE 401
 
-#define MIN_TRAINERS 7
+#define MIN_TRAINERS 34
 #define ADD_TRAINER_PROB 60
 
 #define MOUNTAIN_SYMBOL '%'
@@ -1891,7 +1891,7 @@ void init_world()
 {
     initscr();
     world.w = newwin(MAP_Y, MAP_X, 0, 0);
-    keypad(world.w, TRUE);
+    keypad(stdscr, TRUE);
     world.cur_idx[dim_x] = world.cur_idx[dim_y] = WORLD_SIZE / 2;
     world.char_seq_num = 0;
     new_map();
@@ -1925,26 +1925,49 @@ void print_trainers()
 {
     int y, x;
     int esc = 0;
-    while (!esc)
+    int start = 0;
+    int index = 0;
+    clear();
+    refresh();
+    char p[MIN_TRAINERS][30];
+    for (y = 0; y < MAP_Y; y++)
     {
-        for (y = 0; y < MAP_Y; y++)
+        for (x = 0; x < MAP_X; x++)
         {
-            for (x = 0; x < MAP_X; x++)
+            if (world.cur_map->cmap[y][x])
             {
-                if (world.cur_map->cmap[y][x])
-                {
-                    mvprintw(21, 0, " %c at: %d %d\n", world.cur_map->cmap[y][x]->symbol, y, x);
-                }
+
+                sprintf(p[index], "%c at: %d %d\n", world.cur_map->cmap[y][x]->symbol, y - world.pc.pos[y], x - world.pc.pos[y]);
+
+                index += 1;
             }
         }
+    }
+    while (!esc)
+    {
+        // bounds check this to be between 0 and p[end]
+        if (start >= 0 && start + 21 <= MIN_TRAINERS)
+        {
+            for (int i = start; i < start + 21 && i < index; i++)
+            {
+                mvprintw(i - start, 0, "%s", p[i]);
+            }
+        }
+
         int input = getch();
         switch (input)
         {
         case KEY_ESC:
             esc = 1;
             break;
+        case KEY_UP:
+            start -= 1;
+            break;
+        case KEY_DOWN:
+            start += 1;
+            break;
         default:
-            mvprintw(0, 0, "%c not valid Press escape key to escape\n", input);
+            mvprintw(0, 0, "%c not valid Press escape key to escape or up and down arrow to move up and down on the list\n", input);
             break;
         }
     }
@@ -2432,6 +2455,7 @@ void game_loop()
         }
         else
         {
+            // if moving to a space and not null, then trigger a battle.
             move_func[c->npc->mtype](c, d);
             world.cur_map->cmap[c->pos[dim_y]][c->pos[dim_x]] = NULL;
             world.cur_map->cmap[d[dim_y]][d[dim_x]] = c;
