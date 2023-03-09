@@ -2462,6 +2462,12 @@ void game_loop()
             default:
                 mvprintw(21, 0, "%c wasn't a valid input. 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n", input);
                 input = getch();
+                if (input != 't' && input != '>' && input != '5' && input != '4' && input != 'h' && input != '1' && input != 'b' && input != '2' && input != 'j' && input != '3' && input != 'n' && input != '9' && input != 'u' && input != '7' && input != 'y')
+                {
+                    mvprintw(21, 0, "%c wasn't a valid input. 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n", input);
+                    input = getch();
+                }
+
                 break;
             }
             // battle(c, c->pos[dim_x], c->pos[dim_y]);
