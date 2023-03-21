@@ -796,28 +796,28 @@ int valid_move(int newX, int newY)
     switch (world.cur_map->map[newY][newX])
     {
     case ter_boulder:
-        mvprintw(0, 0, "That boulder move is invalid at: %d %d. Please try again\n", newY, newX);
+        mvprintw(0, 0, "That boulder move is invalid at: %d %d. Your turn has been used up. Your turn has been used up. Please try again\n", newY, newX);
         return 0;
         break;
     case ter_forest:
-        mvprintw(0, 0, "That forest move move to: %d %d is invalid. Please try again\n", newY, newX);
+        mvprintw(0, 0, "That forest move move to: %d %d is invalid. Your turn has been used up. Please try again\n", newY, newX);
 
         return 0;
         break;
     case ter_tree:
-        mvprintw(0, 0, "That tree move move to: %d %d is invalid. Please try again\n", newY, newX);
+        mvprintw(0, 0, "That tree move move to: %d %d is invalid. Your turn has been used up. Please try again\n", newY, newX);
         return 0;
         break;
     case ter_mountain:
-        mvprintw(0, 0, "That mountain move to: %d %d is invalid. Please try again\n", newY, newX);
+        mvprintw(0, 0, "That mountain move to: %d %d is invalid. Your turn has been used up. Please try again\n", newY, newX);
         return 0;
         break;
     case ter_water:
-        mvprintw(0, 0, "That water move move to: %d %d is invalid. Please try again\n", newY, newX);
+        mvprintw(0, 0, "That water move move to: %d %d is invalid. Your turn has been used up. Please try again\n", newY, newX);
         return 0;
         break;
     case ter_gate:
-        mvprintw(0, 0, "That gate move move to: %d %d is invalid. Please try again\n", newY, newX);
+        mvprintw(0, 0, "That gate move move to: %d %d is invalid. Your turn has been used up. Please try again\n", newY, newX);
         return 0;
         break;
     default:
@@ -2334,7 +2334,7 @@ void game_loop()
         c = heap_remove_min(&world.cur_map->turn);
         if (c == &world.pc)
         {
-            mvprintw(21, 0, "Input a char, 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n");
+            mvprintw(21, 0, "Input a char, 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it IF you're not on it, it won't do anything and your turn will be used. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n");
             print_map();
 
             char input = getch();
@@ -2460,17 +2460,16 @@ void game_loop()
                 print_trainers();
                 break;
             default:
-                mvprintw(21, 0, "%c wasn't a valid input. 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n", input);
+                mvprintw(21, 0, "%c wasn't a valid input. 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. If you're not on it the turn will be used up and nothing will happen. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n", input);
                 input = getch();
                 if (input != 't' && input != '>' && input != '5' && input != '4' && input != 'h' && input != '1' && input != 'b' && input != '2' && input != 'j' && input != '3' && input != 'n' && input != '9' && input != 'u' && input != '7' && input != 'y')
                 {
-                    mvprintw(21, 0, "%c wasn't a valid input. 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n", input);
+                    mvprintw(21, 0, "%c wasn't a valid input. 7/y up & left, 8/k up, 9/u  up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it, if not on it your turn will be used up and nothing will happen. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game\n\n\n", input);
                     input = getch();
                 }
 
                 break;
             }
-            // battle(c, c->pos[dim_x], c->pos[dim_y]);
             c->next_turn += move_cost[char_pc][world.cur_map->map[c->pos[dim_y]]
                                                                  [c->pos[dim_x]]];
         }
