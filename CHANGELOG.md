@@ -1,4 +1,100 @@
-commit 7e19dfa5efaa546aaf36781c493b0de196edf588 (HEAD -> master, origin/master)
+commit a4846f5ecb041f0c0fcf5197d4c6c785918cbdc8 (HEAD -> master, origin/master)
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Mon Mar 20 20:01:41 2023 -0500
+
+    updated text and readme
+
+commit 87aaad2fb2cbfed1c5e41f7d22eaad620953e72c
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Thu Mar 9 16:35:57 2023 -0600
+
+    added more logic to deter bad key inputs
+
+commit 896be0fb9fb31e0582b6c7b83eee0c15d701af68
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Thu Mar 9 16:14:52 2023 -0600
+
+    got pokemon battles to ensue for diff types
+
+commit 83ab08daf56a9d1bf38e9dc9f40b65e7b924109c
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Tue Mar 7 16:42:08 2023 -0600
+
+    refactored pokemart, pokecenter
+
+commit 4bba83cf021df03059319e2c13155c2ba0604861
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Tue Mar 7 16:22:40 2023 -0600
+
+    got battles done, but says every npc is defeated after one is
+
+commit 4a73e2a3fdf882410de1e6df3015f1bd35b9a4c1
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Tue Mar 7 15:59:07 2023 -0600
+
+    added relative pos to pc and bound checking
+
+commit 2b4d446ab061a322cd414037b8c56b63a8fb8169
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Tue Mar 7 15:52:43 2023 -0600
+
+    added trainer list and shows full list with scrolling
+
+commit 583fff8479ffeb3b9d9611e2ce30e163c3719393
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Tue Mar 7 14:25:15 2023 -0600
+
+    got char movement and boundaries down
+
+commit 7d70dc8b031408bd47fb33dcbcf8362c17586593
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sun Mar 5 19:16:00 2023 -0600
+
+    added color
+
+commit e8544c92d7b172a3099b5d87d3e5078fe523308c
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sun Mar 5 18:15:25 2023 -0600
+
+    added pokecenter logic
+
+commit 8bf6dfc628879489ac98a2f8ee56ef80268da0cc
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sun Mar 5 16:23:25 2023 -0600
+
+    got movements down for pc
+
+commit eda3a3d93d5fe377b4432cff6eff729a1529659c
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sat Mar 4 11:02:12 2023 -0600
+
+    mod readme and got quit func to work
+
+commit b766dafd71ef104b8fe930d778c61176b7e0351c
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Fri Mar 3 22:56:05 2023 -0600
+
+    got map to print and starting character input
+
+commit af9c1f008e923f09f769882bd7b619903b3173aa
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Thu Mar 2 15:23:06 2023 -0600
+
+    got ncurses imported
+
+commit 64d1d09eefe39f2c74423c5b6700fb93489a0089
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Thu Mar 2 14:39:38 2023 -0600
+
+    added instructors code
+
+commit 6fe4474673e480c3732ec7cab61ee5dd575c1194
+Author: schraderbachar <44781569+schraderbachar@users.noreply.github.com>
+Date:   Wed Mar 1 20:29:53 2023 -0600
+
+    Update CHANGELOG.md
+
+commit 7e19dfa5efaa546aaf36781c493b0de196edf588
 Author: schraderbachar <jj.schraderbachar@icloud.com>
 Date:   Wed Mar 1 20:26:35 2023 -0600
 
