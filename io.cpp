@@ -262,6 +262,26 @@ void io_display()
   refresh();
 }
 
+static void io_teleport_display()
+{
+  int x, y;
+
+  mvprintw(3, 19, " %-36s ", "");
+  mvprintw(4, 19, " Type \"X Y\" then hit enter: %-10s", "");
+  mvprintw(5, 19, " %-36s ", "");
+
+  scanw((char *)"%d %d", &x, &y);
+  mvprintw(4, 19, " Teleporting to (%d, %d) (Press Enter)", x, y);
+  scanw((char *)"");
+
+  world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]]->pc = NULL;
+  world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]] = NULL;
+  world.cur_idx[dim_x] = 200 + x;
+  world.cur_idx[dim_y] = 200 + y;
+  new_map(1);
+  io_display();
+}
+
 uint32_t io_teleport_pc(pair_t dest)
 {
   /* Just for fun. And debugging.  Mostly debugging. */
@@ -311,8 +331,7 @@ static void io_scroll_trainer_list(char (*s)[40], uint32_t count)
   }
 }
 
-static void io_list_trainers_display(character_t **c,
-                                     uint32_t count)
+static void io_list_trainers_display(character_t **c, uint32_t count)
 {
   uint32_t i;
   char(*s)[40]; /* pointer to array of 40 char */
@@ -483,7 +502,26 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
 
   if (world.cur_map->map[dest[dim_y]][dest[dim_x]] == ter_gate)
   {
-    /* Can't leave the map */
+    if (world.pc.pos[dim_x] == 1)
+    {
+      world.cur_idx[dim_x] -= 1;
+    }
+    else if (world.pc.pos[dim_x] == 78)
+    {
+      world.cur_idx[dim_x] += 1;
+    }
+    else if (world.pc.pos[dim_y] == 1)
+    {
+      world.cur_idx[dim_y] -= 1;
+    }
+    else if (world.pc.pos[dim_y] == 19)
+    {
+      world.cur_idx[dim_y] += 1;
+    }
+
+    world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]] = NULL;
+
+    new_map(0);
     return 1;
   }
 
@@ -504,12 +542,10 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
     }
   }
 
-  if (move_cost[char_pc][world.cur_map->map[dest[dim_y]][dest[dim_x]]] ==
-      INT_MAX)
+  if (move_cost[char_pc][world.cur_map->map[dest[dim_y]][dest[dim_x]]] == INT_MAX)
   {
     return 1;
   }
-
   return 0;
 }
 
@@ -582,6 +618,10 @@ void io_handle_input(pair_t dest)
       break;
     case 't':
       io_list_trainers();
+      turn_not_consumed = 1;
+      break;
+    case 'f':
+      io_teleport_display();
       turn_not_consumed = 1;
       break;
     case 'p':
