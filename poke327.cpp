@@ -848,7 +848,7 @@ void rand_pos(pair_t pos)
 void new_hiker()
 {
   pair_t pos;
-  character_t *c;
+  character *c;
 
   do
   {
@@ -858,7 +858,7 @@ void new_hiker()
            pos[dim_x] < 3 || pos[dim_x] > MAP_X - 4 ||
            pos[dim_y] < 3 || pos[dim_y] > MAP_Y - 4);
 
-  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character_t *)malloc(sizeof(*c));
+  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character *)malloc(sizeof(*c));
   c->npc = (npc_t *)malloc(sizeof(*c->npc));
   c->pos[dim_y] = pos[dim_y];
   c->pos[dim_x] = pos[dim_x];
@@ -880,14 +880,14 @@ void new_hiker()
 void new_rival()
 {
   pair_t pos;
-  character_t *c;
+  character *c;
 
   do
   {
     rand_pos(pos);
   } while (world.rival_dist[pos[dim_y]][pos[dim_x]] == INT_MAX || world.rival_dist[pos[dim_y]][pos[dim_x]] < 0 || world.cur_map->cmap[pos[dim_y]][pos[dim_x]] || pos[dim_x] < 3 || pos[dim_x] > MAP_X - 4 || pos[dim_y] < 3 || pos[dim_y] > MAP_Y - 4);
 
-  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character_t *)malloc(sizeof(*c));
+  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character *)malloc(sizeof(*c));
   c->npc = (npc_t *)malloc(sizeof(*c->npc));
   c->pos[dim_y] = pos[dim_y];
   c->pos[dim_x] = pos[dim_x];
@@ -907,7 +907,7 @@ void new_rival()
 void new_swimmer()
 {
   pair_t pos;
-  character_t *c;
+  character *c;
 
   do
   {
@@ -915,7 +915,7 @@ void new_swimmer()
   } while (world.cur_map->map[pos[dim_y]][pos[dim_x]] != ter_water ||
            world.cur_map->cmap[pos[dim_y]][pos[dim_x]]);
 
-  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character_t *)malloc(sizeof(*c));
+  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character *)malloc(sizeof(*c));
   c->npc = (npc_t *)malloc(sizeof(*c->npc));
   c->pos[dim_y] = pos[dim_y];
   c->pos[dim_x] = pos[dim_x];
@@ -935,14 +935,14 @@ void new_swimmer()
 void new_char_other()
 {
   pair_t pos;
-  character_t *c;
+  character *c;
 
   do
   {
     rand_pos(pos);
   } while (world.rival_dist[pos[dim_y]][pos[dim_x]] == INT_MAX || world.rival_dist[pos[dim_y]][pos[dim_x]] < 0 || world.cur_map->cmap[pos[dim_y]][pos[dim_x]] || pos[dim_x] < 3 || pos[dim_x] > MAP_X - 4 || pos[dim_y] < 3 || pos[dim_y] > MAP_Y - 4);
 
-  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character_t *)malloc(sizeof(*c));
+  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character *)malloc(sizeof(*c));
   c->npc = (npc_t *)malloc(sizeof(*c->npc));
   c->pos[dim_y] = pos[dim_y];
   c->pos[dim_x] = pos[dim_x];
@@ -1032,7 +1032,7 @@ void init_pc()
 
 void place_pc()
 {
-  character_t *c;
+  character *c;
 
   if (world.pc.pos[dim_x] == 1)
   {
@@ -1053,7 +1053,7 @@ void place_pc()
 
   world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]] = &world.pc;
 
-  if ((c = (character_t *)heap_peek_min(&world.cur_map->turn)))
+  if ((c = (character *)heap_peek_min(&world.cur_map->turn)))
   {
     world.pc.next_turn = c->next_turn;
   }
@@ -1267,12 +1267,12 @@ void print_rival_dist()
 
 void game_loop()
 {
-  character_t *c;
+  character *c;
   pair_t d;
 
   while (!world.quit)
   {
-    c = (character_t *)heap_remove_min(&world.cur_map->turn);
+    c = (character *)heap_remove_min(&world.cur_map->turn);
 
     move_func[c->npc ? c->npc->mtype : move_pc](c, d);
 

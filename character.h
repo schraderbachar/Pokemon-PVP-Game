@@ -1,11 +1,12 @@
 #ifndef CHARACTER_H
-# define CHARACTER_H
+#define CHARACTER_H
 
-# include <stdint.h>
+#include <stdint.h>
 
-# include "poke327.h"
+#include "poke327.h"
 
-typedef enum __attribute__ ((__packed__)) movement_type {
+typedef enum __attribute__((__packed__)) movement_type
+{
   move_hiker,
   move_rival,
   move_pace,
@@ -17,7 +18,8 @@ typedef enum __attribute__ ((__packed__)) movement_type {
   num_movement_types
 } movement_type_t;
 
-typedef enum __attribute__ ((__packed__)) character_type {
+typedef enum __attribute__((__packed__)) character_type
+{
   char_pc,
   char_hiker,
   char_rival,
@@ -30,14 +32,16 @@ extern const char *char_type_name[num_character_types];
 
 extern int32_t move_cost[num_character_types][num_terrain_types];
 
-typedef struct npc {
+typedef struct npc
+{
   character_type_t ctype;
   movement_type_t mtype;
   int defeated;
   pair_t dir;
 } npc_t;
 
-typedef struct pc {
+typedef struct pc
+{
 } pc_t;
 
 /* character is defined in poke327.h to allow an instance of character
@@ -47,7 +51,7 @@ int32_t cmp_char_turns(const void *key, const void *with);
 void delete_character(void *v);
 void pathfind(map_t *m);
 
-extern void (*move_func[num_movement_types])(character_t *, pair_t);
+extern void (*move_func[num_movement_types])(character *, pair_t);
 
 int pc_move(char);
 
