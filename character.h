@@ -49,7 +49,7 @@ typedef struct pc
 
 int32_t cmp_char_turns(const void *key, const void *with);
 void delete_character(void *v);
-void pathfind(map_t *m);
+void pathfind(map *m);
 
 extern void (*move_func[num_movement_types])(character *, pair_t);
 

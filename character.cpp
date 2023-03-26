@@ -37,9 +37,9 @@ const char *char_type_name[num_character_types] = {
    (world.cur_map->map[pos[dim_y] + 1][pos[dim_x]] == ter) ||     \
    (world.cur_map->map[pos[dim_y] + 1][pos[dim_x] + 1] == ter))
 
-void pathfind(map_t *m);
+void pathfind(map *m);
 
-uint32_t can_see(map_t *m, character *voyeur, character *exhibitionist)
+uint32_t can_see(map *m, character *voyeur, character *exhibitionist)
 {
   /* Application of Bresenham's Line Drawing Algorithm.  If we can draw a   *
    * line from v to e without intersecting any foreign terrain, then v can  *
@@ -321,7 +321,7 @@ static void move_explorer_func(character *c, pair_t dest)
 
 static void move_swimmer_func(character *c, pair_t dest)
 {
-  map_t *m = world.cur_map;
+  map *m = world.cur_map;
   pair_t dir;
 
   dest[dim_x] = c->pos[dim_x];
@@ -466,7 +466,7 @@ static int32_t rival_cmp(const void *key, const void *with)
                           [((path_t *)with)->pos[dim_x]]);
 }
 
-void pathfind(map_t *m)
+void pathfind(map *m)
 {
   heap_t h;
   uint32_t x, y;

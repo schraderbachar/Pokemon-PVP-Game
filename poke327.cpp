@@ -43,7 +43,7 @@ static int32_t edge_penalty(int8_t x, int8_t y)
   return (x == 1 || y == 1 || x == MAP_X - 2 || y == MAP_Y - 2) ? 2 : 1;
 }
 
-static void dijkstra_path(map_t *m, pair_t from, pair_t to)
+static void dijkstra_path(map *m, pair_t from, pair_t to)
 {
   static path_t path[MAP_Y][MAP_X], *p;
   static uint32_t initialized = 0;
@@ -159,7 +159,7 @@ static void dijkstra_path(map_t *m, pair_t from, pair_t to)
   }
 }
 
-static int build_paths(map_t *m)
+static int build_paths(map *m)
 {
   pair_t from, to;
 
@@ -275,7 +275,7 @@ static int gaussian[5][5] = {
     {4, 16, 26, 16, 4},
     {1, 4, 7, 4, 1}};
 
-static int smooth_height(map_t *m)
+static int smooth_height(map *m)
 {
   int32_t i, x, y;
   int32_t s, t, p, q;
@@ -456,7 +456,7 @@ static int smooth_height(map_t *m)
   return 0;
 }
 
-static void find_building_location(map_t *m, pair_t p)
+static void find_building_location(map *m, pair_t p)
 {
   do
   {
@@ -489,7 +489,7 @@ static void find_building_location(map_t *m, pair_t p)
   } while (1);
 }
 
-static int place_pokemart(map_t *m)
+static int place_pokemart(map *m)
 {
   pair_t p;
 
@@ -503,7 +503,7 @@ static int place_pokemart(map_t *m)
   return 0;
 }
 
-static int place_center(map_t *m)
+static int place_center(map *m)
 {
   pair_t p;
 
@@ -519,7 +519,7 @@ static int place_center(map_t *m)
 
 /* Chooses tree or boulder for border cell.  Choice is biased by dominance *
  * of neighboring cells.                                                   */
-static terrain_type_t border_type(map_t *m, int32_t x, int32_t y)
+static terrain_type_t border_type(map *m, int32_t x, int32_t y)
 {
   int32_t p, q;
   int32_t r, t;
@@ -580,7 +580,7 @@ static terrain_type_t border_type(map_t *m, int32_t x, int32_t y)
   }
 }
 
-static int map_terrain(map_t *m, int8_t n, int8_t s, int8_t e, int8_t w)
+static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
 {
   int32_t i, x, y;
   queue_node_t *head, *tail, *tmp;
@@ -801,7 +801,7 @@ static int map_terrain(map_t *m, int8_t n, int8_t s, int8_t e, int8_t w)
   return 0;
 }
 
-static int place_boulders(map_t *m)
+static int place_boulders(map *m)
 {
   int i;
   int x, y;
@@ -819,7 +819,7 @@ static int place_boulders(map_t *m)
   return 0;
 }
 
-static int place_trees(map_t *m)
+static int place_trees(map *m)
 {
   int i;
   int x, y;
@@ -1080,7 +1080,7 @@ int new_map(int teleport)
     return 0;
   }
 
-  world.cur_map = world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x]] = (map_t *)malloc(sizeof(*world.cur_map));
+  world.cur_map = world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x]] = (map *)malloc(sizeof(*world.cur_map));
 
   smooth_height(world.cur_map);
 
