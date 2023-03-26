@@ -780,22 +780,22 @@ static int map_terrain(map_t *m, int8_t n, int8_t s, int8_t e, int8_t w)
   if (n != -1)
   {
     mapxy(n, 0) = ter_gate;
-    mapxy(n, 1) = ter_gate;
+    mapxy(n, 1) = ter_path;
   }
   if (s != -1)
   {
     mapxy(s, MAP_Y - 1) = ter_gate;
-    mapxy(s, MAP_Y - 2) = ter_gate;
+    mapxy(s, MAP_Y - 2) = ter_path;
   }
   if (w != -1)
   {
     mapxy(0, w) = ter_gate;
-    mapxy(1, w) = ter_gate;
+    mapxy(1, w) = ter_path;
   }
   if (e != -1)
   {
     mapxy(MAP_X - 1, e) = ter_gate;
-    mapxy(MAP_X - 2, e) = ter_gate;
+    mapxy(MAP_X - 2, e) = ter_path;
   }
 
   return 0;

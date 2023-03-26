@@ -502,6 +502,7 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
 
   if (world.cur_map->map[dest[dim_y]][dest[dim_x]] == ter_gate)
   {
+    mvprintw(0, 0, "pos x %d y: %d ", world.pc.pos[dim_x], world.pc.pos[dim_y]);
     if (world.pc.pos[dim_x] == 1)
     {
       world.cur_idx[dim_x] -= 1;
@@ -542,13 +543,14 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
     }
   }
 
-  if (move_cost[char_pc][world.cur_map->map[dest[dim_y]][dest[dim_x]]] == INT_MAX)
+  if (move_cost[char_pc][world.cur_map->map[dest[dim_y]][dest[dim_x]]] ==
+      INT_MAX)
   {
     return 1;
   }
+
   return 0;
 }
-
 void io_handle_input(pair_t dest)
 {
   uint32_t turn_not_consumed;
