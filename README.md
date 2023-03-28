@@ -29,3 +29,7 @@ Alternatively, if your IDE suppors it, you can just run the file by clicking the
 Input a char, 7/y up & left, 8/k up, 9/u up & right, 6/l right, 3/n low right, 2/j down, 1/b lower left, 4/h left, 5 rest. > enter a pokebuiling if on it. t to display trainers. up/down arrow to scroll up/down on trainer list. esc to exit trainer list. Q to quit game
 
 When pressing esc there is a bit of a delay so please be patient and don't hit it twice.
+
+Press `f` to fly to a map, (-200,-200) to (200,200). 
+
+Press `p` to teleport to a random place on the map as well.
