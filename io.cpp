@@ -5,7 +5,6 @@
 #include <limits.h>
 
 #include "io.h"
-#include "character.h"
 #include "poke327.h"
 
 typedef struct io_message
@@ -274,7 +273,7 @@ static void io_teleport_display()
   mvprintw(4, 19, " Teleporting to (%d, %d) (Press Enter)", x, y);
   scanw((char *)"");
 
-  world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]]->pc = NULL;
+  world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]] = NULL;
   world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]] = NULL;
   world.cur_idx[dim_x] = 200 + x;
   world.cur_idx[dim_y] = 200 + y;
@@ -331,7 +330,7 @@ static void io_scroll_trainer_list(char (*s)[40], uint32_t count)
   }
 }
 
-static void io_list_trainers_display(character **c, uint32_t count)
+static void io_list_trainers_display(npc **c, uint32_t count)
 {
   uint32_t i;
   char(*s)[40]; /* pointer to array of 40 char */
@@ -347,7 +346,7 @@ static void io_list_trainers_display(character **c, uint32_t count)
   for (i = 0; i < count; i++)
   {
     snprintf(s[i], 40, "%16s %c: %2d %s by %2d %s",
-             char_type_name[c[i]->npc->ctype],
+             char_type_name[c[i]->ctype],
              c[i]->symbol,
              abs(c[i]->pos[dim_y] - world.pc.pos[dim_y]),
              ((c[i]->pos[dim_y] - world.pc.pos[dim_y]) <= 0 ? "North" : "South"),
@@ -381,10 +380,10 @@ static void io_list_trainers_display(character **c, uint32_t count)
 
 static void io_list_trainers()
 {
-  character **c;
+  npc **c;
   uint32_t x, y, count;
 
-  c = (character **)malloc(world.cur_map->num_trainers * sizeof(*c));
+  c = (npc **)malloc(world.cur_map->num_trainers * sizeof(*c));
 
   /* Get a linear list of trainers */
   for (count = 0, y = 1; y < MAP_Y - 1; y++)
@@ -394,7 +393,7 @@ static void io_list_trainers()
       if (world.cur_map->cmap[y][x] && world.cur_map->cmap[y][x] !=
                                            &world.pc)
       {
-        c[count++] = world.cur_map->cmap[y][x];
+        c[count++] = (npc *)world.cur_map->cmap[y][x];
       }
     }
   }
@@ -426,25 +425,17 @@ void io_pokemon_center()
 
 void io_battle(character *aggressor, character *defender)
 {
-  character *npc;
+  npc *n = (npc *)((aggressor == &world.pc) ? defender : aggressor);
 
   io_display();
   mvprintw(0, 0, "Aww, how'd you get so strong?  You and your pokemon must share a special bond!");
   refresh();
   getch();
-  if (aggressor->pc)
-  {
-    npc = defender;
-  }
-  else
-  {
-    npc = aggressor;
-  }
 
-  npc->npc->defeated = 1;
-  if (npc->npc->ctype == char_hiker || npc->npc->ctype == char_rival)
+  n->defeated = 1;
+  if (n->ctype == char_hiker || n->ctype == char_rival)
   {
-    npc->npc->mtype = move_wander;
+    n->mtype = move_wander;
   }
 }
 
@@ -502,7 +493,6 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
 
   if (world.cur_map->map[dest[dim_y]][dest[dim_x]] == ter_gate)
   {
-    mvprintw(0, 0, "pos x %d y: %d ", world.pc.pos[dim_x], world.pc.pos[dim_y]);
     if (world.pc.pos[dim_x] == 1)
     {
       world.cur_idx[dim_x] -= 1;
@@ -528,13 +518,13 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
 
   if (world.cur_map->cmap[dest[dim_y]][dest[dim_x]])
   {
-    if (world.cur_map->cmap[dest[dim_y]][dest[dim_x]]->npc &&
-        world.cur_map->cmap[dest[dim_y]][dest[dim_x]]->npc->defeated)
+    if (dynamic_cast<npc *>(world.cur_map->cmap[dest[dim_y]][dest[dim_x]]) &&
+        ((npc *)world.cur_map->cmap[dest[dim_y]][dest[dim_x]])->defeated)
     {
       // Some kind of greeting here would be nice
       return 1;
     }
-    else if (world.cur_map->cmap[dest[dim_y]][dest[dim_x]]->npc)
+    else if (dynamic_cast<npc *>(world.cur_map->cmap[dest[dim_y]][dest[dim_x]]))
     {
       io_battle(&world.pc, world.cur_map->cmap[dest[dim_y]][dest[dim_x]]);
       // Not actually moving, so set dest back to PC position

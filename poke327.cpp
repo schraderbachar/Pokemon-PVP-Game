@@ -11,7 +11,6 @@
 
 #include "heap.h"
 #include "poke327.h"
-#include "character.h"
 #include "io.h"
 
 typedef struct queue_node
@@ -848,7 +847,7 @@ void rand_pos(pair_t pos)
 void new_hiker()
 {
   pair_t pos;
-  character *c;
+  npc *c;
 
   do
   {
@@ -858,16 +857,14 @@ void new_hiker()
            pos[dim_x] < 3 || pos[dim_x] > MAP_X - 4 ||
            pos[dim_y] < 3 || pos[dim_y] > MAP_Y - 4);
 
-  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character *)malloc(sizeof(*c));
-  c->npc = (npc_t *)malloc(sizeof(*c->npc));
+  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = new npc;
   c->pos[dim_y] = pos[dim_y];
   c->pos[dim_x] = pos[dim_x];
-  c->npc->ctype = char_hiker;
-  c->npc->mtype = move_hiker;
-  c->npc->dir[dim_x] = 0;
-  c->npc->dir[dim_y] = 0;
-  c->npc->defeated = 0;
-  c->pc = NULL;
+  c->ctype = char_hiker;
+  c->mtype = move_hiker;
+  c->dir[dim_x] = 0;
+  c->dir[dim_y] = 0;
+  c->defeated = 0;
   c->symbol = 'h';
   c->next_turn = 0;
   c->seq_num = world.char_seq_num++;
@@ -880,23 +877,21 @@ void new_hiker()
 void new_rival()
 {
   pair_t pos;
-  character *c;
+  npc *c;
 
   do
   {
     rand_pos(pos);
   } while (world.rival_dist[pos[dim_y]][pos[dim_x]] == INT_MAX || world.rival_dist[pos[dim_y]][pos[dim_x]] < 0 || world.cur_map->cmap[pos[dim_y]][pos[dim_x]] || pos[dim_x] < 3 || pos[dim_x] > MAP_X - 4 || pos[dim_y] < 3 || pos[dim_y] > MAP_Y - 4);
 
-  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character *)malloc(sizeof(*c));
-  c->npc = (npc_t *)malloc(sizeof(*c->npc));
+  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = new npc;
   c->pos[dim_y] = pos[dim_y];
   c->pos[dim_x] = pos[dim_x];
-  c->npc->ctype = char_rival;
-  c->npc->mtype = move_rival;
-  c->npc->dir[dim_x] = 0;
-  c->npc->dir[dim_y] = 0;
-  c->npc->defeated = 0;
-  c->pc = NULL;
+  c->ctype = char_rival;
+  c->mtype = move_rival;
+  c->dir[dim_x] = 0;
+  c->dir[dim_y] = 0;
+  c->defeated = 0;
   c->symbol = 'r';
   c->next_turn = 0;
   c->seq_num = world.char_seq_num++;
@@ -907,7 +902,7 @@ void new_rival()
 void new_swimmer()
 {
   pair_t pos;
-  character *c;
+  npc *c;
 
   do
   {
@@ -915,16 +910,14 @@ void new_swimmer()
   } while (world.cur_map->map[pos[dim_y]][pos[dim_x]] != ter_water ||
            world.cur_map->cmap[pos[dim_y]][pos[dim_x]]);
 
-  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character *)malloc(sizeof(*c));
-  c->npc = (npc_t *)malloc(sizeof(*c->npc));
+  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = new npc;
   c->pos[dim_y] = pos[dim_y];
   c->pos[dim_x] = pos[dim_x];
-  c->npc->ctype = char_swimmer;
-  c->npc->mtype = move_swim;
-  c->npc->dir[dim_x] = 0;
-  c->npc->dir[dim_y] = 0;
-  c->npc->defeated = 0;
-  c->pc = NULL;
+  c->ctype = char_swimmer;
+  c->mtype = move_swim;
+  c->dir[dim_x] = 0;
+  c->dir[dim_y] = 0;
+  c->defeated = 0;
   c->symbol = SWIMMER_SYMBOL;
   c->next_turn = 0;
   c->seq_num = world.char_seq_num++;
@@ -935,40 +928,38 @@ void new_swimmer()
 void new_char_other()
 {
   pair_t pos;
-  character *c;
+  npc *c;
 
   do
   {
     rand_pos(pos);
   } while (world.rival_dist[pos[dim_y]][pos[dim_x]] == INT_MAX || world.rival_dist[pos[dim_y]][pos[dim_x]] < 0 || world.cur_map->cmap[pos[dim_y]][pos[dim_x]] || pos[dim_x] < 3 || pos[dim_x] > MAP_X - 4 || pos[dim_y] < 3 || pos[dim_y] > MAP_Y - 4);
 
-  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = (character *)malloc(sizeof(*c));
-  c->npc = (npc_t *)malloc(sizeof(*c->npc));
+  world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = new npc;
   c->pos[dim_y] = pos[dim_y];
   c->pos[dim_x] = pos[dim_x];
-  c->npc->ctype = char_other;
+  c->ctype = char_other;
   switch (rand() % 4)
   {
   case 0:
-    c->npc->mtype = move_pace;
+    c->mtype = move_pace;
     c->symbol = PACER_SYMBOL;
     break;
   case 1:
-    c->npc->mtype = move_wander;
+    c->mtype = move_wander;
     c->symbol = WANDERER_SYMBOL;
     break;
   case 2:
-    c->npc->mtype = move_sentry;
+    c->mtype = move_sentry;
     c->symbol = SENTRY_SYMBOL;
     break;
   case 3:
-    c->npc->mtype = move_explore;
+    c->mtype = move_explore;
     c->symbol = EXPLORER_SYMBOL;
     break;
   }
-  rand_dir(c->npc->dir);
-  c->npc->defeated = 0;
-  c->pc = NULL;
+  rand_dir(c->dir);
+  c->defeated = 0;
   c->next_turn = 0;
   c->seq_num = world.char_seq_num++;
   heap_insert(&world.cur_map->turn, c);
@@ -1021,8 +1012,6 @@ void init_pc()
   world.pc.pos[dim_x] = x;
   world.pc.pos[dim_y] = y;
   world.pc.symbol = '@';
-  world.pc.pc = (pc_t *)malloc(sizeof(*world.pc.pc));
-  world.pc.npc = NULL;
 
   world.cur_map->cmap[y][x] = &world.pc;
   world.pc.next_turn = 0;
@@ -1269,22 +1258,24 @@ void game_loop()
 {
   character *c;
   pair_t d;
+  bool is_pc;
 
   while (!world.quit)
   {
     c = (character *)heap_remove_min(&world.cur_map->turn);
+    is_pc = dynamic_cast<npc *>(c) == NULL;
 
-    move_func[c->npc ? c->npc->mtype : move_pc](c, d);
+    move_func[is_pc ? move_pc : ((npc *)c)->mtype](c, d);
 
     world.cur_map->cmap[c->pos[dim_y]][c->pos[dim_x]] = NULL;
     world.cur_map->cmap[d[dim_y]][d[dim_x]] = c;
 
-    if (c->pc)
+    if (is_pc)
     {
       pathfind(world.cur_map);
     }
 
-    c->next_turn += move_cost[c->npc ? c->npc->ctype : char_pc]
+    c->next_turn += move_cost[is_pc ? char_pc : ((npc *)c)->ctype]
                              [world.cur_map->map[d[dim_y]][d[dim_x]]];
 
     c->pos[dim_y] = d[dim_y];

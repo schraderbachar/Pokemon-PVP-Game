@@ -6,8 +6,6 @@
 
 #include "heap.h"
 
-class character;
-
 #define malloc(size) ({          \
   void *_tmp;                    \
   assert((_tmp = malloc(size))); \
@@ -87,6 +85,59 @@ typedef enum __attribute__((__packed__)) terrain_type
   num_terrain_types,
   ter_debug
 } terrain_type_t;
+typedef enum __attribute__((__packed__)) movement_type
+{
+  move_hiker,
+  move_rival,
+  move_pace,
+  move_wander,
+  move_sentry,
+  move_explore,
+  move_swim,
+  move_pc,
+  num_movement_types
+} movement_type_t;
+
+typedef enum __attribute__((__packed__)) character_type
+{
+  char_pc,
+  char_hiker,
+  char_rival,
+  char_swimmer,
+  char_other,
+  num_character_types
+} character_type_t;
+
+extern const char *char_type_name[num_character_types];
+
+extern int32_t move_cost[num_character_types][num_terrain_types];
+
+// class npc npc;
+// class pc pc;
+/* Here instead of character.h to abvoid including character.h */
+class character
+{
+public:
+  virtual ~character(){};
+
+  pair_t pos;
+  char symbol;
+  int next_turn;
+};
+
+class npc : public character
+{
+public:
+  character_type_t ctype;
+  movement_type_t mtype;
+  int defeated;
+  int seq_num;
+  pair_t dir;
+};
+
+class pc : public character
+{
+};
 
 class map
 {
@@ -99,19 +150,14 @@ public:
   int8_t n, s, e, w;
 };
 
-typedef struct npc npc_t;
-typedef struct pc pc_t;
-/* Here instead of character.h to abvoid including character.h */
-class character
-{
-public:
-  npc_t *npc;
-  pc_t *pc;
-  pair_t pos;
-  char symbol;
-  int next_turn;
-  int seq_num;
-};
+void pathfind(map *m);
+
+/* character is defined in poke327.h to allow an instance of character
+ * in world without including character.h in poke327.h                 */
+
+int32_t cmp_char_turns(const void *key, const void *with);
+void delete_character(void *v);
+extern void (*move_func[num_movement_types])(character *, pair_t);
 
 typedef struct world
 {

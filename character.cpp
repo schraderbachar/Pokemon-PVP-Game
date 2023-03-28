@@ -1,6 +1,5 @@
 #include <limits.h>
 
-#include "character.h"
 #include "poke327.h"
 #include "io.h"
 
@@ -206,70 +205,72 @@ static void move_rival_func(character *c, pair_t dest)
 
 static void move_pacer_func(character *c, pair_t dest)
 {
+  npc *n = (npc *)c;
   dest[dim_x] = c->pos[dim_x];
   dest[dim_y] = c->pos[dim_y];
 
-  if (!c->npc->defeated &&
-      world.cur_map->cmap[c->pos[dim_y] + c->npc->dir[dim_y]]
-                         [c->pos[dim_x] + c->npc->dir[dim_x]] ==
+  if (n->defeated &&
+      world.cur_map->cmap[c->pos[dim_y] + n->dir[dim_y]]
+                         [c->pos[dim_x] + n->dir[dim_x]] ==
           &world.pc)
   {
     io_battle(c, &world.pc);
     return;
   }
 
-  if ((world.cur_map->map[c->pos[dim_y] + c->npc->dir[dim_y]]
-                         [c->pos[dim_x] + c->npc->dir[dim_x]] !=
+  if ((world.cur_map->map[c->pos[dim_y] + n->dir[dim_y]]
+                         [c->pos[dim_x] + n->dir[dim_x]] !=
        world.cur_map->map[c->pos[dim_y]][c->pos[dim_x]]) ||
-      world.cur_map->cmap[c->pos[dim_y] + c->npc->dir[dim_y]]
-                         [c->pos[dim_x] + c->npc->dir[dim_x]])
+      world.cur_map->cmap[c->pos[dim_y] + n->dir[dim_y]]
+                         [c->pos[dim_x] + n->dir[dim_x]])
   {
-    c->npc->dir[dim_x] *= -1;
-    c->npc->dir[dim_y] *= -1;
+    n->dir[dim_x] *= -1;
+    n->dir[dim_y] *= -1;
   }
 
-  if ((world.cur_map->map[c->pos[dim_y] + c->npc->dir[dim_y]]
-                         [c->pos[dim_x] + c->npc->dir[dim_x]] ==
+  if ((world.cur_map->map[c->pos[dim_y] + n->dir[dim_y]]
+                         [c->pos[dim_x] + n->dir[dim_x]] ==
        world.cur_map->map[c->pos[dim_y]][c->pos[dim_x]]) &&
-      !world.cur_map->cmap[c->pos[dim_y] + c->npc->dir[dim_y]]
-                          [c->pos[dim_x] + c->npc->dir[dim_x]])
+      !world.cur_map->cmap[c->pos[dim_y] + n->dir[dim_y]]
+                          [c->pos[dim_x] + n->dir[dim_x]])
   {
-    dest[dim_x] = c->pos[dim_x] + c->npc->dir[dim_x];
-    dest[dim_y] = c->pos[dim_y] + c->npc->dir[dim_y];
+    dest[dim_x] = c->pos[dim_x] + n->dir[dim_x];
+    dest[dim_y] = c->pos[dim_y] + n->dir[dim_y];
   }
 }
 
 static void move_wanderer_func(character *c, pair_t dest)
 {
+  npc *n = (npc *)c;
   dest[dim_x] = c->pos[dim_x];
   dest[dim_y] = c->pos[dim_y];
 
-  if (!c->npc->defeated &&
-      world.cur_map->cmap[c->pos[dim_y] + c->npc->dir[dim_y]]
-                         [c->pos[dim_x] + c->npc->dir[dim_x]] ==
+  if (!n->defeated &&
+      world.cur_map->cmap[c->pos[dim_y] + n->dir[dim_y]]
+                         [c->pos[dim_x] + n->dir[dim_x]] ==
           &world.pc)
   {
     io_battle(c, &world.pc);
     return;
   }
 
-  if ((world.cur_map->map[c->pos[dim_y] + c->npc->dir[dim_y]]
-                         [c->pos[dim_x] + c->npc->dir[dim_x]] !=
+  if ((world.cur_map->map[c->pos[dim_y] + n->dir[dim_y]]
+                         [c->pos[dim_x] + n->dir[dim_x]] !=
        world.cur_map->map[c->pos[dim_y]][c->pos[dim_x]]) ||
-      world.cur_map->cmap[c->pos[dim_y] + c->npc->dir[dim_y]]
-                         [c->pos[dim_x] + c->npc->dir[dim_x]])
+      world.cur_map->cmap[c->pos[dim_y] + n->dir[dim_y]]
+                         [c->pos[dim_x] + n->dir[dim_x]])
   {
-    rand_dir(c->npc->dir);
+    rand_dir(n->dir);
   }
 
-  if ((world.cur_map->map[c->pos[dim_y] + c->npc->dir[dim_y]]
-                         [c->pos[dim_x] + c->npc->dir[dim_x]] ==
+  if ((world.cur_map->map[c->pos[dim_y] + n->dir[dim_y]]
+                         [c->pos[dim_x] + n->dir[dim_x]] ==
        world.cur_map->map[c->pos[dim_y]][c->pos[dim_x]]) &&
-      !world.cur_map->cmap[c->pos[dim_y] + c->npc->dir[dim_y]]
-                          [c->pos[dim_x] + c->npc->dir[dim_x]])
+      !world.cur_map->cmap[c->pos[dim_y] + n->dir[dim_y]]
+                          [c->pos[dim_x] + n->dir[dim_x]])
   {
-    dest[dim_x] = c->pos[dim_x] + c->npc->dir[dim_x];
-    dest[dim_y] = c->pos[dim_y] + c->npc->dir[dim_y];
+    dest[dim_x] = c->pos[dim_x] + n->dir[dim_x];
+    dest[dim_y] = c->pos[dim_y] + n->dir[dim_y];
   }
 }
 
@@ -282,12 +283,13 @@ static void move_sentry_func(character *c, pair_t dest)
 
 static void move_explorer_func(character *c, pair_t dest)
 {
+  npc *n = (npc *)c;
   dest[dim_x] = c->pos[dim_x];
   dest[dim_y] = c->pos[dim_y];
 
-  if (!c->npc->defeated &&
-      world.cur_map->cmap[c->pos[dim_y] + c->npc->dir[dim_y]]
-                         [c->pos[dim_x] + c->npc->dir[dim_x]] ==
+  if (!n->defeated &&
+      world.cur_map->cmap[c->pos[dim_y] + n->dir[dim_y]]
+                         [c->pos[dim_x] + n->dir[dim_x]] ==
           &world.pc)
   {
     io_battle(c, &world.pc);
@@ -295,32 +297,33 @@ static void move_explorer_func(character *c, pair_t dest)
   }
 
   if ((move_cost[char_other][world.cur_map->map[c->pos[dim_y] +
-                                                c->npc->dir[dim_y]]
+                                                n->dir[dim_y]]
                                                [c->pos[dim_x] +
-                                                c->npc->dir[dim_x]]] ==
+                                                n->dir[dim_x]]] ==
        INT_MAX) ||
-      world.cur_map->cmap[c->pos[dim_y] + c->npc->dir[dim_y]]
-                         [c->pos[dim_x] + c->npc->dir[dim_x]])
+      world.cur_map->cmap[c->pos[dim_y] + n->dir[dim_y]]
+                         [c->pos[dim_x] + n->dir[dim_x]])
   {
-    c->npc->dir[dim_x] *= -1;
-    c->npc->dir[dim_y] *= -1;
+    n->dir[dim_x] *= -1;
+    n->dir[dim_y] *= -1;
   }
 
   if ((move_cost[char_other][world.cur_map->map[c->pos[dim_y] +
-                                                c->npc->dir[dim_y]]
+                                                n->dir[dim_y]]
                                                [c->pos[dim_x] +
-                                                c->npc->dir[dim_x]]] !=
+                                                n->dir[dim_x]]] !=
        INT_MAX) &&
-      !world.cur_map->cmap[c->pos[dim_y] + c->npc->dir[dim_y]]
-                          [c->pos[dim_x] + c->npc->dir[dim_x]])
+      !world.cur_map->cmap[c->pos[dim_y] + n->dir[dim_y]]
+                          [c->pos[dim_x] + n->dir[dim_x]])
   {
-    dest[dim_x] = c->pos[dim_x] + c->npc->dir[dim_x];
-    dest[dim_y] = c->pos[dim_y] + c->npc->dir[dim_y];
+    dest[dim_x] = c->pos[dim_x] + n->dir[dim_x];
+    dest[dim_y] = c->pos[dim_y] + n->dir[dim_y];
   }
 }
 
 static void move_swimmer_func(character *c, pair_t dest)
 {
+  npc *n = (npc *)c;
   map *m = world.cur_map;
   pair_t dir;
 
@@ -374,8 +377,8 @@ static void move_swimmer_func(character *c, pair_t dest)
   else
   {
     /* PC is elsewhere.  Keep doing laps. */
-    dir[dim_x] = c->npc->dir[dim_x];
-    dir[dim_y] = c->npc->dir[dim_y];
+    dir[dim_x] = n->dir[dim_x];
+    dir[dim_y] = n->dir[dim_y];
     if ((m->map[dest[dim_y] + dir[dim_y]]
                [dest[dim_x] + dir[dim_x]] != ter_water) ||
         !((m->map[dest[dim_y] + dir[dim_y]]
@@ -427,24 +430,14 @@ void (*move_func[num_movement_types])(character *, pair_t) = {
 
 int32_t cmp_char_turns(const void *key, const void *with)
 {
-  return ((((character *)key)->next_turn ==
-           ((character *)with)->next_turn)
-              ? (((character *)key)->seq_num -
-                 ((character *)with)->seq_num)
-              : (((character *)key)->next_turn -
-                 ((character *)with)->next_turn));
+  return ((character *)key)->next_turn - ((character *)with)->next_turn;
 }
 
 void delete_character(void *v)
 {
-  if (v == &world.pc)
+  if (v != &world.pc)
   {
-    free(world.pc.pc);
-  }
-  else
-  {
-    free(((character *)v)->npc);
-    free(v);
+    delete ((character *)v);
   }
 }
 
