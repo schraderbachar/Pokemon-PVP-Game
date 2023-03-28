@@ -1,4 +1,52 @@
-commit a4846f5ecb041f0c0fcf5197d4c6c785918cbdc8 (HEAD -> master, origin/master)
+commit 368e924050999b428e9492ac346ff1357c391e5c (HEAD -> master)
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Tue Mar 28 17:55:39 2023 -0500
+
+    implemented inheritance for npc, and pc and deleted character.h and put everything in poke327.h
+
+commit 987ab940a97ee12309b7d5102157cf237c157b70 (origin/master)
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sun Mar 26 15:38:43 2023 -0500
+
+    converted map to class
+
+commit 3b8d1390e4c200ef769c31a2e9a903a2e1e57194
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sun Mar 26 14:50:34 2023 -0500
+
+    able to move on paths between maps
+
+commit 33525e04e3567aebc5e04a1b0da0509fbb9019fc
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sun Mar 26 14:16:29 2023 -0500
+
+    converted character to a class
+
+commit 220774c65ca79b62cb9abc51928ca34b4b86c4dc
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sun Mar 26 14:03:41 2023 -0500
+
+    got fly to work
+
+commit 3053f8f13b6c6c21387bd67e7ad455581f757d1d
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Thu Mar 23 16:52:04 2023 -0500
+
+    ported to c++
+
+commit 10f7e8144d3f3a89d08beb004e0f9f07386d7ce4
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Thu Mar 23 12:48:18 2023 -0500
+
+    using instructors code from prev submission
+
+commit 8085c86d11f70074ef4ba725dab611364c42573b
+Author: schraderbachar <44781569+schraderbachar@users.noreply.github.com>
+Date:   Tue Mar 21 15:18:44 2023 -0500
+
+    Update CHANGELOG.md
+
+commit a4846f5ecb041f0c0fcf5197d4c6c785918cbdc8
 Author: schraderbachar <jj.schraderbachar@icloud.com>
 Date:   Mon Mar 20 20:01:41 2023 -0500
 
