@@ -1,17 +1,23 @@
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+#include <string>
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <limits.h>
-#include <sys/time.h>
+#include <ctype.h>
 #include <assert.h>
+#include <stdint.h>
+#include <limits.h>
 #include <unistd.h>
+#include <sstream>
 
 #include "heap.h"
 #include "poke327.h"
+#include "character.h"
 #include "io.h"
+#include "file_parsing.h"
 
 typedef struct queue_node
 {
@@ -42,12 +48,12 @@ static int32_t edge_penalty(int8_t x, int8_t y)
   return (x == 1 || y == 1 || x == MAP_X - 2 || y == MAP_Y - 2) ? 2 : 1;
 }
 
-static void dijkstra_path(map *m, pair_t from, pair_t to)
+static void dijkstra_path(map_t *m, pair_t from, pair_t to)
 {
   static path_t path[MAP_Y][MAP_X], *p;
   static uint32_t initialized = 0;
   heap_t h;
-  uint32_t x, y;
+  uint16_t x, y;
 
   if (!initialized)
   {
@@ -158,7 +164,7 @@ static void dijkstra_path(map *m, pair_t from, pair_t to)
   }
 }
 
-static int build_paths(map *m)
+static int build_paths(map_t *m)
 {
   pair_t from, to;
 
@@ -274,7 +280,7 @@ static int gaussian[5][5] = {
     {4, 16, 26, 16, 4},
     {1, 4, 7, 4, 1}};
 
-static int smooth_height(map *m)
+static int smooth_height(map_t *m)
 {
   int32_t i, x, y;
   int32_t s, t, p, q;
@@ -299,7 +305,7 @@ static int smooth_height(map *m)
     }
     else
     {
-      tail->next = (queue_node *)malloc(sizeof(*tail));
+      tail->next = (queue_node_t *)malloc(sizeof(*tail));
       tail = tail->next;
     }
     tail->next = NULL;
@@ -324,7 +330,7 @@ static int smooth_height(map *m)
     if (x - 1 >= 0 && y - 1 >= 0 && !height[y - 1][x - 1])
     {
       height[y - 1][x - 1] = i;
-      tail->next = (queue_node *)malloc(sizeof(*tail));
+      tail->next = (queue_node_t *)malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x - 1;
@@ -333,7 +339,7 @@ static int smooth_height(map *m)
     if (x - 1 >= 0 && !height[y][x - 1])
     {
       height[y][x - 1] = i;
-      tail->next = (queue_node *)malloc(sizeof(*tail));
+      tail->next = (queue_node_t *)malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x - 1;
@@ -342,7 +348,7 @@ static int smooth_height(map *m)
     if (x - 1 >= 0 && y + 1 < MAP_Y && !height[y + 1][x - 1])
     {
       height[y + 1][x - 1] = i;
-      tail->next = (queue_node *)malloc(sizeof(*tail));
+      tail->next = (queue_node_t *)malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x - 1;
@@ -351,7 +357,7 @@ static int smooth_height(map *m)
     if (y - 1 >= 0 && !height[y - 1][x])
     {
       height[y - 1][x] = i;
-      tail->next = (queue_node *)malloc(sizeof(*tail));
+      tail->next = (queue_node_t *)malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x;
@@ -360,7 +366,7 @@ static int smooth_height(map *m)
     if (y + 1 < MAP_Y && !height[y + 1][x])
     {
       height[y + 1][x] = i;
-      tail->next = (queue_node *)malloc(sizeof(*tail));
+      tail->next = (queue_node_t *)malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x;
@@ -369,7 +375,7 @@ static int smooth_height(map *m)
     if (x + 1 < MAP_X && y - 1 >= 0 && !height[y - 1][x + 1])
     {
       height[y - 1][x + 1] = i;
-      tail->next = (queue_node *)malloc(sizeof(*tail));
+      tail->next = (queue_node_t *)malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x + 1;
@@ -378,7 +384,7 @@ static int smooth_height(map *m)
     if (x + 1 < MAP_X && !height[y][x + 1])
     {
       height[y][x + 1] = i;
-      tail->next = (queue_node *)malloc(sizeof(*tail));
+      tail->next = (queue_node_t *)malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x + 1;
@@ -387,7 +393,7 @@ static int smooth_height(map *m)
     if (x + 1 < MAP_X && y + 1 < MAP_Y && !height[y + 1][x + 1])
     {
       height[y + 1][x + 1] = i;
-      tail->next = (queue_node *)malloc(sizeof(*tail));
+      tail->next = (queue_node_t *)malloc(sizeof(*tail));
       tail = tail->next;
       tail->next = NULL;
       tail->x = x + 1;
@@ -455,7 +461,7 @@ static int smooth_height(map *m)
   return 0;
 }
 
-static void find_building_location(map *m, pair_t p)
+static void find_building_location(map_t *m, pair_t p)
 {
   do
   {
@@ -488,7 +494,7 @@ static void find_building_location(map *m, pair_t p)
   } while (1);
 }
 
-static int place_pokemart(map *m)
+static int place_pokemart(map_t *m)
 {
   pair_t p;
 
@@ -502,7 +508,7 @@ static int place_pokemart(map *m)
   return 0;
 }
 
-static int place_center(map *m)
+static int place_center(map_t *m)
 {
   pair_t p;
 
@@ -518,7 +524,7 @@ static int place_center(map *m)
 
 /* Chooses tree or boulder for border cell.  Choice is biased by dominance *
  * of neighboring cells.                                                   */
-static terrain_type_t border_type(map *m, int32_t x, int32_t y)
+static terrain_type_t border_type(map_t *m, int32_t x, int32_t y)
 {
   int32_t p, q;
   int32_t r, t;
@@ -579,7 +585,7 @@ static terrain_type_t border_type(map *m, int32_t x, int32_t y)
   }
 }
 
-static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
+static int map_terrain(map_t *m, int8_t n, int8_t s, int8_t e, int8_t w)
 {
   int32_t i, x, y;
   queue_node_t *head, *tail, *tmp;
@@ -632,7 +638,7 @@ static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
     }
     else
     {
-      tail->next = (queue_node *)malloc(sizeof(*tail));
+      tail->next = (queue_node_t *)malloc(sizeof(*tail));
       tail = tail->next;
     }
     tail->next = NULL;
@@ -652,14 +658,14 @@ static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
   {
     x = head->x;
     y = head->y;
-    i = m->map[y][x];
+    type = m->map[y][x];
 
     if (x - 1 >= 0 && !m->map[y][x - 1])
     {
       if ((rand() % 100) < 80)
       {
-        m->map[y][x - 1] = (terrain_type_t)i;
-        tail->next = (queue_node *)malloc(sizeof(*tail));
+        m->map[y][x - 1] = type;
+        tail->next = (queue_node_t *)malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x - 1;
@@ -668,8 +674,8 @@ static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
       else if (!added_current)
       {
         added_current = 1;
-        m->map[y][x] = (terrain_type_t)i;
-        tail->next = (queue_node *)malloc(sizeof(*tail));
+        m->map[y][x] = type;
+        tail->next = (queue_node_t *)malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
@@ -681,8 +687,8 @@ static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
     {
       if ((rand() % 100) < 20)
       {
-        m->map[y - 1][x] = (terrain_type_t)i;
-        tail->next = (queue_node *)malloc(sizeof(*tail));
+        m->map[y - 1][x] = type;
+        tail->next = (queue_node_t *)malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
@@ -691,8 +697,8 @@ static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
       else if (!added_current)
       {
         added_current = 1;
-        m->map[y][x] = (terrain_type_t)i;
-        tail->next = (queue_node *)malloc(sizeof(*tail));
+        m->map[y][x] = type;
+        tail->next = (queue_node_t *)malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
@@ -704,8 +710,8 @@ static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
     {
       if ((rand() % 100) < 20)
       {
-        m->map[y + 1][x] = (terrain_type_t)i;
-        tail->next = (queue_node *)malloc(sizeof(*tail));
+        m->map[y + 1][x] = type;
+        tail->next = (queue_node_t *)malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
@@ -714,8 +720,8 @@ static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
       else if (!added_current)
       {
         added_current = 1;
-        m->map[y][x] = (terrain_type_t)i;
-        tail->next = (queue_node *)malloc(sizeof(*tail));
+        m->map[y][x] = type;
+        tail->next = (queue_node_t *)malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
@@ -727,8 +733,8 @@ static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
     {
       if ((rand() % 100) < 80)
       {
-        m->map[y][x + 1] = (terrain_type_t)i;
-        tail->next = (queue_node *)malloc(sizeof(*tail));
+        m->map[y][x + 1] = type;
+        tail->next = (queue_node_t *)malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x + 1;
@@ -737,8 +743,8 @@ static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
       else if (!added_current)
       {
         added_current = 1;
-        m->map[y][x] = (terrain_type_t)i;
-        tail->next = (queue_node *)malloc(sizeof(*tail));
+        m->map[y][x] = type;
+        tail->next = (queue_node_t *)malloc(sizeof(*tail));
         tail = tail->next;
         tail->next = NULL;
         tail->x = x;
@@ -800,7 +806,7 @@ static int map_terrain(map *m, int8_t n, int8_t s, int8_t e, int8_t w)
   return 0;
 }
 
-static int place_boulders(map *m)
+static int place_boulders(map_t *m)
 {
   int i;
   int x, y;
@@ -818,7 +824,7 @@ static int place_boulders(map *m)
   return 0;
 }
 
-static int place_trees(map *m)
+static int place_trees(map_t *m)
 {
   int i;
   int x, y;
@@ -882,7 +888,11 @@ void new_rival()
   do
   {
     rand_pos(pos);
-  } while (world.rival_dist[pos[dim_y]][pos[dim_x]] == INT_MAX || world.rival_dist[pos[dim_y]][pos[dim_x]] < 0 || world.cur_map->cmap[pos[dim_y]][pos[dim_x]] || pos[dim_x] < 3 || pos[dim_x] > MAP_X - 4 || pos[dim_y] < 3 || pos[dim_y] > MAP_Y - 4);
+  } while (world.rival_dist[pos[dim_y]][pos[dim_x]] == INT_MAX ||
+           world.rival_dist[pos[dim_y]][pos[dim_x]] < 0 ||
+           world.cur_map->cmap[pos[dim_y]][pos[dim_x]] ||
+           pos[dim_x] < 3 || pos[dim_x] > MAP_X - 4 ||
+           pos[dim_y] < 3 || pos[dim_y] > MAP_Y - 4);
 
   world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = new npc;
   c->pos[dim_y] = pos[dim_y];
@@ -933,7 +943,11 @@ void new_char_other()
   do
   {
     rand_pos(pos);
-  } while (world.rival_dist[pos[dim_y]][pos[dim_x]] == INT_MAX || world.rival_dist[pos[dim_y]][pos[dim_x]] < 0 || world.cur_map->cmap[pos[dim_y]][pos[dim_x]] || pos[dim_x] < 3 || pos[dim_x] > MAP_X - 4 || pos[dim_y] < 3 || pos[dim_y] > MAP_Y - 4);
+  } while (world.rival_dist[pos[dim_y]][pos[dim_x]] == INT_MAX ||
+           world.rival_dist[pos[dim_y]][pos[dim_x]] < 0 ||
+           world.cur_map->cmap[pos[dim_y]][pos[dim_x]] ||
+           pos[dim_x] < 3 || pos[dim_x] > MAP_X - 4 ||
+           pos[dim_y] < 3 || pos[dim_y] > MAP_Y - 4);
 
   world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c = new npc;
   c->pos[dim_y] = pos[dim_y];
@@ -996,7 +1010,8 @@ void place_characters()
      * roll fails, but if the map is full (or almost full), it's         *
      * impossible (or very difficult) to continue to add, so we abort if *
      * we've tried MAX_TRAINER_TRIES times.                              */
-  } while (++world.cur_map->num_trainers < MIN_TRAINERS || ((rand() % 100) < ADD_TRAINER_PROB));
+  } while (++world.cur_map->num_trainers < MIN_TRAINERS ||
+           ((rand() % 100) < ADD_TRAINER_PROB));
 }
 
 void init_pc()
@@ -1069,7 +1084,9 @@ int new_map(int teleport)
     return 0;
   }
 
-  world.cur_map = world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x]] = (map *)malloc(sizeof(*world.cur_map));
+  world.cur_map =
+      world.world[world.cur_idx[dim_y]][world.cur_idx[dim_x]] =
+          (map_t *)malloc(sizeof(*world.cur_map));
 
   smooth_height(world.cur_map);
 
@@ -1195,16 +1212,13 @@ void delete_world()
 {
   int x, y;
 
-  // Only correct because current game never leaves the initial map
-  // Need to iterate over all maps in 1.05+
-  heap_delete(&world.cur_map->turn);
-
   for (y = 0; y < WORLD_SIZE; y++)
   {
     for (x = 0; x < WORLD_SIZE; x++)
     {
       if (world.world[y][x])
       {
+        heap_delete(&world.world[y][x]->turn);
         free(world.world[y][x]);
         world.world[y][x] = NULL;
       }
@@ -1254,28 +1268,58 @@ void print_rival_dist()
   }
 }
 
+void leave_map(pair_t d)
+{
+  if (d[dim_x] == 0)
+  {
+    world.cur_idx[dim_x]--;
+  }
+  else if (d[dim_y] == 0)
+  {
+    world.cur_idx[dim_y]--;
+  }
+  else if (d[dim_x] == MAP_X - 1)
+  {
+    world.cur_idx[dim_x]++;
+  }
+  else
+  {
+    world.cur_idx[dim_y]++;
+  }
+  new_map(0);
+}
+
 void game_loop()
 {
   character *c;
+  npc *n;
+  pc *p;
   pair_t d;
-  bool is_pc;
 
   while (!world.quit)
   {
     c = (character *)heap_remove_min(&world.cur_map->turn);
-    is_pc = dynamic_cast<npc *>(c) == NULL;
+    n = dynamic_cast<npc *>(c);
+    p = dynamic_cast<pc *>(c);
 
-    move_func[is_pc ? move_pc : ((npc *)c)->mtype](c, d);
+    move_func[n ? n->mtype : move_pc](c, d);
 
     world.cur_map->cmap[c->pos[dim_y]][c->pos[dim_x]] = NULL;
+    if (p && (d[dim_x] == 0 || d[dim_x] == MAP_X - 1 ||
+              d[dim_y] == 0 || d[dim_y] == MAP_Y - 1))
+    {
+      leave_map(d);
+      d[dim_x] = c->pos[dim_x];
+      d[dim_y] = c->pos[dim_y];
+    }
     world.cur_map->cmap[d[dim_y]][d[dim_x]] = c;
 
-    if (is_pc)
+    if (p)
     {
       pathfind(world.cur_map);
     }
 
-    c->next_turn += move_cost[is_pc ? char_pc : ((npc *)c)->ctype]
+    c->next_turn += move_cost[n ? n->ctype : char_pc]
                              [world.cur_map->map[d[dim_y]][d[dim_x]]];
 
     c->pos[dim_y] = d[dim_y];
@@ -1294,64 +1338,944 @@ void usage(char *s)
 
 int main(int argc, char *argv[])
 {
-  struct timeval tv;
-  uint32_t seed;
-  int long_arg;
-  int do_seed;
-  //  char c;
-  //  int x, y;
-  int i;
-
-  do_seed = 1;
-
-  if (argc > 1)
+  if (argc == 2)
   {
-    for (i = 1, long_arg = 0; i < argc; i++, long_arg = 0)
+    std::string arg = argv[1];
+    if (arg == "pokemon" || arg == "moves" || arg == "pokemon_moves" || arg == "pokemon_species" || arg == "experience" || arg == "type_names" || arg == "pokemon_stats" || arg == "stats" || arg == "pokemon_types")
     {
-      if (argv[i][0] == '-')
-      { /* All switches start with a dash */
-        if (argv[i][1] == '-')
-        {
-          argv[i]++;    /* Make the argument have a single dash so we can */
-          long_arg = 1; /* handle long and short args at the same place.  */
-        }
-        switch (argv[i][1])
-        {
-        case 's':
-          if ((!long_arg && argv[i][2]) ||
-              (long_arg && strcmp(argv[i], "-seed")) ||
-              argc < ++i + 1 /* No more arguments */ ||
-              !sscanf(argv[i], "%u", &seed) /* Argument is not an integer */)
-          {
-            usage(argv[0]);
-          }
-          do_seed = 0;
-          break;
-        default:
-          usage(argv[0]);
-        }
+      std::string filename;
+      std::string hPath = std::getenv("HOME");
+      std::string beginPath;
+      std::string line;
+      if (std::filesystem::is_directory("/share/cs327/pokedex"))
+      {
+        beginPath = "/share/cs327/pokedex/pokedex/data/csv/";
+        filename = beginPath + arg + ".csv";
+      }
+      else if (std::filesystem::is_directory(hPath + "/.poke327/pokedex"))
+      {
+        beginPath = "/.poke327/pokedex/pokedex/data/csv/";
+        filename = hPath + beginPath + arg + ".csv";
       }
       else
-      { /* No dash */
-        usage(argv[0]);
+      {
+        std::cout << "Error: Could not find file" << std::endl;
+        return 0;
+      }
+      std::ifstream input;
+      input.open(filename);
+      int lineCount = -2;
+      while (input)
+      {
+        std::getline(input, line);
+        lineCount++;
+      }
+      input.close();
+
+      int idx = 0;
+      if (arg == "pokemon")
+      {
+        Pokemon *pokemonArray = new Pokemon[lineCount]();
+        input.open(filename);
+        std::getline(input, line);
+        while (input)
+        {
+          std::getline(input, line);
+          if (line.length() > 0)
+          {
+            std::stringstream strStream(line);
+            std::string sub;
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "ID: " + sub << std::endl;
+            }
+            pokemonArray[idx].id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Identifier: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Identifier: " + sub << std::endl;
+            }
+            pokemonArray[idx].identifier = sub;
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Species ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Species ID: " + sub << std::endl;
+            }
+            pokemonArray[idx].species_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Height: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Height: " + sub << std::endl;
+            }
+            pokemonArray[idx].height = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Weight: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Weight: " + sub << std::endl;
+            }
+            pokemonArray[idx].weight = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Base Experience: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Base Experience: " + sub << std::endl;
+            }
+            pokemonArray[idx].base_experience = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Order: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Order: " + sub << std::endl;
+            }
+            pokemonArray[idx].order = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Is Default: \n"
+                        << std::endl;
+            }
+            else
+            {
+              std::cout << "Is Default: " + sub + "\n"
+                        << std::endl;
+            }
+            pokemonArray[idx].is_default = std::stoi(sub);
+            idx++;
+          }
+        }
+      }
+      else if (arg == "moves")
+      {
+        Moves *movesArray = new Moves[lineCount]();
+        input.open(filename);
+        std::getline(input, line);
+        while (input)
+        {
+          std::getline(input, line);
+          if (line.length() > 0)
+          {
+            std::stringstream strStream(line);
+            std::string sub;
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "ID: " + sub << std::endl;
+            }
+            movesArray[idx].id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Identifier: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Identifier: " + sub << std::endl;
+            }
+            movesArray[idx].identifier = sub;
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Generation ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Generation ID: " + sub << std::endl;
+            }
+            movesArray[idx].generation_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Type ID " << std::endl;
+            }
+            else
+            {
+              std::cout << "Type ID: " + sub << std::endl;
+            }
+            movesArray[idx].type_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Power: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Power: " + sub << std::endl;
+            }
+            movesArray[idx].power = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "PP: " << std::endl;
+            }
+            else
+            {
+              std::cout << "PP: " + sub << std::endl;
+            }
+            movesArray[idx].pp = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Accuracy: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Accuracy: " + sub << std::endl;
+            }
+            movesArray[idx].accuracy = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Priority: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Priority: " + sub << std::endl;
+            }
+            movesArray[idx].priority = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Target ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Target ID: " + sub << std::endl;
+            }
+            movesArray[idx].target_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Damage Class ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Damage Class ID: " + sub << std::endl;
+            }
+            movesArray[idx].damage_class_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Effect ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Effect ID: " + sub << std::endl;
+            }
+            movesArray[idx].effect_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Effect Chance: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Effect Chance: " + sub << std::endl;
+            }
+            movesArray[idx].effect_chance = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Contest Type ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Contest Type ID: " + sub << std::endl;
+            }
+            movesArray[idx].contest_type_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Contest Effect ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Contest Effect ID: " + sub << std::endl;
+            }
+            movesArray[idx].contest_effect_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Super Contest Effect ID: \n"
+                        << std::endl;
+            }
+            else
+            {
+              std::cout << "Super Contest Effect ID: " + sub + "\n"
+                        << std::endl;
+            }
+            movesArray[idx].super_contest_effect_id = std::stoi(sub);
+            idx++;
+          }
+        }
+      }
+      else if (arg == "pokemon_moves")
+      {
+        Pokemon_moves *pokemonMovesArray = new Pokemon_moves[lineCount]();
+        input.open(filename);
+        std::getline(input, line);
+        while (input)
+        {
+          std::getline(input, line);
+          if (line.length() > 0)
+          {
+            std::stringstream strStream(line);
+            std::string sub;
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Pokemon ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Pokemon ID: " + sub << std::endl;
+            }
+            pokemonMovesArray[idx].pokemon_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Version Group ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Version Group ID: " + sub << std::endl;
+            }
+            pokemonMovesArray[idx].version_group_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Move ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Move ID: " + sub << std::endl;
+            }
+            pokemonMovesArray[idx].move_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Pokemon Move Method ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Pokemon Move Method ID: " + sub << std::endl;
+            }
+            pokemonMovesArray[idx].pokemon_move_method_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Level: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Level: " + sub << std::endl;
+            }
+            pokemonMovesArray[idx].level = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Order: \n"
+                        << std::endl;
+            }
+            else
+            {
+              std::cout << "Order: " + sub + "\n"
+                        << std::endl;
+            }
+            pokemonMovesArray[idx].order = std::stoi(sub);
+            idx++;
+          }
+        }
+      }
+      else if (arg == "pokemon_species")
+      {
+        Pokemon_species *pokemonSpeciesArray = new Pokemon_species[lineCount]();
+        input.open(filename);
+        std::getline(input, line);
+        while (input)
+        {
+          std::getline(input, line);
+          if (line.length() > 0)
+          {
+            std::stringstream strStream(line);
+            std::string sub;
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "ID: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Identifier: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Identifier: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].identifier = sub;
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Generation ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Generation ID: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].generation_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Evolves From Species ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Evolves From Species ID: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].evolves_from_species_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Evolution Chain ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Evolution Chain ID: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].evolution_chain_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Color ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Color ID: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].color_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Shape ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Shape ID: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].shape_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Habitat ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Habitat ID: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].habitat_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Gender Rate: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Gender Rate: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].gender_rate = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Capture Rate: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Capture Rate: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].capture_rate = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Base Happiness: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Base Happiness: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].base_happiness = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Is Baby: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Is Baby: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].is_baby = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Hatch Counter: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Hatch Counter: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].hatch_counter = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Has Gender Differences: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Has Gender Differences: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].has_gender_differences = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Growth Rate ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Growth Rate ID: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].growth_rate_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Forms Switchable: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Forms Switchable: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].forms_switchable = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Is Legendary: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Is Legendary: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].is_legendary = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Is Mythical: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Is Mythical: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].is_mythical = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Order: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Order: " + sub << std::endl;
+            }
+            pokemonSpeciesArray[idx].order = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Conquest Order: \n"
+                        << std::endl;
+            }
+            else
+            {
+              std::cout << "Conquest Order: " + sub + "\n"
+                        << std::endl;
+            }
+            pokemonSpeciesArray[idx].conquest_order = std::stoi(sub);
+            idx++;
+          }
+        }
+      }
+      else if (arg == "experience")
+      {
+        Experience *experienceArray = new Experience[lineCount]();
+        input.open(filename);
+        std::getline(input, line);
+        while (input)
+        {
+          std::getline(input, line);
+          if (line.length() > 0)
+          {
+            std::stringstream strStream(line);
+            std::string sub;
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Growth Rate ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Growth Rate ID: " + sub << std::endl;
+            }
+            experienceArray[idx].growth_rate_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Level: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Level: " + sub << std::endl;
+            }
+            experienceArray[idx].level = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              sub = "INT_MAX";
+              std::cout << "Experience: \n"
+                        << std::endl;
+            }
+            else
+            {
+              std::cout << "Experience: " + sub + "\n"
+                        << std::endl;
+            }
+            experienceArray[idx].experience = std::stoi(sub);
+            idx++;
+          }
+        }
+      }
+      else if (arg == "type_names")
+      {
+        Type_names *typeNamesArray = new Type_names[lineCount]();
+        input.open(filename);
+        std::getline(input, line);
+        while (input)
+        {
+          std::getline(input, line);
+          if (line.length() > 0)
+          {
+            std::stringstream strStream(line);
+            std::string sub;
+            getline(strStream, sub, ',');
+            std::string tempTypeId = "INT_MAX";
+            if (sub.length() > 0)
+            {
+              tempTypeId = sub;
+            }
+            getline(strStream, sub, ',');
+            if (sub == "9")
+            {
+              if (tempTypeId == "INT_MAX")
+              {
+                std::cout << "Type ID: " << std::endl;
+              }
+              else
+              {
+                std::cout << "Type ID: " + tempTypeId << std::endl;
+              }
+              std::cout << "Local Language ID: 9" << std::endl;
+              typeNamesArray[idx].type_id = std::stoi(tempTypeId);
+              typeNamesArray[idx].local_language_id = 9;
+              getline(strStream, sub, ',');
+              if (sub.length() == 0)
+              {
+                sub = "INT_MAX";
+                std::cout << "Name: \n"
+                          << std::endl;
+              }
+              else
+              {
+                std::cout << "Name: " + sub + "\n"
+                          << std::endl;
+              }
+              typeNamesArray[idx].name = sub;
+            }
+            idx++;
+          }
+        }
+      }
+      else if (arg == "stats")
+      {
+        Stats *statsArray = new Stats[lineCount]();
+        input.open(filename);
+        std::getline(input, line);
+        while (input)
+        {
+          std::getline(input, line);
+          if (line.length() > 0)
+          {
+            std::stringstream strStream(line);
+            std::string sub;
+            getline(strStream, sub, ',');
+
+            std::cout << "ID: " + sub << std::endl;
+
+            statsArray[idx].id = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+              std::cout << "here" << std::endl;
+              sub = "-1";
+              std::cout << "Damage Class ID: " << std::endl;
+            }
+            else
+            {
+              std::cout << "Damage Class ID: " + sub << std::endl;
+            }
+            statsArray[idx].damage_class_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+
+            std::cout << "Identifier: " + sub << std::endl;
+
+            statsArray[idx].identifier = sub;
+            getline(strStream, sub, ',');
+
+            std::cout << "Is Battle Only: " + sub << std::endl;
+
+            statsArray[idx].is_battle_only = std::stoi(sub);
+            getline(strStream, sub, ',');
+            if (sub.length() == 0)
+            {
+
+              sub = "-1";
+              std::cout << "Game Index: \n"
+                        << std::endl;
+            }
+            else
+            {
+              std::cout << "Game Index: " + sub + "\n"
+                        << std::endl;
+            }
+
+            statsArray[idx].game_index = std::stoi(sub);
+            idx++;
+          }
+        }
+      }
+      else if (arg == "pokemon_stats")
+      {
+        Pokemon_stats *pokemonStatsArray = new Pokemon_stats[lineCount]();
+        input.open(filename);
+        std::getline(input, line);
+        while (input)
+        {
+          std::getline(input, line);
+          if (line.length() > 0)
+          {
+            std::stringstream strStream(line);
+            std::string sub;
+            getline(strStream, sub, ',');
+
+            std::cout << "Pokemon ID: " + sub << std::endl;
+
+            pokemonStatsArray[idx].pokemon_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+
+            std::cout << "Stat ID: " + sub << std::endl;
+
+            pokemonStatsArray[idx].stat_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+
+            std::cout << "Base Stat: " + sub << std::endl;
+
+            pokemonStatsArray[idx].base_stat = std::stoi(sub);
+            getline(strStream, sub, ',');
+
+            std::cout << "Effort: " + sub + "\n"
+                      << std::endl;
+
+            pokemonStatsArray[idx].effort = std::stoi(sub);
+            idx++;
+          }
+        }
+      }
+      else if (arg == "pokemon_types")
+      {
+        Pokemon_types *pokemonTypesArray = new Pokemon_types[lineCount]();
+        input.open(filename);
+        std::getline(input, line);
+        while (input)
+        {
+          std::getline(input, line);
+          if (line.length() > 0)
+          {
+            std::stringstream strStream(line);
+            std::string sub;
+            getline(strStream, sub, ',');
+
+            std::cout << "Pokemon ID: " + sub << std::endl;
+
+            pokemonTypesArray[idx].pokemon_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+
+            std::cout << "Type ID: " + sub << std::endl;
+
+            pokemonTypesArray[idx].type_id = std::stoi(sub);
+            getline(strStream, sub, ',');
+
+            std::cout << "Slot: " + sub + "\n"
+                      << std::endl;
+
+            pokemonTypesArray[idx].slot = std::stoi(sub);
+
+            idx++;
+          }
+        }
       }
     }
+    else
+    {
+      std::cout << "Error: Invalid filename" << std::endl;
+    }
   }
-
-  if (do_seed)
+  else
   {
-    /* Allows me to start the game more than once *
-     * per second, as opposed to time().          */
-    gettimeofday(&tv, NULL);
-    seed = (tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff;
+    std::cout << "Error: Please enter 1 filename to parse" << std::endl;
   }
+  return 0;
+  // int i;
 
-  printf("Using seed: %u\n", seed);
-  srand(seed);
+  // do_seed = 1;
 
-  io_init_terminal();
+  // if (argc > 1)
+  // {
+  //   for (i = 1, long_arg = 0; i < argc; i++, long_arg = 0)
+  //   {
+  //     if (argv[i][0] == '-')
+  //     { /* All switches start with a dash */
+  //       if (argv[i][1] == '-')
+  //       {
+  //         argv[i]++;    /* Make the argument have a single dash so we can */
+  //         long_arg = 1; /* handle long and short args at the same place.  */
+  //       }
+  //       switch (argv[i][1])
+  //       {
+  //       case 's':
+  //         if ((!long_arg && argv[i][2]) ||
+  //             (long_arg && strcmp(argv[i], "-seed")) ||
+  //             argc < ++i + 1 /* No more arguments */ ||
+  //             !sscanf(argv[i], "%u", &seed) /* Argument is not an integer */)
+  //         {
+  //           usage(argv[0]);
+  //         }
+  //         do_seed = 0;
+  //         break;
+  //       default:
+  //         usage(argv[0]);
+  //       }
+  //     }
+  //     else
+  //     { /* No dash */
+  //       usage(argv[0]);
+  //     }
+  //   }
+  // }
 
-  init_world();
+  // if (do_seed)
+  // {
+  //   /* Allows me to start the game more than once *
+  //    * per second, as opposed to time().          */
+  //   gettimeofday(&tv, NULL);
+  //   seed = (tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff;
+  // }
+
+  // printf("Using seed: %u\n", seed);
+  // srand(seed);
+
+  // io_init_terminal();
+
+  // init_world();
 
   /* print_hiker_dist(); */
 
@@ -1416,11 +2340,11 @@ int main(int argc, char *argv[])
 
   */
 
-  game_loop();
+  // game_loop();
 
-  delete_world();
+  // delete_world();
 
-  io_reset_terminal();
+  // io_reset_terminal();
 
   return 0;
 }

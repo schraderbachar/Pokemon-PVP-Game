@@ -5,6 +5,7 @@
 #include <limits.h>
 
 #include "io.h"
+#include "character.h"
 #include "poke327.h"
 
 typedef struct io_message
@@ -112,7 +113,8 @@ static int compare_trainer_distance(const void *v1, const void *v2)
   const character *const *c1 = (const character *const *)v1;
   const character *const *c2 = (const character *const *)v2;
 
-  return (world.rival_dist[(*c1)->pos[dim_y]][(*c1)->pos[dim_x]] - world.rival_dist[(*c2)->pos[dim_y]][(*c2)->pos[dim_x]]);
+  return (world.rival_dist[(*c1)->pos[dim_y]][(*c1)->pos[dim_x]] -
+          world.rival_dist[(*c2)->pos[dim_y]][(*c2)->pos[dim_x]]);
 }
 
 static character *io_nearest_visible_trainer()
@@ -127,7 +129,8 @@ static character *io_nearest_visible_trainer()
   {
     for (x = 1; x < MAP_X - 1; x++)
     {
-      if (world.cur_map->cmap[y][x] && world.cur_map->cmap[y][x] != &world.pc)
+      if (world.cur_map->cmap[y][x] && world.cur_map->cmap[y][x] !=
+                                           &world.pc)
       {
         c[count++] = world.cur_map->cmap[y][x];
       }
@@ -218,8 +221,6 @@ void io_display()
           attroff(COLOR_PAIR(COLOR_CYAN));
           break;
         default:
-          /* Use zero as an error symbol, since it stands out somewhat, and it's *
-           * not otherwise used.                                                 */
           attron(COLOR_PAIR(COLOR_CYAN));
           mvaddch(y + 1, x, ERROR_SYMBOL);
           attroff(COLOR_PAIR(COLOR_CYAN));
@@ -259,26 +260,6 @@ void io_display()
   io_print_message_queue(0, 0);
 
   refresh();
-}
-
-static void io_teleport_display()
-{
-  int x, y;
-
-  mvprintw(3, 19, " %-36s ", "");
-  mvprintw(4, 19, " Type \"X Y\" then hit enter: %-10s", "");
-  mvprintw(5, 19, " %-36s ", "");
-
-  scanw((char *)"%d %d", &x, &y);
-  mvprintw(4, 19, " Teleporting to (%d, %d) (Press Enter)", x, y);
-  scanw((char *)"");
-
-  world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]] = NULL;
-  world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]] = NULL;
-  world.cur_idx[dim_x] = 200 + x;
-  world.cur_idx[dim_y] = 200 + y;
-  new_map(1);
-  io_display();
 }
 
 uint32_t io_teleport_pc(pair_t dest)
@@ -330,7 +311,8 @@ static void io_scroll_trainer_list(char (*s)[40], uint32_t count)
   }
 }
 
-static void io_list_trainers_display(npc **c, uint32_t count)
+static void io_list_trainers_display(npc **c,
+                                     uint32_t count)
 {
   uint32_t i;
   char(*s)[40]; /* pointer to array of 40 char */
@@ -393,7 +375,7 @@ static void io_list_trainers()
       if (world.cur_map->cmap[y][x] && world.cur_map->cmap[y][x] !=
                                            &world.pc)
       {
-        c[count++] = (npc *)world.cur_map->cmap[y][x];
+        c[count++] = dynamic_cast<npc *>(world.cur_map->cmap[y][x]);
       }
     }
   }
@@ -491,31 +473,6 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
     break;
   }
 
-  if (world.cur_map->map[dest[dim_y]][dest[dim_x]] == ter_gate)
-  {
-    if (world.pc.pos[dim_x] == 1)
-    {
-      world.cur_idx[dim_x] -= 1;
-    }
-    else if (world.pc.pos[dim_x] == 78)
-    {
-      world.cur_idx[dim_x] += 1;
-    }
-    else if (world.pc.pos[dim_y] == 1)
-    {
-      world.cur_idx[dim_y] -= 1;
-    }
-    else if (world.pc.pos[dim_y] == 19)
-    {
-      world.cur_idx[dim_y] += 1;
-    }
-
-    world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]] = NULL;
-
-    new_map(0);
-    return 1;
-  }
-
   if (world.cur_map->cmap[dest[dim_y]][dest[dim_x]])
   {
     if (dynamic_cast<npc *>(world.cur_map->cmap[dest[dim_y]][dest[dim_x]]) &&
@@ -524,7 +481,7 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
       // Some kind of greeting here would be nice
       return 1;
     }
-    else if (dynamic_cast<npc *>(world.cur_map->cmap[dest[dim_y]][dest[dim_x]]))
+    else if ((dynamic_cast<npc *>(world.cur_map->cmap[dest[dim_y]][dest[dim_x]])))
     {
       io_battle(&world.pc, world.cur_map->cmap[dest[dim_y]][dest[dim_x]]);
       // Not actually moving, so set dest back to PC position
@@ -541,6 +498,46 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
 
   return 0;
 }
+
+void io_teleport_world(pair_t dest)
+{
+  /* mvscanw documentation is unclear about return values.  I believe *
+   * that the return value works the same way as scanf, but instead   *
+   * of counting on that, we'll initialize x and y to out of bounds   *
+   * values and accept their updates only if in range.                */
+  int x = INT_MAX, y = INT_MAX;
+
+  world.cur_map->cmap[world.pc.pos[dim_y]][world.pc.pos[dim_x]] = NULL;
+
+  echo();
+  curs_set(1);
+  do
+  {
+    mvprintw(0, 0, "Enter x [-200, 200]:           ");
+    refresh();
+    mvscanw(0, 21, (char *)"%d", &x);
+  } while (x < -200 || x > 200);
+  do
+  {
+    mvprintw(0, 0, "Enter y [-200, 200]:          ");
+    refresh();
+    mvscanw(0, 21, (char *)"%d", &y);
+  } while (y < -200 || y > 200);
+
+  refresh();
+  noecho();
+  curs_set(0);
+
+  x += 200;
+  y += 200;
+
+  world.cur_idx[dim_x] = x;
+  world.cur_idx[dim_y] = y;
+
+  new_map(1);
+  io_teleport_pc(dest);
+}
+
 void io_handle_input(pair_t dest)
 {
   uint32_t turn_not_consumed;
@@ -612,17 +609,16 @@ void io_handle_input(pair_t dest)
       io_list_trainers();
       turn_not_consumed = 1;
       break;
-    case 'f':
-      io_teleport_display();
-      turn_not_consumed = 1;
-      break;
     case 'p':
       /* Teleport the PC to a random place in the map.              */
       io_teleport_pc(dest);
       turn_not_consumed = 0;
       break;
-    case 'm':
-
+    case 'f':
+      /* Fly to any map in the world.                                */
+      io_teleport_world(dest);
+      turn_not_consumed = 0;
+      break;
     case 'q':
       /* Demonstrate use of the message queue.  You can use this for *
        * printf()-style debugging (though gdb is probably a better   *

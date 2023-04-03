@@ -1,8 +1,9 @@
 #ifndef IO_H
-#define IO_H
+# define IO_H
+
+# include "pair.h"
 
 class character;
-typedef int16_t pair_t[2];
 
 void io_init_terminal(void);
 void io_reset_terminal(void);

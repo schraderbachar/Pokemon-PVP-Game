@@ -1,0 +1,755 @@
+void parseFile(std::string fileName)
+{
+  std::string filename = fileName;
+  std::string hPath = std::getenv("HOME");
+  std::string beginPath;
+  std::string line;
+  std::ifstream input;
+  int lineCount;
+  int idx;
+  if (std::filesystem::is_directory("/share/cs327/pokedex"))
+  {
+    beginPath = "/share/cs327/pokedex/pokedex/data/csv/";
+  }
+  else if (std::filesystem::is_directory(hPath + "/.poke327/pokedex"))
+  {
+    beginPath = hPath + "/.poke327/pokedex/pokedex/data/csv/";
+  }
+  else
+  {
+    beginPath = "/Users/jj/Desktop/ISU_Submissions/327/dbFolder";
+  }
+  if (fileName == "pokemon.csv")
+  {
+    filename = beginPath + "pokemon.csv";
+    input.open(filename);
+    lineCount = -2;
+    while (input)
+    {
+      std::getline(input, line);
+      lineCount++;
+    }
+    input.close();
+
+    idx = 0;
+    Pokemon *pokemonArray = new Pokemon[lineCount]();
+    input.open(filename);
+    std::getline(input, line);
+    while (input)
+    {
+      std::getline(input, line);
+      if (line.length() > 0)
+      {
+        std::stringstream strStream(line);
+        std::string sub;
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonArray[idx].id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonArray[idx].identifier = sub;
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonArray[idx].species_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonArray[idx].height = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonArray[idx].weight = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonArray[idx].base_experience = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonArray[idx].order = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonArray[idx].is_default = std::stoi(sub);
+        idx++;
+      }
+    }
+    input.close();
+  }
+  if (fileName == "moves.csv")
+  {
+    filename = beginPath + "moves.csv";
+    input.open(filename);
+    lineCount = -2;
+    idx = 0;
+    while (input)
+    {
+      std::getline(input, line);
+      lineCount++;
+    }
+    input.close();
+
+    Moves *movesArray = new Moves[lineCount]();
+    // int movesArrayLength = lineCount;
+    input.open(filename);
+    std::getline(input, line);
+    while (input)
+    {
+      std::getline(input, line);
+      if (line.length() > 0)
+      {
+        std::stringstream strStream(line);
+        std::string sub;
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].identifier = sub;
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].generation_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].type_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].power = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].pp = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].accuracy = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].priority = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].target_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].damage_class_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].effect_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].effect_chance = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].contest_type_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].contest_effect_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        movesArray[idx].super_contest_effect_id = std::stoi(sub);
+        idx++;
+      }
+    }
+    input.close();
+  }
+  if (fileName == "pokemon_moves.csv")
+  {
+    filename = beginPath + "pokemon_moves.csv";
+    input.open(filename);
+    lineCount = -2;
+    idx = 0;
+    while (input)
+    {
+      std::getline(input, line);
+      lineCount++;
+    }
+    input.close();
+
+    Pokemon_moves *pokemonMovesArray = new Pokemon_moves[lineCount]();
+    // int pokemonMovesArrayLength = lineCount;
+    input.open(filename);
+    std::getline(input, line);
+    while (input)
+    {
+      std::getline(input, line);
+      if (line.length() > 0)
+      {
+        std::stringstream strStream(line);
+        std::string sub;
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonMovesArray[idx].pokemon_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonMovesArray[idx].version_group_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonMovesArray[idx].move_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonMovesArray[idx].pokemon_move_method_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonMovesArray[idx].level = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonMovesArray[idx].order = std::stoi(sub);
+        idx++;
+      }
+    }
+    input.close();
+    filename = beginPath + "pokemon_species.csv";
+    input.open(filename);
+    lineCount = -2;
+    idx = 0;
+    while (input)
+    {
+      std::getline(input, line);
+      lineCount++;
+    }
+    input.close();
+
+    Pokemon_species *pokemonSpeciesArray = new Pokemon_species[lineCount]();
+    input.open(filename);
+    std::getline(input, line);
+    while (input)
+    {
+      std::getline(input, line);
+      if (line.length() > 0)
+      {
+        std::stringstream strStream(line);
+        std::string sub;
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].identifier = sub;
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].generation_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].evolves_from_species_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].evolution_chain_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].color_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].shape_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].habitat_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].gender_rate = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].capture_rate = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].base_happiness = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].is_baby = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].hatch_counter = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].has_gender_differences = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].growth_rate_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].forms_switchable = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].is_legendary = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].is_mythical = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].order = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonSpeciesArray[idx].conquest_order = std::stoi(sub);
+        idx++;
+      }
+    }
+    input.close();
+  }
+  if (fileName == "experience.csv")
+  {
+    filename = beginPath + "experience.csv";
+    input.open(filename);
+    lineCount = -2;
+    idx = 0;
+    while (input)
+    {
+      std::getline(input, line);
+      lineCount++;
+    }
+    input.close();
+
+    Experience *experienceArray = new Experience[lineCount]();
+    input.open(filename);
+    std::getline(input, line);
+    while (input)
+    {
+      std::getline(input, line);
+      if (line.length() > 0)
+      {
+        std::stringstream strStream(line);
+        std::string sub;
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        experienceArray[idx].growth_rate_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        experienceArray[idx].level = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        experienceArray[idx].experience = std::stoi(sub);
+        idx++;
+      }
+    }
+    input.close();
+  }
+  if (fileName == "pokemon_stats.csv")
+  {
+    filename = beginPath + "pokemon_stats.csv";
+    input.open(filename);
+    lineCount = -2;
+    idx = 0;
+    while (input)
+    {
+      std::getline(input, line);
+      lineCount++;
+    }
+    input.close();
+
+    Pokemon_stats *pokemonStatsArray = new Pokemon_stats[lineCount]();
+    // int pokemonStatsArrayLength = lineCount;
+    input.open(filename);
+    std::getline(input, line);
+    while (input)
+    {
+      std::getline(input, line);
+      if (line.length() > 0)
+      {
+        std::stringstream strStream(line);
+        std::string sub;
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonStatsArray[idx].pokemon_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonStatsArray[idx].stat_id = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonStatsArray[idx].base_stat = std::stoi(sub);
+        getline(strStream, sub, ',');
+        if (sub.length() == 0)
+        {
+          sub = "-1";
+        }
+        pokemonStatsArray[idx].effort = std::stoi(sub);
+        idx++;
+      }
+    }
+    input.close();
+  }
+  else
+  {
+
+    filename = beginPath + "type_names.csv";
+    input.open(filename);
+    lineCount = -2;
+    idx = 0;
+    while (input)
+    {
+      std::getline(input, line);
+      lineCount++;
+    }
+    input.close();
+
+    Type_names *typeNamesArray = new Type_names[lineCount]();
+    input.open(filename);
+    std::getline(input, line);
+    while (input)
+    {
+      std::getline(input, line);
+      if (line.length() > 0)
+      {
+        std::stringstream strStream(line);
+        std::string sub;
+        getline(strStream, sub, ',');
+        std::string tempTypeId = "-1";
+        if (sub.length() > 0)
+        {
+          tempTypeId = sub;
+        }
+        getline(strStream, sub, ',');
+        if (sub == "9")
+        {
+          typeNamesArray[idx].type_id = std::stoi(tempTypeId);
+          typeNamesArray[idx].local_language_id = 9;
+          getline(strStream, sub, ',');
+          if (sub.length() == 0)
+          {
+            sub = "-1";
+          }
+          typeNamesArray[idx].name = sub;
+        }
+        idx++;
+      }
+    }
+  }
+}
+
+void getFile(int file_num)
+{
+  switch (file_num)
+  {
+  case 1:
+    std::cout << "Pokemon";
+    parseFile("pokemon.csv");
+    break;
+  case 2:
+    std::cout << "moves";
+    parseFile("moves.csv");
+    break;
+  case 3:
+    std::cout << "pokemon moves";
+    parseFile("pokemon_moves.csv");
+    break;
+  case 4:
+    std::cout << "pokemon species";
+    parseFile("pokemon_species.csv");
+    break;
+  case 5:
+    std::cout << "experience";
+    parseFile("experience.csv");
+    break;
+  case 6:
+    std::cout << "type names";
+    parseFile("type_names.csv");
+    break;
+  case 7:
+    std::cout << "pokemon stats";
+    parseFile("pokemon_stats.csv");
+    break;
+  case 8:
+    std::cout << "stats";
+    parseFile("stats.csv");
+    break;
+  case 9:
+    std::cout << "pokemon types";
+    parseFile("pokemon_types.csv");
+    break;
+
+  default:
+    std::cout << "You didn't enter a correct value, terminating program";
+    break;
+  }
+}
+int main(int argc, char *argv[])
+{
+  // struct timeval tv;
+  // uint32_t seed;
+  // int long_arg;
+  // int do_seed;
+  int num;
+  std::cout << "Type 1 for pokemon, 2 for moves, 3 for pokemon moves, 4 pokemon species,  5 for experience, 6 for type names,7 pokemon stats, 8 for stats or 9 for pokemon types to see those files.\n";
+  std::cin >> num;
+  getFile(num);
+
+  return 0;
+  // int i;
+
+  // do_seed = 1;
+
+  // if (argc > 1)
+  // {
+  //   for (i = 1, long_arg = 0; i < argc; i++, long_arg = 0)
+  //   {
+  //     if (argv[i][0] == '-')
+  //     { /* All switches start with a dash */
+  //       if (argv[i][1] == '-')
+  //       {
+  //         argv[i]++;    /* Make the argument have a single dash so we can */
+  //         long_arg = 1; /* handle long and short args at the same place.  */
+  //       }
+  //       switch (argv[i][1])
+  //       {
+  //       case 's':
+  //         if ((!long_arg && argv[i][2]) ||
+  //             (long_arg && strcmp(argv[i], "-seed")) ||
+  //             argc < ++i + 1 /* No more arguments */ ||
+  //             !sscanf(argv[i], "%u", &seed) /* Argument is not an integer */)
+  //         {
+  //           usage(argv[0]);
+  //         }
+  //         do_seed = 0;
+  //         break;
+  //       default:
+  //         usage(argv[0]);
+  //       }
+  //     }
+  //     else
+  //     { /* No dash */
+  //       usage(argv[0]);
+  //     }
+  //   }
+  // }
+
+  // if (do_seed)
+  // {
+  //   /* Allows me to start the game more than once *
+  //    * per second, as opposed to time().          */
+  //   gettimeofday(&tv, NULL);
+  //   seed = (tv.tv_usec ^ (tv.tv_sec << 20)) & 0xffffffff;
+  // }
+
+  // printf("Using seed: %u\n", seed);
+  // srand(seed);
+
+  // io_init_terminal();
+
+  // init_world();
+
+  /* print_hiker_dist(); */
+
+  /*
+  do {
+    print_map();
+    printf("Current position is %d%cx%d%c (%d,%d).  "
+           "Enter command: ",
+           abs(world.cur_idx[dim_x] - (WORLD_SIZE / 2)),
+           world.cur_idx[dim_x] - (WORLD_SIZE / 2) >= 0 ? 'E' : 'W',
+           abs(world.cur_idx[dim_y] - (WORLD_SIZE / 2)),
+           world.cur_idx[dim_y] - (WORLD_SIZE / 2) <= 0 ? 'N' : 'S',
+           world.cur_idx[dim_x] - (WORLD_SIZE / 2),
+           world.cur_idx[dim_y] - (WORLD_SIZE / 2));
+    scanf(" %c", &c);
+    switch (c) {
+    case 'n':
+      if (world.cur_idx[dim_y]) {
+        world.cur_idx[dim_y]--;
+        new_map();
+      }
+      break;
+    case 's':
+      if (world.cur_idx[dim_y] < WORLD_SIZE - 1) {
+        world.cur_idx[dim_y]++;
+        new_map();
+      }
+      break;
+    case 'e':
+      if (world.cur_idx[dim_x] < WORLD_SIZE - 1) {
+        world.cur_idx[dim_x]++;
+        new_map();
+      }
+      break;
+    case 'w':
+      if (world.cur_idx[dim_x]) {
+        world.cur_idx[dim_x]--;
+        new_map();
+      }
+      break;
+     case 'q':
+      break;
+    case 'f':
+      scanf(" %d %d", &x, &y);
+      if (x >= -(WORLD_SIZE / 2) && x <= WORLD_SIZE / 2 &&
+          y >= -(WORLD_SIZE / 2) && y <= WORLD_SIZE / 2) {
+        world.cur_idx[dim_x] = x + (WORLD_SIZE / 2);
+        world.cur_idx[dim_y] = y + (WORLD_SIZE / 2);
+        new_map();
+      }
+      break;
+    case '?':
+    case 'h':
+      printf("Move with 'e'ast, 'w'est, 'n'orth, 's'outh or 'f'ly x y.\n"
+             "Quit with 'q'.  '?' and 'h' print this help message.\n");
+      break;
+    default:
+      fprintf(stderr, "%c: Invalid input.  Enter '?' for help.\n", c);
+      break;
+    }
+  } while (c != 'q');
+
+  */
+
+  // game_loop();
+
+  // delete_world();
+
+  // io_reset_terminal();
+
+  return 0;
+}
