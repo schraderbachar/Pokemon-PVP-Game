@@ -240,7 +240,7 @@ void parsePokemonMovesList(AllPokemonArrays *allArrays, std::string filename)
     }
     input.close();
 }
-parsePokemonSpeciesList(AllPokemonArrays *allArrays, std::string filename)
+void parsePokemonSpeciesList(AllPokemonArrays *allArrays, std::string filename)
 {
     std::ifstream input;
     std::string line;
@@ -380,7 +380,8 @@ parsePokemonSpeciesList(AllPokemonArrays *allArrays, std::string filename)
     }
     input.close();
 }
-INT MAXvoid parsePokemonTypesList(AllPokemonArrays *allArrays, std::string filename)
+
+void parsePokemonTypesList(AllPokemonArrays *allArrays, std::string filename)
 {
     std::ifstream input;
     std::string line;
@@ -501,7 +502,8 @@ void parsePokemonStatsList(AllPokemonArrays *allArrays, std::string filename)
     }
     input.close();
 }
-INT MAXvoid parseTypeNamesList(AllPokemonArrays *allArrays, std::string filename)
+
+void parseTypeNamesList(AllPokemonArrays *allArrays, std::string filename)
 {
     std::ifstream input;
     std::string line;

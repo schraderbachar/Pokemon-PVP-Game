@@ -1347,15 +1347,18 @@ int main(int argc, char *argv[])
       std::string hPath = std::getenv("HOME");
       std::string beginPath;
       std::string line;
+
       if (std::filesystem::is_directory("/share/cs327/pokedex"))
       {
         beginPath = "/share/cs327/pokedex/pokedex/data/csv/";
         filename = beginPath + arg + ".csv";
       }
-      else if (std::filesystem::is_directory(hPath + "/.poke327/pokedex"))
+
+      else if (std::filesystem::is_directory(hPath + "/poke327/pokedex"))
       {
-        beginPath = "/.poke327/pokedex/pokedex/data/csv/";
+        beginPath = "/poke327/pokedex/pokedex/data/csv/";
         filename = hPath + beginPath + arg + ".csv";
+        std::cout << filename << std::endl;
       }
       else
       {
@@ -1371,7 +1374,7 @@ int main(int argc, char *argv[])
         lineCount++;
       }
       input.close();
-
+      std::cout << lineCount << std::endl;
       int idx = 0;
       if (arg == "pokemon")
       {
