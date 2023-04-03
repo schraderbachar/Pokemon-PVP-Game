@@ -1358,7 +1358,6 @@ int main(int argc, char *argv[])
       {
         beginPath = "/poke327/pokedex/pokedex/data/csv/";
         filename = hPath + beginPath + arg + ".csv";
-        std::cout << filename << std::endl;
       }
       else
       {
