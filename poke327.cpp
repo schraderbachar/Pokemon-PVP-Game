@@ -1390,7 +1390,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "ID: " << std::endl;
             }
             else
@@ -1401,7 +1401,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Identifier: " << std::endl;
             }
             else
@@ -1412,7 +1412,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Species ID: " << std::endl;
             }
             else
@@ -1423,7 +1423,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Height: " << std::endl;
             }
             else
@@ -1434,7 +1434,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Weight: " << std::endl;
             }
             else
@@ -1445,7 +1445,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Base Experience: " << std::endl;
             }
             else
@@ -1456,7 +1456,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Order: " << std::endl;
             }
             else
@@ -1467,7 +1467,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Is Default: \n"
                         << std::endl;
             }
@@ -1496,7 +1496,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "ID: " << std::endl;
             }
             else
@@ -1507,7 +1507,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Identifier: " << std::endl;
             }
             else
@@ -1518,7 +1518,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Generation ID: " << std::endl;
             }
             else
@@ -1529,7 +1529,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Type ID " << std::endl;
             }
             else
@@ -1540,7 +1540,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Power: " << std::endl;
             }
             else
@@ -1551,7 +1551,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "PP: " << std::endl;
             }
             else
@@ -1562,7 +1562,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Accuracy: " << std::endl;
             }
             else
@@ -1573,7 +1573,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Priority: " << std::endl;
             }
             else
@@ -1584,7 +1584,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Target ID: " << std::endl;
             }
             else
@@ -1595,7 +1595,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Damage Class ID: " << std::endl;
             }
             else
@@ -1606,7 +1606,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Effect ID: " << std::endl;
             }
             else
@@ -1617,7 +1617,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Effect Chance: " << std::endl;
             }
             else
@@ -1628,7 +1628,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Contest Type ID: " << std::endl;
             }
             else
@@ -1639,7 +1639,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Contest Effect ID: " << std::endl;
             }
             else
@@ -1650,7 +1650,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Super Contest Effect ID: \n"
                         << std::endl;
             }
@@ -1679,7 +1679,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Pokemon ID: " << std::endl;
             }
             else
@@ -1690,7 +1690,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Version Group ID: " << std::endl;
             }
             else
@@ -1701,7 +1701,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Move ID: " << std::endl;
             }
             else
@@ -1712,7 +1712,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Pokemon Move Method ID: " << std::endl;
             }
             else
@@ -1723,7 +1723,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Level: " << std::endl;
             }
             else
@@ -1734,7 +1734,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Order: \n"
                         << std::endl;
             }
@@ -1763,7 +1763,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "ID: " << std::endl;
             }
             else
@@ -1774,7 +1774,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Identifier: " << std::endl;
             }
             else
@@ -1785,7 +1785,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Generation ID: " << std::endl;
             }
             else
@@ -1796,7 +1796,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Evolves From Species ID: " << std::endl;
             }
             else
@@ -1807,7 +1807,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Evolution Chain ID: " << std::endl;
             }
             else
@@ -1818,7 +1818,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Color ID: " << std::endl;
             }
             else
@@ -1829,7 +1829,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Shape ID: " << std::endl;
             }
             else
@@ -1840,7 +1840,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Habitat ID: " << std::endl;
             }
             else
@@ -1851,7 +1851,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Gender Rate: " << std::endl;
             }
             else
@@ -1862,7 +1862,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Capture Rate: " << std::endl;
             }
             else
@@ -1873,7 +1873,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Base Happiness: " << std::endl;
             }
             else
@@ -1884,7 +1884,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Is Baby: " << std::endl;
             }
             else
@@ -1895,7 +1895,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Hatch Counter: " << std::endl;
             }
             else
@@ -1906,7 +1906,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Has Gender Differences: " << std::endl;
             }
             else
@@ -1917,7 +1917,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Growth Rate ID: " << std::endl;
             }
             else
@@ -1928,7 +1928,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Forms Switchable: " << std::endl;
             }
             else
@@ -1939,7 +1939,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Is Legendary: " << std::endl;
             }
             else
@@ -1950,7 +1950,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Is Mythical: " << std::endl;
             }
             else
@@ -1961,7 +1961,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Order: " << std::endl;
             }
             else
@@ -1972,7 +1972,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Conquest Order: \n"
                         << std::endl;
             }
@@ -2001,7 +2001,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Growth Rate ID: " << std::endl;
             }
             else
@@ -2012,7 +2012,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Level: " << std::endl;
             }
             else
@@ -2023,7 +2023,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Experience: \n"
                         << std::endl;
             }
@@ -2050,7 +2050,7 @@ int main(int argc, char *argv[])
             std::stringstream strStream(line);
             std::string sub;
             getline(strStream, sub, ',');
-            std::string tempTypeId = "-1";
+            std::string tempTypeId = "2147483647";
             if (sub.length() > 0)
             {
               tempTypeId = sub;
@@ -2058,7 +2058,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub == "9")
             {
-              if (tempTypeId == "-1")
+              if (tempTypeId == "2147483647")
               {
                 std::cout << "Type ID: " << std::endl;
               }
@@ -2072,7 +2072,7 @@ int main(int argc, char *argv[])
               getline(strStream, sub, ',');
               if (sub.length() == 0)
               {
-                sub = "-1";
+                sub = "2147483647";
                 std::cout << "Name: \n"
                           << std::endl;
               }
@@ -2107,7 +2107,7 @@ int main(int argc, char *argv[])
             getline(strStream, sub, ',');
             if (sub.length() == 0)
             {
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Damage Class ID: " << std::endl;
             }
             else
@@ -2129,7 +2129,7 @@ int main(int argc, char *argv[])
             if (sub.length() == 0)
             {
 
-              sub = "-1";
+              sub = "2147483647";
               std::cout << "Game Index: \n"
                         << std::endl;
             }
