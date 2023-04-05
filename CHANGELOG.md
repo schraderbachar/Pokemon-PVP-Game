@@ -1,10 +1,70 @@
-commit 368e924050999b428e9492ac346ff1357c391e5c (HEAD -> master)
+commit 0d503992d25234bee5415017cfc4af7eb23085b2 (HEAD -> master, origin/master)
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Wed Apr 5 14:19:23 2023 -0500
+
+    final touches before submission
+
+commit 387861be9d9950bb9cfa170881471c0e263a2563
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Tue Apr 4 09:43:05 2023 -0500
+
+    changed -1s to int max values
+
+commit 7285424c594e8bc442e6d88b6bf5f4e85a4ee7ee
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Mon Apr 3 16:04:21 2023 -0500
+
+    more updates- couldn't do INT_MAX so I did -1
+
+commit 514418a953269548b6e1317b3891c8edd9024401
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Mon Apr 3 14:23:04 2023 -0500
+
+    more changes
+
+commit 87c26ca041bde30d38e1836b368611b84c76c075
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Mon Apr 3 14:22:00 2023 -0500
+
+    deleted test file
+
+commit 29e3058dbd39e88d79ae8e886c467a6af69038d4
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Mon Apr 3 14:21:38 2023 -0500
+
+    deleted test file
+
+commit d78046a6ebc4b2a9f053354b561bf106356ff1a3
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Mon Apr 3 14:21:13 2023 -0500
+
+    got all files to parse within the home directory
+
+commit e0bb4322efba19abafe469a55241d33b0dde9dfd
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Mon Apr 3 13:51:47 2023 -0500
+
+    got files to parse for each one
+
+commit a2e2c18c7559375d3056bbd004f0f021bfad6bce
+Author: schraderbachar <44781569+schraderbachar@users.noreply.github.com>
+Date:   Tue Mar 28 17:59:00 2023 -0500
+
+    Update README.md
+
+commit f92750140c9143330cfd29f12a4ce840df2615a1
+Author: schraderbachar <44781569+schraderbachar@users.noreply.github.com>
+Date:   Tue Mar 28 17:57:57 2023 -0500
+
+    Update CHANGELOG.md
+
+commit 368e924050999b428e9492ac346ff1357c391e5c
 Author: schraderbachar <jj.schraderbachar@icloud.com>
 Date:   Tue Mar 28 17:55:39 2023 -0500
 
     implemented inheritance for npc, and pc and deleted character.h and put everything in poke327.h
 
-commit 987ab940a97ee12309b7d5102157cf237c157b70 (origin/master)
+commit 987ab940a97ee12309b7d5102157cf237c157b70
 Author: schraderbachar <jj.schraderbachar@icloud.com>
 Date:   Sun Mar 26 15:38:43 2023 -0500
 
