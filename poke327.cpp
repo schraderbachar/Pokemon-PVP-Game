@@ -1348,15 +1348,15 @@ int main(int argc, char *argv[])
       std::string beginPath;
       std::string line;
 
-      if (std::filesystem::is_directory("/share/cs327/pokedex"))
+      if (std::filesystem::is_directory("/share/cs327"))
       {
         beginPath = "/share/cs327/pokedex/pokedex/data/csv/";
         filename = beginPath + arg + ".csv";
       }
 
-      else if (std::filesystem::is_directory(hPath + "/poke327/pokedex"))
+      else if (std::filesystem::is_directory(hPath + "/.poke327"))
       {
-        beginPath = "/poke327/pokedex/pokedex/data/csv/";
+        beginPath = "/.poke327/pokedex/pokedex/data/csv/";
         filename = hPath + beginPath + arg + ".csv";
       }
       else
