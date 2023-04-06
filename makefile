@@ -6,12 +6,12 @@ RM = rm -f
 TERM = "S2023"
 
 CFLAGS = -Wall -Werror -ggdb -funroll-loops -DTERM=$(TERM)
-CXXFLAGS = -Wall -Werror -ggdb -funroll-loops -std=c++17 -DTERM=$(TERM)
+CXXFLAGS = -Wall -Werror -ggdb -funroll-loops --std=c++17 -DTERM=$(TERM)
 
 LDFLAGS = -lncurses
 
 BIN = poke327
-OBJS = poke327.o heap.o character.o io.o file_parsing.o
+OBJS = poke327.o heap.o character.o io.o db_parse.o
 
 all: $(BIN) etags
 

@@ -3,10 +3,13 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <vector>
 
 #include "io.h"
 #include "character.h"
 #include "poke327.h"
+#include "db_parse.h"
+#include "pokemon.h"
 
 typedef struct io_message
 {
@@ -404,6 +407,123 @@ void io_pokemon_center()
   refresh();
   getch();
 }
+void io_pokemon_encounter()
+{
+  float range;
+  int distance,
+      pokemon_level,
+      gender,
+      shiny,
+      hp,
+      attack,
+      defense,
+      speed,
+      special_attack,
+      special_defense;
+  pokemon_db selected_pokemon = pokemon[rand() % 1093];
+  pokemon_move_db p_move1, p_move2;
+  move_db move1, move2;
+  std::vector<pokemon_move_db> possible_moves;
+
+  for (pokemon_move_db move : pokemon_moves)
+  {
+    if (move.pokemon_id == selected_pokemon.species_id && move.pokemon_move_method_id == 1)
+    {
+      possible_moves.push_back(move);
+    }
+  }
+
+  gender = rand() % 100 < 50 ? 0 : 1;
+
+  p_move1 = possible_moves[rand() % possible_moves.size()];
+  p_move2 = possible_moves[rand() % possible_moves.size()];
+
+  while (p_move2.move_id == p_move1.move_id)
+  {
+    p_move2 = possible_moves[rand() % possible_moves.size()];
+  }
+
+  for (move_db move : moves)
+  {
+    if (move.id == p_move1.move_id)
+    {
+      move1 = move;
+    }
+    if (move.id == p_move2.move_id)
+    {
+      move2 = move;
+    }
+  }
+
+  distance = abs(world.cur_idx[dim_x] - 200) + abs(world.cur_idx[dim_y] - 200);
+  if (distance <= 200)
+  {
+    range = distance / 2 + 1;
+  }
+  else
+  {
+    range = 100 - (distance - 200) / 2 + 1;
+  }
+  pokemon_level = rand() % ((int)range) + 1;
+
+  shiny = rand() % 8192 == 0;
+
+  for (pokemon_stats_db stat : pokemon_stats)
+  {
+    if (stat.pokemon_id == selected_pokemon.id)
+    {
+      switch (stat.stat_id)
+      {
+      case 1:
+        hp = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + pokemon_level + 10;
+        break;
+      case 2:
+        attack = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + 5;
+        break;
+      case 3:
+        defense = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + 5;
+        break;
+      case 4:
+        speed = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + 5;
+        break;
+      case 5:
+        special_attack = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + 5;
+        break;
+      case 6:
+        special_defense = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + 5;
+        break;
+      }
+    }
+  }
+
+  mvprintw(3, 19, " %-40s ", "");
+  mvprintw(4, 19, " %-40s ", "");
+  mvprintw(5, 19, " %-40s ", "");
+  mvprintw(6, 19, " %-40s ", "");
+  mvprintw(7, 19, " %-40s ", "");
+  mvprintw(8, 19, " %-40s ", "");
+  mvprintw(9, 19, " %-40s ", "");
+  mvprintw(10, 19, " %-40s ", "");
+
+  if (shiny)
+  {
+    mvprintw(4, 19, " A wild SHINY %s (%c) appeared!", selected_pokemon.identifier, gender == 0 ? 'M' : 'F');
+  }
+  else
+  {
+    mvprintw(4, 19, " A wild %s (%c) appeared!", selected_pokemon.identifier, gender == 0 ? 'M' : 'F');
+  }
+  mvprintw(6, 19, " Level: %d", pokemon_level);
+  mvprintw(7, 19, " Moves:");
+  mvprintw(8, 19, "  - %s", move1.identifier);
+  mvprintw(9, 19, "  - %s", move2.identifier);
+  mvprintw(6, 38, " HP: %d", hp);
+  mvprintw(7, 38, " Attack (S): %d (%d)", attack, special_attack);
+  mvprintw(8, 38, " Defense (S): %d (%d)", defense, special_defense);
+  mvprintw(9, 38, " Speed: %d", speed);
+  refresh();
+  getch();
+}
 
 void io_battle(character *aggressor, character *defender)
 {
@@ -487,6 +607,14 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
       // Not actually moving, so set dest back to PC position
       dest[dim_x] = world.pc.pos[dim_x];
       dest[dim_y] = world.pc.pos[dim_y];
+    }
+  }
+
+  if (world.cur_map->map[dest[dim_y]][dest[dim_x]] == ter_grass)
+  {
+    if (rand() % 100 < 10)
+    {
+      io_pokemon_encounter();
     }
   }
 

@@ -1,11 +1,12 @@
 #ifndef CHARACTER_H
-# define CHARACTER_H
+#define CHARACTER_H
 
-# include <stdint.h>
+#include <stdint.h>
 
-# include "pair.h"
+#include "pair.h"
 
-typedef enum __attribute__ ((__packed__)) movement_type {
+typedef enum __attribute__((__packed__)) movement_type
+{
   move_hiker,
   move_rival,
   move_pace,
@@ -17,7 +18,8 @@ typedef enum __attribute__ ((__packed__)) movement_type {
   num_movement_types
 } movement_type_t;
 
-typedef enum __attribute__ ((__packed__)) character_type {
+typedef enum __attribute__((__packed__)) character_type
+{
   char_pc,
   char_hiker,
   char_rival,
@@ -28,8 +30,9 @@ typedef enum __attribute__ ((__packed__)) character_type {
 
 extern const char *char_type_name[num_character_types];
 
-class character {
- public:
+class character
+{
+public:
   virtual ~character() {}
   pair_t pos;
   char symbol;
@@ -37,16 +40,22 @@ class character {
   int seq_num;
 };
 
-class npc : public character {
- public:
+class npc : public character
+{
+public:
   character_type_t ctype;
   movement_type_t mtype;
   int defeated;
   pair_t dir;
+  class pokemon *p_inventory[6];
 };
 
-class pc : public character {
- public:
+class pc : public character
+{
+public:
+  class pokemon *p_inventory[6];
+  int inventory[3];
+  int p_count;
 };
 
 int32_t cmp_char_turns(const void *key, const void *with);
