@@ -525,12 +525,120 @@ void io_pokemon_encounter()
   getch();
 }
 
+// void io_trainer_pokemon(character *trainer)
+// {
+//   npc *n = (npc *)(trainer);
+//   mvprintw(6, 19, "HP: %d", n->p_inventory[0]->get_hp());
+//   mvprintw(7, 19, " Moves:");
+//   mvprintw(8, 19, "  - %s", n->p_inventory[0]->get_move(1));
+//   mvprintw(9, 19, "  - %s", n->p_inventory[0]->get_move(2));
+//   mvprintw(7, 38, " Attack: %d", n->p_inventory[0]->get_atk());
+//   mvprintw(8, 38, " Defense : %d ", n->p_inventory[0]->get_def());
+//   mvprintw(9, 38, " Speed: %d", n->p_inventory[0]->get_speed());
+// }
+
 void io_battle(character *aggressor, character *defender)
 {
   npc *n = (npc *)((aggressor == &world.pc) ? defender : aggressor);
-
+  int key;
   io_display();
-  mvprintw(0, 0, "Aww, how'd you get so strong?  You and your pokemon must share a special bond!");
+  mvprintw(3, 19, " %-40s ", "");
+  mvprintw(4, 19, " %-40s ", "");
+  mvprintw(5, 19, " %-40s ", "");
+  mvprintw(6, 19, " %-40s ", "");
+  mvprintw(7, 19, " %-40s ", "");
+  mvprintw(8, 19, " %-40s ", "");
+  mvprintw(9, 19, " %-40s ", "");
+  mvprintw(10, 19, " %-40s ", "");
+
+  mvprintw(0, 0, "Choose a number between 1 and 6 to see that trainers pokemon");
+  switch (key = getch())
+  {
+  case '1':
+    mvprintw(3, 19, "For NPC: %c", n->symbol);
+    mvprintw(4, 19, "Pokemon 1: %s", n->p_inventory[0]->get_species());
+    mvprintw(5, 19, "Level %d", n->p_inventory[0]->level);
+    mvprintw(6, 19, "HP: %d", n->p_inventory[0]->get_hp());
+    mvprintw(7, 19, " Moves:");
+    mvprintw(8, 19, "  - %s", n->p_inventory[0]->get_move(0));
+    mvprintw(9, 19, "  - %s", n->p_inventory[0]->get_move(1));
+    mvprintw(7, 38, " Attack: %d", n->p_inventory[0]->get_atk());
+    mvprintw(8, 38, " Defense : %d ", n->p_inventory[0]->get_def());
+    mvprintw(9, 38, " Speed: %d", n->p_inventory[0]->get_speed());
+    break;
+  case '2':
+    mvprintw(3, 19, "For NPC: %c", n->symbol);
+    mvprintw(4, 19, "Pokemon 2: %s", n->p_inventory[1]->get_species());
+    mvprintw(5, 19, "Level %d", n->p_inventory[1]->level);
+    mvprintw(6, 19, "HP: %d", n->p_inventory[1]->get_hp());
+    mvprintw(7, 19, " Moves:");
+    mvprintw(8, 19, "  - %s", n->p_inventory[1]->get_move(0));
+    mvprintw(9, 19, "  - %s", n->p_inventory[1]->get_move(1));
+    mvprintw(7, 38, " Attack: %d", n->p_inventory[1]->get_atk());
+    mvprintw(8, 38, " Defense : %d ", n->p_inventory[1]->get_def());
+    mvprintw(9, 38, " Speed: %d", n->p_inventory[1]->get_speed());
+    break;
+  case '3':
+    mvprintw(3, 19, "For NPC: %c", n->symbol);
+    mvprintw(4, 19, "Pokemon 3: %s", n->p_inventory[2]->get_species());
+    mvprintw(5, 19, "Level %d", n->p_inventory[2]->level);
+    mvprintw(6, 19, "HP: %d", n->p_inventory[2]->get_hp());
+    mvprintw(7, 19, " Moves:");
+    mvprintw(8, 19, "  - %s", n->p_inventory[2]->get_move(0));
+    mvprintw(9, 19, "  - %s", n->p_inventory[2]->get_move(1));
+    mvprintw(7, 38, " Attack: %d", n->p_inventory[2]->get_atk());
+    mvprintw(8, 38, " Defense : %d ", n->p_inventory[2]->get_def());
+    mvprintw(9, 38, " Speed: %d", n->p_inventory[2]->get_speed());
+    break;
+  case '4':
+    mvprintw(3, 19, "For NPC: %c", n->symbol);
+    mvprintw(4, 19, "Pokemon 4: %s", n->p_inventory[3]->get_species());
+    mvprintw(5, 19, "Level %d", n->p_inventory[3]->level);
+    mvprintw(6, 19, "HP: %d", n->p_inventory[3]->get_hp());
+    mvprintw(7, 19, " Moves:");
+    mvprintw(8, 19, "  - %s", n->p_inventory[3]->get_move(0));
+    mvprintw(9, 19, "  - %s", n->p_inventory[3]->get_move(1));
+    mvprintw(7, 38, " Attack: %d", n->p_inventory[3]->get_atk());
+    mvprintw(8, 38, " Defense : %d ", n->p_inventory[3]->get_def());
+    mvprintw(9, 38, " Speed: %d", n->p_inventory[3]->get_speed());
+    break;
+  case '5':
+    mvprintw(3, 19, "For NPC: %c", n->symbol);
+    mvprintw(4, 19, "Pokemon 5: %s", n->p_inventory[4]->get_species());
+    mvprintw(5, 19, "Level %d", n->p_inventory[4]->level);
+    mvprintw(6, 19, "HP: %d", n->p_inventory[4]->get_hp());
+    mvprintw(7, 19, " Moves:");
+    mvprintw(8, 19, "  - %s", n->p_inventory[4]->get_move(0));
+    mvprintw(9, 19, "  - %s", n->p_inventory[4]->get_move(1));
+    mvprintw(7, 38, " Attack: %d", n->p_inventory[4]->get_atk());
+    mvprintw(8, 38, " Defense : %d ", n->p_inventory[4]->get_def());
+    mvprintw(9, 38, " Speed: %d", n->p_inventory[4]->get_speed());
+    break;
+  case '6':
+    mvprintw(3, 19, "For NPC: %c", n->symbol);
+    mvprintw(4, 19, "Pokemon 6: %s", n->p_inventory[5]->get_species());
+    mvprintw(5, 19, "Level %d", n->p_inventory[5]->level);
+    mvprintw(6, 19, "HP: %d", n->p_inventory[5]->get_hp());
+    mvprintw(7, 19, " Moves:");
+    mvprintw(8, 19, "  - %s", n->p_inventory[5]->get_move(0));
+    mvprintw(9, 19, "  - %s", n->p_inventory[5]->get_move(1));
+    mvprintw(7, 38, " Attack: %d", n->p_inventory[5]->get_atk());
+    mvprintw(8, 38, " Defense : %d ", n->p_inventory[5]->get_def());
+    mvprintw(9, 38, " Speed: %d", n->p_inventory[5]->get_speed());
+    break;
+  default:
+    mvprintw(0, 0, "Didn't recognize input, going to choose the first one");
+    mvprintw(3, 19, "For NPC: %c", n->symbol);
+    mvprintw(4, 19, "Pokemon 1: %s", n->p_inventory[0]->get_species());
+    mvprintw(5, 19, "Level %d", n->p_inventory[0]->level);
+    mvprintw(6, 19, "HP: %d", n->p_inventory[0]->get_hp());
+    mvprintw(7, 19, " Moves:");
+    mvprintw(8, 19, "  - %s", n->p_inventory[0]->get_move(0));
+    mvprintw(9, 19, "  - %s", n->p_inventory[0]->get_move(1));
+    mvprintw(7, 38, " Attack: %d", n->p_inventory[0]->get_atk());
+    mvprintw(8, 38, " Defense : %d ", n->p_inventory[0]->get_def());
+    mvprintw(9, 38, " Speed: %d", n->p_inventory[0]->get_speed());
+  }
   refresh();
   getch();
 
@@ -540,7 +648,6 @@ void io_battle(character *aggressor, character *defender)
     n->mtype = move_wander;
   }
 }
-
 uint32_t move_pc_dir(uint32_t input, pair_t dest)
 {
   dest[dim_y] = world.pc.pos[dim_y];

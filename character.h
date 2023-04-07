@@ -54,8 +54,6 @@ class pc : public character
 {
 public:
   class pokemon *p_inventory[6];
-  int inventory[3];
-  int p_count;
 };
 
 int32_t cmp_char_turns(const void *key, const void *with);
