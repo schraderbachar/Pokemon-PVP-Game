@@ -948,6 +948,8 @@ void new_rival()
   c->defeated = 0;
   c->symbol = 'r';
   c->next_turn = 0;
+  // populate npc pokemon
+  c->p_inventory[0] = random_pokemon();
   while (((rand() % 100) < 60) && counter < 6)
   {
     c->p_inventory[counter] = random_pokemon();
@@ -979,6 +981,8 @@ void new_swimmer()
   c->defeated = 0;
   c->symbol = SWIMMER_SYMBOL;
   c->next_turn = 0;
+  // populate npc pokemon
+  c->p_inventory[0] = random_pokemon();
   while (((rand() % 100) < 60) && counter < 6)
   {
     c->p_inventory[counter] = random_pokemon();
@@ -993,6 +997,7 @@ void new_char_other()
 {
   pair_t pos;
   npc *c;
+  int counter = 1;
 
   do
   {
@@ -1030,6 +1035,13 @@ void new_char_other()
   c->defeated = 0;
   c->next_turn = 0;
   c->seq_num = world.char_seq_num++;
+  // populate npc pokemon
+  c->p_inventory[0] = random_pokemon();
+  while (((rand() % 100) < 60) && counter < 6)
+  {
+    c->p_inventory[counter] = random_pokemon();
+    counter++;
+  }
   heap_insert(&world.cur_map->turn, c);
   world.cur_map->cmap[pos[dim_y]][pos[dim_x]] = c;
 }
