@@ -503,6 +503,7 @@ void io_pokemon_encounter()
   {
     if (stat.pokemon_id == selected_pokemon.id)
     {
+      // IVs
       switch (stat.stat_id)
       {
       case 1:
@@ -556,18 +557,6 @@ void io_pokemon_encounter()
   getch();
 }
 
-// void io_trainer_pokemon(character *trainer)
-// {
-//   npc *n = (npc *)(trainer);
-//   mvprintw(6, 19, "HP: %d", n->p_inventory[0]->get_hp());
-//   mvprintw(7, 19, " Moves:");
-//   mvprintw(8, 19, "  - %s", n->p_inventory[0]->get_move(1));
-//   mvprintw(9, 19, "  - %s", n->p_inventory[0]->get_move(2));
-//   mvprintw(7, 38, " Attack: %d", n->p_inventory[0]->get_atk());
-//   mvprintw(8, 38, " Defense : %d ", n->p_inventory[0]->get_def());
-//   mvprintw(9, 38, " Speed: %d", n->p_inventory[0]->get_speed());
-// }
-
 void io_battle(character *aggressor, character *defender)
 {
   npc *n = (npc *)((aggressor == &world.pc) ? defender : aggressor);
@@ -583,7 +572,6 @@ void io_battle(character *aggressor, character *defender)
   mvprintw(8, 19, " %-40s ", "");
   mvprintw(9, 19, " %-40s ", "");
   mvprintw(10, 19, " %-40s ", "");
-  mvprintw(11, 19, " %-40s ", "");
 
   mvprintw(0, 0, "Choose a number between 1 and 3 to see that trainers (%c) pokemon: %d\n", n->symbol, sizeof(n->p_inventory));
   switch (key = getch())
@@ -596,10 +584,8 @@ void io_battle(character *aggressor, character *defender)
     mvprintw(7, 19, " Moves:");
     mvprintw(8, 19, "  - %s", n->p_inventory[0]->get_move(0));
     mvprintw(9, 19, "  - %s", n->p_inventory[0]->get_move(1));
-    mvprintw(10, 19, "  - %s", n->p_inventory[0]->get_move(2));
-    mvprintw(11, 19, "  - %s", n->p_inventory[0]->get_move(3));
-    mvprintw(7, 38, " Attack: %d", n->p_inventory[0]->get_atk());
-    mvprintw(8, 38, " Defense : %d ", n->p_inventory[0]->get_def());
+    mvprintw(7, 38, " Attack (S): %d (%d)", n->p_inventory[0]->get_atk(), n->p_inventory[0]->get_spatk());
+    mvprintw(8, 38, " Defense (S): %d (%d)", n->p_inventory[0]->get_def(), n->p_inventory[0]->get_spdef());
     mvprintw(9, 38, " Speed: %d", n->p_inventory[0]->get_speed());
     break;
   case '2':
@@ -610,10 +596,8 @@ void io_battle(character *aggressor, character *defender)
     mvprintw(7, 19, " Moves:");
     mvprintw(8, 19, "  - %s", n->p_inventory[1]->get_move(0));
     mvprintw(9, 19, "  - %s", n->p_inventory[1]->get_move(1));
-    mvprintw(10, 19, "  - %s", n->p_inventory[1]->get_move(2));
-    mvprintw(11, 19, "  - %s", n->p_inventory[1]->get_move(3));
-    mvprintw(7, 38, " Attack: %d", n->p_inventory[1]->get_atk());
-    mvprintw(8, 38, " Defense : %d ", n->p_inventory[1]->get_def());
+    mvprintw(7, 38, " Attack (S): %d (%d)", n->p_inventory[1]->get_atk(), n->p_inventory[1]->get_spatk());
+    mvprintw(8, 38, " Defense (S): %d (%d)", n->p_inventory[1]->get_def(), n->p_inventory[1]->get_spdef());
     mvprintw(9, 38, " Speed: %d", n->p_inventory[1]->get_speed());
     break;
   case '3':
@@ -624,10 +608,8 @@ void io_battle(character *aggressor, character *defender)
     mvprintw(7, 19, " Moves:");
     mvprintw(8, 19, "  - %s", n->p_inventory[2]->get_move(0));
     mvprintw(9, 19, "  - %s", n->p_inventory[2]->get_move(1));
-    mvprintw(10, 19, "  - %s", n->p_inventory[2]->get_move(2));
-    mvprintw(11, 19, "  - %s", n->p_inventory[2]->get_move(3));
-    mvprintw(7, 38, " Attack: %d", n->p_inventory[2]->get_atk());
-    mvprintw(8, 38, " Defense : %d ", n->p_inventory[2]->get_def());
+    mvprintw(7, 38, " Attack (S): %d (%d)", n->p_inventory[2]->get_atk(), n->p_inventory[2]->get_spatk());
+    mvprintw(8, 38, " Defense (S): %d (%d)", n->p_inventory[2]->get_def(), n->p_inventory[2]->get_spdef());
     mvprintw(9, 38, " Speed: %d", n->p_inventory[2]->get_speed());
     break;
   default:
