@@ -242,6 +242,7 @@ void io_display()
   mvprintw(22, 1, "%d known %s.", world.cur_map->num_trainers,
            world.cur_map->num_trainers > 1 ? "trainers" : "trainer");
   mvprintw(22, 30, "Nearest visible trainer: ");
+  mvprintw(24, 1, "PC pokemon: %s", world.pc.p_inventory[0]->get_species());
   if ((c = io_nearest_visible_trainer()))
   {
     attron(COLOR_PAIR(COLOR_RED));
@@ -401,7 +402,7 @@ void io_pokemart()
   getch();
 }
 
-void io_starting_pokemon(pc *pc)
+void select_pokemon()
 {
   char key = ' ';
   class pokemon *p1;
@@ -419,18 +420,15 @@ void io_starting_pokemon(pc *pc)
 
   if (key == '1')
   {
-    pc->p_inventory[0] = p1;
-    mvprintw(0, 0, "You chose: %s ", p1->get_species());
+    world.pc.p_inventory[0] = p1;
   }
   else if (key == '2')
   {
-    pc->p_inventory[0] = p2;
-    mvprintw(0, 0, "You chose: %s ", p2->get_species());
+    world.pc.p_inventory[0] = p2;
   }
   else if (key == '3')
   {
-    pc->p_inventory[0] = p3;
-    mvprintw(0, 0, "You chose: %s ", p3->get_species());
+    world.pc.p_inventory[0] = p3;
   }
 }
 
@@ -587,7 +585,7 @@ void io_battle(character *aggressor, character *defender)
   mvprintw(10, 19, " %-40s ", "");
   mvprintw(11, 19, " %-40s ", "");
 
-  mvprintw(0, 0, "Choose a number between 1 and 6 to see that trainers (%c): %d\n", n->symbol, sizeof(n->p_inventory));
+  mvprintw(0, 0, "Choose a number between 1 and 3 to see that trainers (%c) pokemon: %d\n", n->symbol, sizeof(n->p_inventory));
   switch (key = getch())
   {
   case '1':
@@ -631,48 +629,6 @@ void io_battle(character *aggressor, character *defender)
     mvprintw(7, 38, " Attack: %d", n->p_inventory[2]->get_atk());
     mvprintw(8, 38, " Defense : %d ", n->p_inventory[2]->get_def());
     mvprintw(9, 38, " Speed: %d", n->p_inventory[2]->get_speed());
-    break;
-  case '4':
-    mvprintw(3, 19, "For NPC %c at %d,%d", n->symbol, n->pos[dim_x], n->pos[dim_y]);
-    mvprintw(4, 19, "Pokemon 4: %s", n->p_inventory[3]->get_species());
-    mvprintw(5, 19, "Level %d", n->p_inventory[3]->level);
-    mvprintw(6, 19, "HP: %d", n->p_inventory[3]->get_hp());
-    mvprintw(7, 19, " Moves:");
-    mvprintw(8, 19, "  - %s", n->p_inventory[3]->get_move(0));
-    mvprintw(9, 19, "  - %s", n->p_inventory[3]->get_move(1));
-    mvprintw(10, 19, "  - %s", n->p_inventory[3]->get_move(2));
-    mvprintw(11, 19, "  - %s", n->p_inventory[3]->get_move(3));
-    mvprintw(7, 38, " Attack: %d", n->p_inventory[3]->get_atk());
-    mvprintw(8, 38, " Defense : %d ", n->p_inventory[3]->get_def());
-    mvprintw(9, 38, " Speed: %d", n->p_inventory[3]->get_speed());
-    break;
-  case '5':
-    mvprintw(3, 19, "For NPC %c at %d,%d", n->symbol, n->pos[dim_x], n->pos[dim_y]);
-    mvprintw(4, 19, "Pokemon 5: %s", n->p_inventory[4]->get_species());
-    mvprintw(5, 19, "Level %d", n->p_inventory[4]->level);
-    mvprintw(6, 19, "HP: %d", n->p_inventory[4]->get_hp());
-    mvprintw(7, 19, " Moves:");
-    mvprintw(8, 19, "  - %s", n->p_inventory[4]->get_move(0));
-    mvprintw(9, 19, "  - %s", n->p_inventory[4]->get_move(1));
-    mvprintw(10, 19, "  - %s", n->p_inventory[4]->get_move(2));
-    mvprintw(11, 19, "  - %s", n->p_inventory[4]->get_move(3));
-    mvprintw(7, 38, " Attack: %d", n->p_inventory[4]->get_atk());
-    mvprintw(8, 38, " Defense : %d ", n->p_inventory[4]->get_def());
-    mvprintw(9, 38, " Speed: %d", n->p_inventory[4]->get_speed());
-    break;
-  case '6':
-    mvprintw(3, 19, "For NPC %c at %d,%d", n->symbol, n->pos[dim_x], n->pos[dim_y]);
-    mvprintw(4, 19, "Pokemon 6: %s", n->p_inventory[5]->get_species());
-    mvprintw(5, 19, "Level %d", n->p_inventory[5]->level);
-    mvprintw(6, 19, "HP: %d", n->p_inventory[5]->get_hp());
-    mvprintw(7, 19, " Moves:");
-    mvprintw(8, 19, "  - %s", n->p_inventory[5]->get_move(0));
-    mvprintw(9, 19, "  - %s", n->p_inventory[5]->get_move(1));
-    mvprintw(10, 19, "  - %s", n->p_inventory[5]->get_move(2));
-    mvprintw(11, 19, "  - %s", n->p_inventory[5]->get_move(3));
-    mvprintw(7, 38, " Attack: %d", n->p_inventory[5]->get_atk());
-    mvprintw(8, 38, " Defense : %d ", n->p_inventory[5]->get_def());
-    mvprintw(9, 38, " Speed: %d", n->p_inventory[5]->get_speed());
     break;
   default:
     mvprintw(0, 0, "Didn't recognize input, going to choose the first one\n");

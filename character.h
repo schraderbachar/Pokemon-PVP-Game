@@ -47,7 +47,7 @@ public:
   movement_type_t mtype;
   int defeated;
   pair_t dir;
-  class pokemon *p_inventory[6];
+  class pokemon *p_inventory[3];
 };
 
 class pc : public character

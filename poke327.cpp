@@ -911,7 +911,7 @@ void new_hiker()
   c->next_turn = 0;
   // populate npc pokemon
   c->p_inventory[0] = random_pokemon();
-  while (((rand() % 100) < 60) && counter < 6)
+  while (((rand() % 100) < 60) && counter < 3)
   {
     c->p_inventory[counter] = random_pokemon();
     counter++;
@@ -950,7 +950,7 @@ void new_rival()
   c->next_turn = 0;
   // populate npc pokemon
   c->p_inventory[0] = random_pokemon();
-  while (((rand() % 100) < 60) && counter < 6)
+  while (((rand() % 100) < 60) && counter < 3)
   {
     c->p_inventory[counter] = random_pokemon();
     counter++;
@@ -983,7 +983,7 @@ void new_swimmer()
   c->next_turn = 0;
   // populate npc pokemon
   c->p_inventory[0] = random_pokemon();
-  while (((rand() % 100) < 60) && counter < 6)
+  while (((rand() % 100) < 60) && counter < 3)
   {
     c->p_inventory[counter] = random_pokemon();
     counter++;
@@ -1037,7 +1037,7 @@ void new_char_other()
   c->seq_num = world.char_seq_num++;
   // populate npc pokemon
   c->p_inventory[0] = random_pokemon();
-  while (((rand() % 100) < 60) && counter < 6)
+  while (((rand() % 100) < 60) && counter < 3)
   {
     c->p_inventory[counter] = random_pokemon();
     counter++;
@@ -1096,7 +1096,6 @@ void init_pc()
 
   world.cur_map->cmap[y][x] = &world.pc;
   world.pc.next_turn = 0;
-  io_starting_pokemon(&world.pc);
 
   heap_insert(&world.cur_map->turn, &world.pc);
 }
@@ -1464,6 +1463,8 @@ int main(int argc, char *argv[])
   io_init_terminal();
 
   init_world();
+
+  select_pokemon();
 
   /* print_hiker_dist(); */
 
