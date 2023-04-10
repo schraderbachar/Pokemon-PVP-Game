@@ -401,6 +401,39 @@ void io_pokemart()
   getch();
 }
 
+void io_starting_pokemon(pc *pc)
+{
+  char key = ' ';
+  class pokemon *p1;
+  class pokemon *p2;
+  class pokemon *p3;
+  p1 = new class pokemon(1);
+  p2 = new class pokemon(1);
+  p3 = new class pokemon(1);
+
+  while (key != '1' && key != '2' && key != '3')
+  {
+    mvprintw(0, 0, "Please select a starter pokemon. 1 for %s, 2 for %s, or 3 for %s ", p1->get_species(), p2->get_species(), p3->get_species());
+    key = getch();
+  }
+
+  if (key == '1')
+  {
+    pc->p_inventory[0] = p1;
+    mvprintw(0, 0, "You chose: %s ", p1->get_species());
+  }
+  else if (key == '2')
+  {
+    pc->p_inventory[0] = p2;
+    mvprintw(0, 0, "You chose: %s ", p2->get_species());
+  }
+  else if (key == '3')
+  {
+    pc->p_inventory[0] = p3;
+    mvprintw(0, 0, "You chose: %s ", p3->get_species());
+  }
+}
+
 void io_pokemon_center()
 {
   mvprintw(0, 0, "Welcome to the Pokemon Center.  How can Nurse Joy assist you?");

@@ -1,7 +1,7 @@
 #ifndef IO_H
-# define IO_H
+#define IO_H
 
-# include "pair.h"
+#include "pair.h"
 
 class character;
 
@@ -11,5 +11,6 @@ void io_display(void);
 void io_handle_input(pair_t dest);
 void io_queue_message(const char *format, ...);
 void io_battle(character *aggressor, character *defender);
+void io_starting_pokemon(character *pc);
 
 #endif

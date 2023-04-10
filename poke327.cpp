@@ -1096,6 +1096,7 @@ void init_pc()
 
   world.cur_map->cmap[y][x] = &world.pc;
   world.pc.next_turn = 0;
+  io_starting_pokemon(&world.pc);
 
   heap_insert(&world.cur_map->turn, &world.pc);
 }
