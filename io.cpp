@@ -493,9 +493,13 @@ void io_pokemon_encounter()
   }
   else
   {
-    range = 100 - (distance - 200) / 2 + 1;
+    range = (distance - 200) / 2 + 1;
   }
   pokemon_level = rand() % ((int)range) + 1;
+  if (pokemon_level > 100)
+  {
+    pokemon_level = 100;
+  }
 
   shiny = rand() % 3 == 0;
 
