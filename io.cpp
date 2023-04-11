@@ -242,7 +242,7 @@ void io_display()
   mvprintw(22, 1, "%d known %s.", world.cur_map->num_trainers,
            world.cur_map->num_trainers > 1 ? "trainers" : "trainer");
   mvprintw(22, 30, "Nearest visible trainer: ");
-  mvprintw(24, 1, "PC pokemon: %s", world.pc.p_inventory[0]->get_species());
+  mvprintw(24, 1, "PC pokemon: %s %s", (world.pc.p_inventory[0]->is_shiny() ? "SHINY" : ""), world.pc.p_inventory[0]->get_species());
   if ((c = io_nearest_visible_trainer()))
   {
     attron(COLOR_PAIR(COLOR_RED));
@@ -414,22 +414,7 @@ void select_pokemon()
 
   while (key != '1' && key != '2' && key != '3')
   {
-    if (p1->is_shiny())
-    {
-      mvprintw(0, 0, "Please select a starter pokemon. 1 for SHINY %s, 2 for %s, or 3 for %s ", p1->get_species(), p2->get_species(), p3->get_species());
-    }
-    else if (p2->is_shiny())
-    {
-      mvprintw(0, 0, "Please select a starter pokemon. 1 for %s, 2 for SHINY %s, or 3 for %s ", p1->get_species(), p2->get_species(), p3->get_species());
-    }
-    else if (p3->is_shiny())
-    {
-      mvprintw(0, 0, "Please select a starter pokemon. 1 for %s, 2 for %s, or 3 for SHINY %s ", p1->get_species(), p2->get_species(), p3->get_species());
-    }
-    else
-    {
-      mvprintw(0, 0, "Please select a starter pokemon. 1 for %s, 2 for %s, or 3 for %s ", p1->get_species(), p2->get_species(), p3->get_species());
-    }
+    mvprintw(0, 0, "Please select a starter pokemon. 1 for %s %s, 2 for %s %s, or 3 for %s %s ", (p1->is_shiny() ? "SHINY" : ""), p1->get_species(), (p2->is_shiny() ? "SHINY" : ""), p2->get_species(), (p3->is_shiny() ? "SHINY" : ""), p3->get_species());
     key = getch();
   }
 
