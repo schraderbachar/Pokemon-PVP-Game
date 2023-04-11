@@ -625,8 +625,6 @@ void io_battle(character *aggressor, character *defender)
     mvprintw(7, 19, " Moves:");
     mvprintw(8, 19, "  - %s", n->p_inventory[0]->get_move(0));
     mvprintw(9, 19, "  - %s", n->p_inventory[0]->get_move(1));
-    mvprintw(10, 19, "  - %s", n->p_inventory[0]->get_move(2));
-    mvprintw(11, 19, "  - %s", n->p_inventory[0]->get_move(3));
     mvprintw(7, 38, " Attack: %d", n->p_inventory[0]->get_atk());
     mvprintw(8, 38, " Defense : %d ", n->p_inventory[0]->get_def());
     mvprintw(9, 38, " Speed: %d", n->p_inventory[0]->get_speed());
