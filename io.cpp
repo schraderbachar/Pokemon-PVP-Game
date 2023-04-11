@@ -414,7 +414,22 @@ void select_pokemon()
 
   while (key != '1' && key != '2' && key != '3')
   {
-    mvprintw(0, 0, "Please select a starter pokemon. 1 for %s, 2 for %s, or 3 for %s ", p1->get_species(), p2->get_species(), p3->get_species());
+    if (p1->is_shiny())
+    {
+      mvprintw(0, 0, "Please select a starter pokemon. 1 for SHINY %s, 2 for %s, or 3 for %s ", p1->get_species(), p2->get_species(), p3->get_species());
+    }
+    else if (p2->is_shiny())
+    {
+      mvprintw(0, 0, "Please select a starter pokemon. 1 for %s, 2 for SHINY %s, or 3 for %s ", p1->get_species(), p2->get_species(), p3->get_species());
+    }
+    else if (p3->is_shiny())
+    {
+      mvprintw(0, 0, "Please select a starter pokemon. 1 for %s, 2 for %s, or 3 for SHINY %s ", p1->get_species(), p2->get_species(), p3->get_species());
+    }
+    else
+    {
+      mvprintw(0, 0, "Please select a starter pokemon. 1 for %s, 2 for %s, or 3 for %s ", p1->get_species(), p2->get_species(), p3->get_species());
+    }
     key = getch();
   }
 
@@ -497,7 +512,7 @@ void io_pokemon_encounter()
   }
   pokemon_level = rand() % ((int)range) + 1;
 
-  shiny = rand() % 8192 == 0;
+  shiny = rand() % 3 == 0;
 
   for (pokemon_stats_db stat : pokemon_stats)
   {

@@ -49,7 +49,7 @@ pokemon::pokemon(int level) : level(level)
         // simpler.
         sort(s->levelup_moves.begin(), s->levelup_moves.end());
 
-                s->base_stat[0] = pokemon_stats[pokemon_species_index * 6 - 5].base_stat;
+        s->base_stat[0] = pokemon_stats[pokemon_species_index * 6 - 5].base_stat;
         s->base_stat[1] = pokemon_stats[pokemon_species_index * 6 - 4].base_stat;
         s->base_stat[2] = pokemon_stats[pokemon_species_index * 6 - 3].base_stat;
         s->base_stat[3] = pokemon_stats[pokemon_species_index * 6 - 2].base_stat;
@@ -90,7 +90,7 @@ pokemon::pokemon(int level) : level(level)
 
     current_hp = effective_stat[stat_hp];
 
-    shiny = (((rand() & 0x1fff) == 0x1fff) ? true : false);
+    shiny = (((rand() % 5) == 0) ? true : false);
     gender = ((rand() & 0x1) ? gender_female : gender_male);
 }
 
