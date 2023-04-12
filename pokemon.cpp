@@ -63,7 +63,7 @@ pokemon::pokemon(int level) : level(level)
 
     // 0 is an invalid index, since the array is 1 indexed.
     move_index[0] = move_index[1] = move_index[2] = move_index[3] = 0;
-    // I don't think 0 moves is possible, but account for it to be safe
+
     if (i)
     {
         move_index[0] = s->levelup_moves[rand() % i].move;
