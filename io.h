@@ -12,5 +12,6 @@ void io_handle_input(pair_t dest);
 void io_queue_message(const char *format, ...);
 void io_battle(character *aggressor, character *defender);
 void select_pokemon();
+void io_encounter_pokemon();
 
 #endif

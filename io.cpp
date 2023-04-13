@@ -446,129 +446,6 @@ void select_pokemon()
   }
 }
 
-void io_pokemon_encounter()
-{
-  float range;
-  int distance,
-      pokemon_level,
-      gender,
-      shiny,
-      hp,
-      attack,
-      defense,
-      speed,
-      special_attack,
-      special_defense;
-  pokemon_db selected_pokemon = pokemon[rand() % 1093];
-  pokemon_move_db p_move1, p_move2;
-  move_db move1, move2;
-  std::vector<pokemon_move_db> possible_moves;
-
-  for (pokemon_move_db move : pokemon_moves)
-  {
-    if (move.pokemon_id == selected_pokemon.species_id && move.pokemon_move_method_id == 1)
-    {
-      possible_moves.push_back(move);
-    }
-  }
-
-  gender = rand() % 100 < 50 ? 0 : 1;
-
-  p_move1 = possible_moves[rand() % possible_moves.size()];
-  p_move2 = possible_moves[rand() % possible_moves.size()];
-
-  while (p_move2.move_id == p_move1.move_id)
-  {
-    p_move2 = possible_moves[rand() % possible_moves.size()];
-  }
-
-  for (move_db move : moves)
-  {
-    if (move.id == p_move1.move_id)
-    {
-      move1 = move;
-    }
-    if (move.id == p_move2.move_id)
-    {
-      move2 = move;
-    }
-  }
-
-  distance = abs(world.cur_idx[dim_x] - 200) + abs(world.cur_idx[dim_y] - 200);
-  if (distance <= 200)
-  {
-    range = distance / 2 + 1;
-  }
-  else
-  {
-    range = (distance - 200) / 2 + 1;
-  }
-  pokemon_level = rand() % ((int)range) + 1;
-  if (pokemon_level > 100)
-  {
-    pokemon_level = 100;
-  }
-
-  shiny = rand() % 3 == 0;
-
-  for (pokemon_stats_db stat : pokemon_stats)
-  {
-    if (stat.pokemon_id == selected_pokemon.id)
-    {
-      // IVs
-      switch (stat.stat_id)
-      {
-      case 1:
-        hp = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + pokemon_level + 10;
-        break;
-      case 2:
-        attack = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + 5;
-        break;
-      case 3:
-        defense = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + 5;
-        break;
-      case 4:
-        speed = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + 5;
-        break;
-      case 5:
-        special_attack = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + 5;
-        break;
-      case 6:
-        special_defense = ((stat.base_stat + rand() % 15) * 2 * pokemon_level) / 100 + 5;
-        break;
-      }
-    }
-  }
-
-  mvprintw(3, 19, " %-40s ", "");
-  mvprintw(4, 19, " %-40s ", "");
-  mvprintw(5, 19, " %-40s ", "");
-  mvprintw(6, 19, " %-40s ", "");
-  mvprintw(7, 19, " %-40s ", "");
-  mvprintw(8, 19, " %-40s ", "");
-  mvprintw(9, 19, " %-40s ", "");
-  mvprintw(10, 19, " %-40s ", "");
-
-  if (shiny)
-  {
-    mvprintw(4, 19, " A wild SHINY %s (%c) appeared!", selected_pokemon.identifier, gender == 0 ? 'M' : 'F');
-  }
-  else
-  {
-    mvprintw(4, 19, " A wild %s (%c) appeared!", selected_pokemon.identifier, gender == 0 ? 'M' : 'F');
-  }
-  mvprintw(6, 19, " Level: %d", pokemon_level);
-  mvprintw(7, 19, " Moves:");
-  mvprintw(8, 19, "  - %s", move1.identifier);
-  mvprintw(9, 19, "  - %s", move2.identifier);
-  mvprintw(6, 38, " HP: %d", hp);
-  mvprintw(7, 38, " Attack (S): %d (%d)", attack, special_attack);
-  mvprintw(8, 38, " Defense (S): %d (%d)", defense, special_defense);
-  mvprintw(9, 38, " Speed: %d", speed);
-  refresh();
-  getch();
-}
-
 void io_encounter_pokemon()
 {
   class pokemon *p;
@@ -1299,74 +1176,524 @@ static void io_display_bag()
   }
 }
 
+void io_trainer_battle(character *defender)
+{
+  npc *p = (npc *)defender;
+  int in_battle = 1;
+  int selection;
+  int pokemon_selection;
+  int current_pokemon = 0;
+  int npc_current_pokemon = 0;
+  int check_int;
+  int item_input;
+  int turn = 0;
+
+  while (in_battle)
+  {
+    mvprintw(3, 10, " %-60s ", "");
+    mvprintw(4, 10, " %-60s ", "");
+    mvprintw(5, 10, " %-60s ", "");
+    mvprintw(6, 10, " %-60s ", "");
+    mvprintw(7, 10, " %-60s ", "");
+    mvprintw(8, 10, " %-60s ", "");
+    mvprintw(9, 10, " %-60s ", "");
+    mvprintw(10, 10, " %-60s ", "");
+    mvprintw(11, 10, " %-60s ", "");
+    mvprintw(12, 10, " %-60s ", "");
+    mvprintw(13, 10, " %-60s ", "");
+    mvprintw(14, 10, " %-60s ", "");
+    mvprintw(15, 10, " %-60s ", "");
+
+    mvprintw(3, 10, "Trainer %c's pokemon %s %s:", p->symbol,
+             p->p_inventory[npc_current_pokemon]->is_shiny() ? "SHINY" : "", p->p_inventory[npc_current_pokemon]->get_species());
+    mvprintw(4, 10, "HP: %d ATK: %d DEF: %d SPATK: %d SPDEF: % d SPEED %d %s ", p->p_inventory[npc_current_pokemon]->get_hp(), p->p_inventory[npc_current_pokemon]->get_atk(), p->p_inventory[npc_current_pokemon]->get_def(), p->p_inventory[npc_current_pokemon]->get_spatk(), p->p_inventory[npc_current_pokemon]->get_spdef(), p->p_inventory[npc_current_pokemon]->get_speed(), p->p_inventory[npc_current_pokemon]->get_gender_string());
+
+    mvprintw(5, 10, "%s's moves: %s %s", p->p_inventory[npc_current_pokemon]->get_species(),
+             p->p_inventory[npc_current_pokemon]->get_move(npc_current_pokemon), p->p_inventory[npc_current_pokemon]->get_move(1));
+    mvprintw(6, 10, " Battle Options:");
+    mvprintw(7, 10, " 1. Fight");
+    mvprintw(8, 10, " 2. Bag");
+    mvprintw(10, 10, " 3. Switch Pokemon");
+    mvprintw(12, 10, " Current Pokemon: LVL %d %s - %d HP", world.pc.p_inventory[current_pokemon]->level, world.pc.p_inventory[current_pokemon]->get_species(), world.pc.p_inventory[current_pokemon]->current_hp);
+    mvprintw(16, 10, " %-60s ", "");
+
+    mvprintw(6, 38, " Moves:");
+    mvprintw(7, 38, " 1. %s", world.pc.p_inventory[current_pokemon]->get_move(0));
+    if (p->p_inventory[npc_current_pokemon]->get_move(1) != NULL)
+    {
+      mvprintw(8, 38, " 2. %s", world.pc.p_inventory[current_pokemon]->get_move(1));
+    }
+    if (p->p_inventory[npc_current_pokemon]->get_move(2) != NULL)
+    {
+      mvprintw(9, 38, " 3. %s", world.pc.p_inventory[current_pokemon]->get_move(2));
+    }
+    if (p->p_inventory[npc_current_pokemon]->get_move(3) != NULL)
+    {
+      mvprintw(10, 38, " 4. %s", world.pc.p_inventory[current_pokemon]->get_move(3));
+    }
+
+    mvprintw(13, 10, " Bag Contents:");
+    mvprintw(14, 10, " A. Potions:   %d", world.pc.inventory[POTION]);
+    mvprintw(15, 10, " B. Revives:   %d", world.pc.inventory[REVIVE]);
+    mvprintw(16, 10, " C. Pokeballs: %d", world.pc.inventory[POKEBALLS]);
+    mvprintw(13, 38, " Pokemon:");
+    if (world.pc.p_inventory[0] != NULL)
+    {
+      mvprintw(14, 38, " 1. LVL %d %s - %d HP", world.pc.p_inventory[0]->level, world.pc.p_inventory[0]->get_species(), world.pc.p_inventory[0]->current_hp);
+    }
+    if (world.pc.p_inventory[1] != NULL)
+    {
+      mvprintw(15, 38, " 2. LVL %d %s - %d HP", world.pc.p_inventory[1]->level, world.pc.p_inventory[1]->get_species(), world.pc.p_inventory[1]->current_hp);
+    }
+    if (world.pc.p_inventory[2] != NULL)
+    {
+      mvprintw(16, 38, " 3. LVL %d %s - %d HP", world.pc.p_inventory[2]->level, world.pc.p_inventory[2]->get_species(), world.pc.p_inventory[2]->current_hp);
+    }
+    if (world.pc.p_inventory[3] != NULL)
+    {
+      mvprintw(17, 38, " 4. LVL %d %s - %d HP", world.pc.p_inventory[3]->level, world.pc.p_inventory[3]->get_species(), world.pc.p_inventory[3]->current_hp);
+      mvprintw(17, 10, " %-60s ", "");
+    }
+    if (world.pc.p_inventory[4] != NULL)
+    {
+      mvprintw(18, 38, " 5. LVL %d %s - %d HP", world.pc.p_inventory[4]->level, world.pc.p_inventory[4]->get_species(), world.pc.p_inventory[4]->current_hp);
+      mvprintw(18, 10, " %-60s ", "");
+    }
+    if (world.pc.p_inventory[5] != NULL)
+    {
+      mvprintw(19, 38, " 6. LVL %d %s - %d HP", world.pc.p_inventory[5]->level, world.pc.p_inventory[5]->get_species(), world.pc.p_inventory[5]->current_hp);
+      mvprintw(19, 10, " %-60s ", "");
+    }
+    mvprintw(17, 10, " %-60s ", "");
+    mvprintw(18, 10, " %-60s ", "");
+    mvprintw(19, 10, " %-60s ", "");
+
+    mvprintw(18, 10, " Please select what you would like to do.");
+    refresh();
+
+    int alive = 0;
+    for (int i = 0; i < world.pc.p_count; i++)
+    {
+      if (world.pc.p_inventory[i]->current_hp > 0)
+      {
+        alive++;
+      }
+    }
+    if (alive == 0)
+    {
+      mvprintw(18, 10, " %-60s ", "");
+      mvprintw(18, 10, " All of your Pokemon are knocked out. You ran away.");
+      refresh();
+      getch();
+      in_battle = 0;
+      delete p;
+      break;
+    }
+    int npc_alive = 0;
+    for (int i = 0; p->p_inventory[i]; i++)
+    {
+      if (p->p_inventory[i]->current_hp > 0)
+      {
+        npc_alive++;
+      }
+    }
+    if (npc_alive == 0)
+    {
+      mvprintw(18, 10, " %-60s ", "");
+      mvprintw(18, 10, " All of the trainer's Pokemon are knocked out. They ran away.");
+      refresh();
+      getch();
+      in_battle = 0;
+      delete p;
+      break;
+    }
+    selection = getch();
+    switch (selection)
+    {
+    case '3':
+      mvprintw(18, 10, " %-60s ", "");
+      mvprintw(18, 10, " Please select a Pokemon to switch with.");
+      pokemon_selection = getch();
+      switch (pokemon_selection)
+      {
+      case '1':
+        check_int = 0;
+        break;
+      case '2':
+        check_int = 1;
+        break;
+      case '4':
+        check_int = 3;
+        break;
+      case '5':
+        check_int = 4;
+        break;
+      case '6':
+        check_int = 5;
+        break;
+      }
+      if (current_pokemon == check_int)
+      {
+        mvprintw(18, 10, " %-60s ", "");
+        mvprintw(18, 10, " Already using this Pokemon.");
+      }
+      else
+      {
+        current_pokemon = check_int;
+      }
+      break;
+    case '2':
+      // items
+      mvprintw(18, 10, " %-60s ", "");
+      mvprintw(18, 10, " Please select an item to use");
+      item_input = getch();
+      switch (item_input)
+      {
+      case 'a':
+        if (world.pc.inventory[POTION] > 0)
+        {
+          mvprintw(18, 10, " %-60s ", "");
+          mvprintw(18, 10, " Select pokemon to use a potion on.    ");
+          pokemon_selection = getch();
+          switch (pokemon_selection)
+          {
+          case '1':
+            if (world.pc.p_inventory[0] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[0]->current_hp + 20 > world.pc.p_inventory[0]->get_hp())
+              {
+                world.pc.p_inventory[0]->current_hp = world.pc.p_inventory[0]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[0]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[0]->get_species());
+            }
+            break;
+          case '2':
+            if (world.pc.p_inventory[1] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[1]->current_hp + 20 > world.pc.p_inventory[1]->get_hp())
+              {
+                world.pc.p_inventory[1]->current_hp = world.pc.p_inventory[1]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[1]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[1]->get_species());
+            }
+            break;
+          case '3':
+            if (world.pc.p_inventory[2] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[2]->current_hp + 20 > world.pc.p_inventory[2]->get_hp())
+              {
+                world.pc.p_inventory[2]->current_hp = world.pc.p_inventory[2]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[2]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[2]->get_species());
+            }
+            break;
+          case '4':
+            if (world.pc.p_inventory[3] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[3]->current_hp + 20 > world.pc.p_inventory[3]->get_hp())
+              {
+                world.pc.p_inventory[3]->current_hp = world.pc.p_inventory[3]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[3]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[3]->get_species());
+            }
+            break;
+          case '5':
+            if (world.pc.p_inventory[4] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[4]->current_hp + 20 > world.pc.p_inventory[4]->get_hp())
+              {
+                world.pc.p_inventory[4]->current_hp = world.pc.p_inventory[4]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[4]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[4]->get_species());
+            }
+            break;
+          case '6':
+            if (world.pc.p_inventory[5] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[5]->current_hp + 20 > world.pc.p_inventory[5]->get_hp())
+              {
+                world.pc.p_inventory[5]->current_hp = world.pc.p_inventory[5]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[5]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[5]->get_species());
+            }
+            break;
+          default:
+            mvprintw(18, 10, " %-50s ", "");
+            mvprintw(18, 10, " Invalid Selection");
+            break;
+          }
+        }
+        break;
+      case 'b':
+        if (world.pc.inventory[REVIVE] > 0)
+        {
+          mvprintw(18, 10, " Select pokemon to use a revive on.    ");
+          pokemon_selection = getch();
+          switch (pokemon_selection)
+          {
+          case '1':
+            if (world.pc.p_inventory[0] != NULL)
+            {
+              if (world.pc.p_inventory[0]->current_hp == 0)
+              {
+                world.pc.p_inventory[0]->current_hp = (int)(world.pc.p_inventory[0]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[0]->get_species());
+              }
+            }
+            break;
+          case '2':
+            if (world.pc.p_inventory[1] != NULL)
+            {
+              if (world.pc.p_inventory[1]->current_hp == 0)
+              {
+                world.pc.p_inventory[1]->current_hp = (int)(world.pc.p_inventory[1]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[1]->get_species());
+              }
+            }
+            break;
+          case '3':
+            if (world.pc.p_inventory[2] != NULL)
+            {
+              if (world.pc.p_inventory[2]->current_hp == 0)
+              {
+                world.pc.p_inventory[2]->current_hp = (int)(world.pc.p_inventory[2]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[2]->get_species());
+              }
+            }
+            break;
+          case '4':
+            if (world.pc.p_inventory[3] != NULL)
+            {
+              if (world.pc.p_inventory[3]->current_hp == 0)
+              {
+                world.pc.p_inventory[3]->current_hp = (int)(world.pc.p_inventory[3]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[3]->get_species());
+              }
+            }
+            break;
+          case '5':
+            if (world.pc.p_inventory[4] != NULL)
+            {
+              if (world.pc.p_inventory[4]->current_hp == 0)
+              {
+                world.pc.p_inventory[4]->current_hp = (int)(world.pc.p_inventory[4]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[4]->get_species());
+              }
+            }
+            break;
+          case '6':
+            if (world.pc.p_inventory[5] != NULL)
+            {
+              if (world.pc.p_inventory[5]->current_hp == 0)
+              {
+                world.pc.p_inventory[5]->current_hp = (int)(world.pc.p_inventory[5]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[5]->get_species());
+              }
+            }
+            break;
+          default:
+            mvprintw(18, 10, " %-50s ", "");
+            mvprintw(18, 10, " Invalid Selection");
+            break;
+          }
+        }
+        break;
+      }
+      break;
+    case '1':
+      // trainer battle
+
+      if (world.pc.p_inventory[current_pokemon]->current_hp > 0)
+      {
+        mvprintw(18, 10, " %-60s ", "");
+        mvprintw(18, 10, " Select a move to use.");
+        int move_selection = getch();
+        int move;
+        switch (move_selection)
+        {
+        case '1':
+          move = 0;
+          break;
+        case '2':
+          move = 1;
+          break;
+        case '3':
+          move = 2;
+          break;
+        case '4':
+          move = 3;
+          break;
+        }
+        // redo this part for trainers
+        double crit = ((rand() % 255) < (p->p_inventory[npc_current_pokemon]->get_speed() / 2)) ? 1.5 : 1;
+        double npc_crit = ((rand() % 255) < (world.pc.p_inventory[current_pokemon]->get_speed() / 2)) ? 1.5 : 1;
+
+        int npc_damage = (int)((((((2 * p->p_inventory[npc_current_pokemon]->level) / 5) + 2) * p->p_inventory[npc_current_pokemon]->get_move_power(move) * p->p_inventory[npc_current_pokemon]->get_atk() / p->p_inventory[npc_current_pokemon]->get_def()) / 50 + 2) * npc_crit * (rand() % 16 + 85));
+
+        int damage = (int)((((((2 * world.pc.p_inventory[current_pokemon]->level) / 5) + 2) * world.pc.p_inventory[current_pokemon]->get_move_power(move) * world.pc.p_inventory[current_pokemon]->get_atk() / world.pc.p_inventory[current_pokemon]->get_def()) / 50 + 2) * crit * (rand() % 16 + 85));
+        if (turn == 0) // trainer
+        {
+          if (!((rand() % 100) < world.pc.p_inventory[current_pokemon]->get_move_accuracy(move)))
+          {
+            mvprintw(18, 10, " %-60s ", "");
+            mvprintw(18, 10, " %s missed!", p->p_inventory[0]->get_species());
+            turn = 1;
+            getch();
+            break;
+          }
+          else
+          {
+            mvprintw(18, 10, " %-60s ", "");
+            mvprintw(18, 10, " %s did %d damage!", world.pc.p_inventory[current_pokemon]->get_species(), damage);
+            turn = 1;
+            getch();
+            if (p->p_inventory[npc_current_pokemon]->current_hp - damage <= 0)
+            {
+              mvprintw(18, 10, " %-60s ", "");
+              mvprintw(18, 10, " %s was defeated!", p->p_inventory[npc_current_pokemon]->get_species());
+              if (p->p_inventory[npc_current_pokemon++] && p->p_inventory[npc_current_pokemon++]->current_hp > 0)
+              {
+                npc_current_pokemon++;
+              }
+              else
+              {
+                mvprintw(18, 10, " %-60s ", "");
+                mvprintw(18, 10, " All of the trainers Pokemon are knocked out. You won.");
+                refresh();
+                getch();
+                in_battle = 0;
+                delete p;
+                break;
+              }
+              getch();
+              break;
+            }
+            else
+            {
+              p->p_inventory[0]->current_hp -= damage;
+            }
+          }
+        }
+        else
+        { // turn == 1 - npcs turn
+          if (p->p_inventory[npc_current_pokemon]->current_hp > 0)
+          {
+            if (!((rand() % 100) < p->p_inventory[npc_current_pokemon]->get_move_accuracy(move)))
+            {
+              mvprintw(18, 10, " %-60s ", "");
+              mvprintw(18, 10, " %s missed!", p->p_inventory[npc_current_pokemon]->get_species());
+              turn = 0;
+              getch();
+            }
+            else
+            {
+              mvprintw(18, 10, " %-60s ", "");
+              mvprintw(18, 10, " %s did %d damage!", p->p_inventory[npc_current_pokemon]->get_species(), npc_damage);
+              turn = 0;
+              getch();
+              if (world.pc.p_inventory[current_pokemon]->current_hp - npc_damage <= 0)
+              {
+                mvprintw(18, 10, " %-60s ", "");
+                mvprintw(18, 10, " %s was defeated!", world.pc.p_inventory[current_pokemon]->get_species());
+                if (world.pc.p_inventory[current_pokemon++] && world.pc.p_inventory[current_pokemon++]->current_hp > 0)
+                {
+                  current_pokemon++;
+                }
+                else
+                {
+                  mvprintw(18, 10, " %-60s ", "");
+                  mvprintw(18, 10, " All of the your Pokemon are knocked out. You flee.");
+                  refresh();
+                  getch();
+                  in_battle = 0;
+                  delete p;
+                  break;
+                }
+                turn = 0;
+                getch();
+                break;
+              }
+              else
+              {
+                world.pc.p_inventory[current_pokemon]->current_hp -= npc_damage;
+                break;
+              }
+            }
+          }
+          else
+          {
+            mvprintw(18, 10, " %-60s ", "");
+            mvprintw(18, 10, " All of the trainers Pokemon are knocked out. You won.");
+            refresh();
+            getch();
+            in_battle = 0;
+            delete p;
+            break;
+          }
+        }
+      }
+      else
+      {
+        mvprintw(18, 10, " %-60s ", "");
+        mvprintw(18, 10, " Your current Pokemon is knocked out.");
+      }
+      break;
+    }
+  }
+}
 void io_battle(character *aggressor, character *defender)
 {
   npc *n = (npc *)((aggressor == &world.pc) ? defender : aggressor);
-  int key;
   io_display();
-  mvprintw(2, 19, " %-40s ", "");
-  mvprintw(3, 19, " %-40s ", "");
-  mvprintw(3, 19, " %-40s ", "");
-  mvprintw(4, 19, " %-40s ", "");
-  mvprintw(5, 19, " %-40s ", "");
-  mvprintw(6, 19, " %-40s ", "");
-  mvprintw(7, 19, " %-40s ", "");
-  mvprintw(8, 19, " %-40s ", "");
-  mvprintw(9, 19, " %-40s ", "");
-  mvprintw(10, 19, " %-40s ", "");
-
-  mvprintw(0, 0, "Choose a number between 1 and 3 to see that trainers (%c) pokemon: %d\n", n->symbol, sizeof(n->p_inventory));
-  switch (key = getch())
-  {
-  case '1':
-    mvprintw(3, 19, "For NPC %c at %d,%d", n->symbol, n->pos[dim_x], n->pos[dim_y]);
-    mvprintw(4, 19, "Pokemon 1: %s", n->p_inventory[0]->get_species());
-    mvprintw(5, 19, "Level %d", n->p_inventory[0]->level);
-    mvprintw(6, 19, "HP: %d", n->p_inventory[0]->get_hp());
-    mvprintw(7, 19, " Moves:");
-    mvprintw(8, 19, "  - %s", n->p_inventory[0]->get_move(0));
-    mvprintw(9, 19, "  - %s", n->p_inventory[0]->get_move(1));
-    mvprintw(7, 38, " Attack (S): %d (%d)", n->p_inventory[0]->get_atk(), n->p_inventory[0]->get_spatk());
-    mvprintw(8, 38, " Defense (S): %d (%d)", n->p_inventory[0]->get_def(), n->p_inventory[0]->get_spdef());
-    mvprintw(9, 38, " Speed: %d", n->p_inventory[0]->get_speed());
-    break;
-  case '2':
-    mvprintw(3, 19, "For NPC %c at %d,%d", n->symbol, n->pos[dim_x], n->pos[dim_y]);
-    mvprintw(4, 19, "Pokemon 2: %s", n->p_inventory[1]->get_species());
-    mvprintw(5, 19, "Level %d", n->p_inventory[1]->level);
-    mvprintw(6, 19, "HP: %d", n->p_inventory[1]->get_hp());
-    mvprintw(7, 19, " Moves:");
-    mvprintw(8, 19, "  - %s", n->p_inventory[1]->get_move(0));
-    mvprintw(9, 19, "  - %s", n->p_inventory[1]->get_move(1));
-    mvprintw(7, 38, " Attack (S): %d (%d)", n->p_inventory[1]->get_atk(), n->p_inventory[1]->get_spatk());
-    mvprintw(8, 38, " Defense (S): %d (%d)", n->p_inventory[1]->get_def(), n->p_inventory[1]->get_spdef());
-    mvprintw(9, 38, " Speed: %d", n->p_inventory[1]->get_speed());
-    break;
-  case '3':
-    mvprintw(3, 19, "For NPC %c at %d,%d", n->symbol, n->pos[dim_x], n->pos[dim_y]);
-    mvprintw(4, 19, "Pokemon 3: %s", n->p_inventory[2]->get_species());
-    mvprintw(5, 19, "Level %d", n->p_inventory[2]->level);
-    mvprintw(6, 19, "HP: %d", n->p_inventory[2]->get_hp());
-    mvprintw(7, 19, " Moves:");
-    mvprintw(8, 19, "  - %s", n->p_inventory[2]->get_move(0));
-    mvprintw(9, 19, "  - %s", n->p_inventory[2]->get_move(1));
-    mvprintw(7, 38, " Attack (S): %d (%d)", n->p_inventory[2]->get_atk(), n->p_inventory[2]->get_spatk());
-    mvprintw(8, 38, " Defense (S): %d (%d)", n->p_inventory[2]->get_def(), n->p_inventory[2]->get_spdef());
-    mvprintw(9, 38, " Speed: %d", n->p_inventory[2]->get_speed());
-    break;
-  default:
-    mvprintw(0, 0, "Didn't recognize input, going to choose the first one\n");
-    mvprintw(3, 19, "For NPC: %c", n->symbol);
-    mvprintw(4, 19, "Pokemon 1: %s", n->p_inventory[0]->get_species());
-    mvprintw(5, 19, "Level %d", n->p_inventory[0]->level);
-    mvprintw(6, 19, "HP: %d", n->p_inventory[0]->get_hp());
-    mvprintw(7, 19, " Moves:");
-    mvprintw(8, 19, "  - %s", n->p_inventory[0]->get_move(0));
-    mvprintw(9, 19, "  - %s", n->p_inventory[0]->get_move(1));
-    mvprintw(7, 38, " Attack: %d", n->p_inventory[0]->get_atk());
-    mvprintw(8, 38, " Defense : %d ", n->p_inventory[0]->get_def());
-    mvprintw(9, 38, " Speed: %d", n->p_inventory[0]->get_speed());
-  }
+  io_trainer_battle(n);
   refresh();
   getch();
 
@@ -1449,7 +1776,7 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
   {
     if (rand() % 100 < 10)
     {
-      io_pokemon_encounter();
+      io_encounter_pokemon();
     }
   }
 
