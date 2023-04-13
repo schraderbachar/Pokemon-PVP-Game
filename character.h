@@ -47,13 +47,15 @@ public:
   movement_type_t mtype;
   int defeated;
   pair_t dir;
-  class pokemon *p_inventory[3];
+  class pokemon *p_inventory[6];
 };
 
 class pc : public character
 {
 public:
-  class pokemon *p_inventory[1];
+  class pokemon *p_inventory[6];
+  int inventory[3];
+  int p_count;
 };
 
 int32_t cmp_char_turns(const void *key, const void *with);

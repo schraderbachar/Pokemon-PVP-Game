@@ -398,6 +398,20 @@ static void io_list_trainers()
 void io_pokemart()
 {
   mvprintw(0, 0, "Welcome to the Pokemart.  Could I interest you in some Pokeballs?");
+  world.pc.inventory[POTION] = 2;
+  world.pc.inventory[REVIVE] = 2;
+  world.pc.inventory[POKEBALLS] = 2;
+  refresh();
+  getch();
+}
+
+void io_pokemon_center()
+{
+  mvprintw(0, 0, "Welcome to the Pokemon Center.  Nurse Joy has healed your Pokemon!");
+  for (int i = 0; i < world.pc.p_count; i++)
+  {
+    world.pc.p_inventory[i]->current_hp = world.pc.p_inventory[i]->get_hp();
+  }
   refresh();
   getch();
 }
@@ -432,12 +446,6 @@ void select_pokemon()
   }
 }
 
-void io_pokemon_center()
-{
-  mvprintw(0, 0, "Welcome to the Pokemon Center.  How can Nurse Joy assist you?");
-  refresh();
-  getch();
-}
 void io_pokemon_encounter()
 {
   float range;
@@ -559,6 +567,736 @@ void io_pokemon_encounter()
   mvprintw(9, 38, " Speed: %d", speed);
   refresh();
   getch();
+}
+
+void io_encounter_pokemon()
+{
+  class pokemon *p;
+  int current_pokemon = 0;
+  int selection;
+  int pokemon_selection;
+  int in_battle = 1;
+  int check_int;
+  int item_input;
+
+  int md = (abs(world.cur_idx[dim_x] - (WORLD_SIZE / 2)) +
+            abs(world.cur_idx[dim_y] - (WORLD_SIZE / 2)));
+  int minl, maxl;
+
+  if (md <= 200)
+  {
+    minl = 1;
+    maxl = md / 2;
+  }
+  else
+  {
+    minl = (md - 200) / 2;
+    maxl = 100;
+  }
+  if (minl < 1)
+  {
+    minl = 1;
+  }
+  if (minl > 100)
+  {
+    minl = 100;
+  }
+  if (maxl < 1)
+  {
+    maxl = 1;
+  }
+  if (maxl > 100)
+  {
+    maxl = 100;
+  }
+
+  p = new class pokemon(rand() % (maxl - minl + 1) + minl);
+
+  while (in_battle)
+  {
+    mvprintw(3, 10, " %-60s ", "");
+    mvprintw(4, 10, " %-60s ", "");
+    mvprintw(5, 10, " %-60s ", "");
+    mvprintw(6, 10, " %-60s ", "");
+    mvprintw(7, 10, " %-60s ", "");
+    mvprintw(8, 10, " %-60s ", "");
+    mvprintw(9, 10, " %-60s ", "");
+    mvprintw(10, 10, " %-60s ", "");
+    mvprintw(11, 10, " %-60s ", "");
+    mvprintw(12, 10, " %-60s ", "");
+    mvprintw(13, 10, " %-60s ", "");
+    mvprintw(14, 10, " %-60s ", "");
+    mvprintw(15, 10, " %-60s ", "");
+
+    mvprintw(4, 10, "%s%s%s: HP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
+             p->is_shiny() ? "*" : "", p->get_species(),
+             p->is_shiny() ? "*" : "", p->get_hp(), p->get_atk(),
+             p->get_def(), p->get_spatk(), p->get_spdef(),
+             p->get_speed(), p->get_gender_string());
+    mvprintw(5, 10, "%s's moves: %s %s", p->get_species(),
+             p->get_move(0), p->get_move(1));
+    mvprintw(6, 10, " Battle Options:");
+    mvprintw(7, 10, " 1. Fight");
+    mvprintw(8, 10, " 2. Bag");
+    mvprintw(9, 10, " 3. Run");
+    mvprintw(10, 10, " 4. Switch Pokemon");
+    mvprintw(12, 10, " Current Pokemon: LVL %d %s - %d HP", world.pc.p_inventory[current_pokemon]->level, world.pc.p_inventory[current_pokemon]->get_species(), world.pc.p_inventory[current_pokemon]->current_hp);
+    mvprintw(16, 10, " %-60s ", "");
+
+    mvprintw(6, 38, " Moves:");
+    mvprintw(7, 38, " 1. %s", world.pc.p_inventory[current_pokemon]->get_move(0));
+    if (p->get_move(1) != NULL)
+    {
+      mvprintw(8, 38, " 2. %s", world.pc.p_inventory[current_pokemon]->get_move(1));
+    }
+    if (p->get_move(2) != NULL)
+    {
+      mvprintw(9, 38, " 3. %s", world.pc.p_inventory[current_pokemon]->get_move(2));
+    }
+    if (p->get_move(3) != NULL)
+    {
+      mvprintw(10, 38, " 4. %s", world.pc.p_inventory[current_pokemon]->get_move(3));
+    }
+
+    mvprintw(13, 10, " Bag Contents:");
+    mvprintw(14, 10, " A. Potions:   %d", world.pc.inventory[POTION]);
+    mvprintw(15, 10, " B. Revives:   %d", world.pc.inventory[REVIVE]);
+    mvprintw(16, 10, " C. Pokeballs: %d", world.pc.inventory[POKEBALLS]);
+    mvprintw(13, 38, " Pokemon:");
+    if (world.pc.p_inventory[0] != NULL)
+    {
+      mvprintw(14, 38, " 1. LVL %d %s - %d HP", world.pc.p_inventory[0]->level, world.pc.p_inventory[0]->get_species(), world.pc.p_inventory[0]->current_hp);
+    }
+    if (world.pc.p_inventory[1] != NULL)
+    {
+      mvprintw(15, 38, " 2. LVL %d %s - %d HP", world.pc.p_inventory[1]->level, world.pc.p_inventory[1]->get_species(), world.pc.p_inventory[1]->current_hp);
+    }
+    if (world.pc.p_inventory[2] != NULL)
+    {
+      mvprintw(16, 38, " 3. LVL %d %s - %d HP", world.pc.p_inventory[2]->level, world.pc.p_inventory[2]->get_species(), world.pc.p_inventory[2]->current_hp);
+    }
+    if (world.pc.p_inventory[3] != NULL)
+    {
+      mvprintw(17, 38, " 4. LVL %d %s - %d HP", world.pc.p_inventory[3]->level, world.pc.p_inventory[3]->get_species(), world.pc.p_inventory[3]->current_hp);
+      mvprintw(17, 10, " %-60s ", "");
+    }
+    if (world.pc.p_inventory[4] != NULL)
+    {
+      mvprintw(18, 38, " 5. LVL %d %s - %d HP", world.pc.p_inventory[4]->level, world.pc.p_inventory[4]->get_species(), world.pc.p_inventory[4]->current_hp);
+      mvprintw(18, 10, " %-60s ", "");
+    }
+    if (world.pc.p_inventory[5] != NULL)
+    {
+      mvprintw(19, 38, " 6. LVL %d %s - %d HP", world.pc.p_inventory[5]->level, world.pc.p_inventory[5]->get_species(), world.pc.p_inventory[5]->current_hp);
+      mvprintw(19, 10, " %-60s ", "");
+    }
+    mvprintw(17, 10, " %-60s ", "");
+    mvprintw(18, 10, " %-60s ", "");
+    mvprintw(19, 10, " %-60s ", "");
+
+    mvprintw(18, 10, " Please select what you would like to do.");
+    refresh();
+
+    int alive = 0;
+    for (int i = 0; i < world.pc.p_count; i++)
+    {
+      if (world.pc.p_inventory[i]->current_hp > 0)
+      {
+        alive++;
+      }
+    }
+    if (alive == 0)
+    {
+      mvprintw(18, 10, " %-60s ", "");
+      mvprintw(18, 10, " All of your Pokemon are knocked out. You ran away.");
+      refresh();
+      getch();
+      in_battle = 0;
+      delete p;
+      break;
+    }
+
+    selection = getch();
+    switch (selection)
+    {
+    case '4':
+      mvprintw(18, 10, " %-60s ", "");
+      mvprintw(18, 10, " Please select a Pokemon to switch with.");
+      pokemon_selection = getch();
+      switch (pokemon_selection)
+      {
+      case '1':
+        check_int = 0;
+        break;
+      case '2':
+        check_int = 1;
+        break;
+      case '3':
+        check_int = 2;
+        break;
+      case '4':
+        check_int = 3;
+        break;
+      case '5':
+        check_int = 4;
+        break;
+      case '6':
+        check_int = 5;
+        break;
+      }
+      if (current_pokemon == check_int)
+      {
+        mvprintw(18, 10, " %-60s ", "");
+        mvprintw(18, 10, " Already using this Pokemon.");
+      }
+      else
+      {
+        current_pokemon = check_int;
+      }
+      break;
+    case '3':
+      mvprintw(18, 10, " %-60s ", "");
+      mvprintw(18, 10, " You ran away.");
+      refresh();
+      getch();
+      in_battle = 0;
+      delete p;
+      break;
+    case '2':
+      mvprintw(18, 10, " %-60s ", "");
+      mvprintw(18, 10, " Please select an item to use");
+      item_input = getch();
+      switch (item_input)
+      {
+      case 'a':
+        if (world.pc.inventory[POTION] > 0)
+        {
+          mvprintw(18, 10, " %-60s ", "");
+          mvprintw(18, 10, " Select pokemon to use a potion on.    ");
+          pokemon_selection = getch();
+          switch (pokemon_selection)
+          {
+          case '1':
+            if (world.pc.p_inventory[0] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[0]->current_hp + 20 > world.pc.p_inventory[0]->get_hp())
+              {
+                world.pc.p_inventory[0]->current_hp = world.pc.p_inventory[0]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[0]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[0]->get_species());
+            }
+            break;
+          case '2':
+            if (world.pc.p_inventory[1] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[1]->current_hp + 20 > world.pc.p_inventory[1]->get_hp())
+              {
+                world.pc.p_inventory[1]->current_hp = world.pc.p_inventory[1]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[1]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[1]->get_species());
+            }
+            break;
+          case '3':
+            if (world.pc.p_inventory[2] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[2]->current_hp + 20 > world.pc.p_inventory[2]->get_hp())
+              {
+                world.pc.p_inventory[2]->current_hp = world.pc.p_inventory[2]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[2]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[2]->get_species());
+            }
+            break;
+          case '4':
+            if (world.pc.p_inventory[3] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[3]->current_hp + 20 > world.pc.p_inventory[3]->get_hp())
+              {
+                world.pc.p_inventory[3]->current_hp = world.pc.p_inventory[3]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[3]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[3]->get_species());
+            }
+            break;
+          case '5':
+            if (world.pc.p_inventory[4] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[4]->current_hp + 20 > world.pc.p_inventory[4]->get_hp())
+              {
+                world.pc.p_inventory[4]->current_hp = world.pc.p_inventory[4]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[4]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[4]->get_species());
+            }
+            break;
+          case '6':
+            if (world.pc.p_inventory[5] != NULL)
+            {
+              world.pc.inventory[POTION]--;
+              if (world.pc.p_inventory[5]->current_hp + 20 > world.pc.p_inventory[5]->get_hp())
+              {
+                world.pc.p_inventory[5]->current_hp = world.pc.p_inventory[5]->get_hp();
+              }
+              else
+              {
+                world.pc.p_inventory[5]->current_hp += 20;
+              }
+              mvprintw(18, 10, " %-50s ", "");
+              mvprintw(18, 10, " Used potion on %s", world.pc.p_inventory[5]->get_species());
+            }
+            break;
+          default:
+            mvprintw(18, 10, " %-50s ", "");
+            mvprintw(18, 10, " Invalid Selection");
+            break;
+          }
+        }
+        break;
+      case 'b':
+        if (world.pc.inventory[REVIVE] > 0)
+        {
+          mvprintw(18, 10, " Select pokemon to use a revive on.    ");
+          pokemon_selection = getch();
+          switch (pokemon_selection)
+          {
+          case '1':
+            if (world.pc.p_inventory[0] != NULL)
+            {
+              if (world.pc.p_inventory[0]->current_hp == 0)
+              {
+                world.pc.p_inventory[0]->current_hp = (int)(world.pc.p_inventory[0]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[0]->get_species());
+              }
+            }
+            break;
+          case '2':
+            if (world.pc.p_inventory[1] != NULL)
+            {
+              if (world.pc.p_inventory[1]->current_hp == 0)
+              {
+                world.pc.p_inventory[1]->current_hp = (int)(world.pc.p_inventory[1]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[1]->get_species());
+              }
+            }
+            break;
+          case '3':
+            if (world.pc.p_inventory[2] != NULL)
+            {
+              if (world.pc.p_inventory[2]->current_hp == 0)
+              {
+                world.pc.p_inventory[2]->current_hp = (int)(world.pc.p_inventory[2]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[2]->get_species());
+              }
+            }
+            break;
+          case '4':
+            if (world.pc.p_inventory[3] != NULL)
+            {
+              if (world.pc.p_inventory[3]->current_hp == 0)
+              {
+                world.pc.p_inventory[3]->current_hp = (int)(world.pc.p_inventory[3]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[3]->get_species());
+              }
+            }
+            break;
+          case '5':
+            if (world.pc.p_inventory[4] != NULL)
+            {
+              if (world.pc.p_inventory[4]->current_hp == 0)
+              {
+                world.pc.p_inventory[4]->current_hp = (int)(world.pc.p_inventory[4]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[4]->get_species());
+              }
+            }
+            break;
+          case '6':
+            if (world.pc.p_inventory[5] != NULL)
+            {
+              if (world.pc.p_inventory[5]->current_hp == 0)
+              {
+                world.pc.p_inventory[5]->current_hp = (int)(world.pc.p_inventory[5]->get_hp() / 2);
+                world.pc.inventory[REVIVE]--;
+                mvprintw(18, 10, " %-50s ", "");
+                mvprintw(18, 10, " Used revive on %s", world.pc.p_inventory[5]->get_species());
+              }
+            }
+            break;
+          default:
+            mvprintw(18, 10, " %-50s ", "");
+            mvprintw(18, 10, " Invalid Selection");
+            break;
+          }
+        }
+        break;
+      case 'c':
+        if (world.pc.inventory[POKEBALLS] > 0)
+        {
+          if (world.pc.p_count < 6)
+          {
+            mvprintw(18, 10, " %-60s ", "");
+            mvprintw(18, 10, " You captured %s", p->get_species());
+            getch();
+            world.pc.p_inventory[world.pc.p_count] = p;
+            world.pc.p_count++;
+            in_battle = 0;
+            break;
+          }
+          else
+          {
+            mvprintw(18, 10, " %-60s ", "");
+            mvprintw(18, 10, " %s ran away.", p->get_species());
+            refresh();
+            getch();
+            in_battle = 0;
+            delete p;
+            break;
+          }
+        }
+        break;
+      }
+      break;
+    case '1':
+      if (world.pc.p_inventory[current_pokemon]->current_hp > 0)
+      {
+        mvprintw(18, 10, " %-60s ", "");
+        mvprintw(18, 10, " Select a move to use.");
+        int move_selection = getch();
+        int move;
+        switch (move_selection)
+        {
+        case '1':
+          move = 0;
+          break;
+        case '2':
+          move = 1;
+          break;
+        case '3':
+          move = 2;
+          break;
+        case '4':
+          move = 3;
+          break;
+        }
+        double crit = ((rand() % 255) < (world.pc.p_inventory[current_pokemon]->get_speed() / 2)) ? 1.5 : 1;
+        int damage = (int)((((((2 * world.pc.p_inventory[current_pokemon]->level) / 5) + 2) * world.pc.p_inventory[current_pokemon]->get_move_power(move) * world.pc.p_inventory[current_pokemon]->get_atk() / world.pc.p_inventory[current_pokemon]->get_def()) / 50 + 2) * crit * (rand() % 16 + 85));
+        if (!((rand() % 100) < world.pc.p_inventory[current_pokemon]->get_move_accuracy(move)))
+        {
+          mvprintw(18, 10, " %-60s ", "");
+          mvprintw(18, 10, " %s missed!", p->get_species());
+          getch();
+        }
+        else
+        {
+          mvprintw(18, 10, " %-60s ", "");
+          mvprintw(18, 10, " %s did %d damage!", world.pc.p_inventory[current_pokemon]->get_species(), damage);
+          getch();
+          if (p->current_hp - damage <= 0)
+          {
+            mvprintw(18, 10, " %-60s ", "");
+            mvprintw(18, 10, " %s was defeated!", p->get_species());
+            getch();
+            in_battle = 0;
+            break;
+          }
+          else
+          {
+            p->current_hp -= damage;
+          }
+        }
+      }
+      else
+      {
+        mvprintw(18, 10, " %-60s ", "");
+        mvprintw(18, 10, " Your current Pokemon is knocked out.");
+      }
+      break;
+    }
+  }
+}
+
+static void io_display_bag()
+{
+  int item_input, pokemon_selection;
+
+  mvprintw(3, 19, " %-50s ", "");
+  mvprintw(4, 19, " %-50s ", "");
+  mvprintw(5, 19, " %-50s ", "");
+  mvprintw(6, 19, " %-50s ", "");
+  mvprintw(7, 19, " %-50s ", "");
+  mvprintw(8, 19, " %-50s ", "");
+  mvprintw(9, 19, " %-50s ", "");
+  mvprintw(10, 19, " %-50s ", "");
+  mvprintw(11, 19, " %-50s ", "");
+  mvprintw(12, 19, " %-50s ", "");
+
+  mvprintw(4, 19, " Bag Contents:");
+  mvprintw(5, 19, " A. Potions:   %d", world.pc.inventory[POTION]);
+  mvprintw(6, 19, " B. Revives:   %d", world.pc.inventory[REVIVE]);
+  mvprintw(7, 19, " C. Pokeballs: %d", world.pc.inventory[POKEBALLS]);
+  mvprintw(4, 38, " Pokemon:");
+  if (world.pc.p_inventory[0] != NULL)
+  {
+    mvprintw(5, 38, " 1. LVL %d %s - %d HP", world.pc.p_inventory[0]->level, world.pc.p_inventory[0]->get_species(), world.pc.p_inventory[0]->current_hp);
+  }
+  if (world.pc.p_inventory[1] != NULL)
+  {
+    mvprintw(6, 38, " 2. LVL %d %s - %d HP", world.pc.p_inventory[1]->level, world.pc.p_inventory[1]->get_species(), world.pc.p_inventory[1]->current_hp);
+  }
+  if (world.pc.p_inventory[2] != NULL)
+  {
+    mvprintw(7, 38, " 3. LVL %d %s - %d HP", world.pc.p_inventory[2]->level, world.pc.p_inventory[2]->get_species(), world.pc.p_inventory[2]->current_hp);
+  }
+  if (world.pc.p_inventory[3] != NULL)
+  {
+    mvprintw(8, 38, " 4. LVL %d %s - %d HP", world.pc.p_inventory[3]->level, world.pc.p_inventory[3]->get_species(), world.pc.p_inventory[3]->current_hp);
+  }
+  if (world.pc.p_inventory[4] != NULL)
+  {
+    mvprintw(9, 38, " 5. LVL %d %s - %d HP", world.pc.p_inventory[4]->level, world.pc.p_inventory[4]->get_species(), world.pc.p_inventory[4]->current_hp);
+  }
+  if (world.pc.p_inventory[5] != NULL)
+  {
+    mvprintw(10, 38, " 6. LVL %d %s - %d HP", world.pc.p_inventory[5]->level, world.pc.p_inventory[5]->get_species(), world.pc.p_inventory[5]->current_hp);
+  }
+  mvprintw(11, 19, " To use Potion or Revive, press A or B.");
+  refresh();
+  item_input = getch();
+  switch (item_input)
+  {
+  case 'a':
+    if (world.pc.inventory[POTION] > 0)
+    {
+      mvprintw(11, 19, " Select pokemon to use a potion on.    ");
+      pokemon_selection = getch();
+      switch (pokemon_selection)
+      {
+      case '1':
+        if (world.pc.p_inventory[0] != NULL)
+        {
+          world.pc.inventory[POTION]--;
+          if (world.pc.p_inventory[0]->current_hp + 20 > world.pc.p_inventory[0]->get_hp())
+          {
+            world.pc.p_inventory[0]->current_hp = world.pc.p_inventory[0]->get_hp();
+          }
+          else
+          {
+            world.pc.p_inventory[0]->current_hp += 20;
+          }
+          mvprintw(11, 19, " %-50s ", "");
+          mvprintw(11, 19, " Used potion on %s", world.pc.p_inventory[0]->get_species());
+        }
+        break;
+      case '2':
+        if (world.pc.p_inventory[1] != NULL)
+        {
+          world.pc.inventory[POTION]--;
+          if (world.pc.p_inventory[1]->current_hp + 20 > world.pc.p_inventory[1]->get_hp())
+          {
+            world.pc.p_inventory[1]->current_hp = world.pc.p_inventory[1]->get_hp();
+          }
+          else
+          {
+            world.pc.p_inventory[1]->current_hp += 20;
+          }
+          mvprintw(11, 19, " %-50s ", "");
+          mvprintw(11, 19, " Used potion on %s", world.pc.p_inventory[1]->get_species());
+        }
+        break;
+      case '3':
+        if (world.pc.p_inventory[2] != NULL)
+        {
+          world.pc.inventory[POTION]--;
+          if (world.pc.p_inventory[2]->current_hp + 20 > world.pc.p_inventory[2]->get_hp())
+          {
+            world.pc.p_inventory[2]->current_hp = world.pc.p_inventory[2]->get_hp();
+          }
+          else
+          {
+            world.pc.p_inventory[2]->current_hp += 20;
+          }
+          mvprintw(11, 19, " %-50s ", "");
+          mvprintw(11, 19, " Used potion on %s", world.pc.p_inventory[2]->get_species());
+        }
+        break;
+      case '4':
+        if (world.pc.p_inventory[3] != NULL)
+        {
+          world.pc.inventory[POTION]--;
+          if (world.pc.p_inventory[3]->current_hp + 20 > world.pc.p_inventory[3]->get_hp())
+          {
+            world.pc.p_inventory[3]->current_hp = world.pc.p_inventory[3]->get_hp();
+          }
+          else
+          {
+            world.pc.p_inventory[3]->current_hp += 20;
+          }
+          mvprintw(11, 19, " %-50s ", "");
+          mvprintw(11, 19, " Used potion on %s", world.pc.p_inventory[3]->get_species());
+        }
+        break;
+      case '5':
+        if (world.pc.p_inventory[4] != NULL)
+        {
+          world.pc.inventory[POTION]--;
+          if (world.pc.p_inventory[4]->current_hp + 20 > world.pc.p_inventory[4]->get_hp())
+          {
+            world.pc.p_inventory[4]->current_hp = world.pc.p_inventory[4]->get_hp();
+          }
+          else
+          {
+            world.pc.p_inventory[4]->current_hp += 20;
+          }
+          mvprintw(11, 19, " %-50s ", "");
+          mvprintw(11, 19, " Used potion on %s", world.pc.p_inventory[4]->get_species());
+        }
+        break;
+      case '6':
+        if (world.pc.p_inventory[5] != NULL)
+        {
+          world.pc.inventory[POTION]--;
+          if (world.pc.p_inventory[5]->current_hp + 20 > world.pc.p_inventory[5]->get_hp())
+          {
+            world.pc.p_inventory[5]->current_hp = world.pc.p_inventory[5]->get_hp();
+          }
+          else
+          {
+            world.pc.p_inventory[5]->current_hp += 20;
+          }
+          mvprintw(11, 19, " %-50s ", "");
+          mvprintw(11, 19, " Used potion on %s", world.pc.p_inventory[5]->get_species());
+        }
+        break;
+      default:
+        mvprintw(11, 19, " %-50s ", "");
+        mvprintw(11, 19, " Invalid Selection");
+        break;
+      }
+    }
+    break;
+  case 'b':
+    if (world.pc.inventory[REVIVE] > 0)
+    {
+      mvprintw(11, 19, " Select pokemon to use a revive on.    ");
+      pokemon_selection = getch();
+      switch (pokemon_selection)
+      {
+      case '1':
+        if (world.pc.p_inventory[0] != NULL)
+        {
+          if (world.pc.p_inventory[0]->current_hp == 0)
+          {
+            world.pc.p_inventory[0]->current_hp = (int)(world.pc.p_inventory[0]->get_hp() / 2);
+            world.pc.inventory[REVIVE]--;
+            mvprintw(11, 19, " %-50s ", "");
+            mvprintw(11, 19, " Used revive on %s", world.pc.p_inventory[0]->get_species());
+          }
+        }
+        break;
+      case '2':
+        if (world.pc.p_inventory[1] != NULL)
+        {
+          if (world.pc.p_inventory[1]->current_hp == 0)
+          {
+            world.pc.p_inventory[1]->current_hp = (int)(world.pc.p_inventory[1]->get_hp() / 2);
+            world.pc.inventory[REVIVE]--;
+            mvprintw(11, 19, " %-50s ", "");
+            mvprintw(11, 19, " Used revive on %s", world.pc.p_inventory[1]->get_species());
+          }
+        }
+        break;
+      case '3':
+        if (world.pc.p_inventory[2] != NULL)
+        {
+          if (world.pc.p_inventory[2]->current_hp == 0)
+          {
+            world.pc.p_inventory[2]->current_hp = (int)(world.pc.p_inventory[2]->get_hp() / 2);
+            world.pc.inventory[REVIVE]--;
+            mvprintw(11, 19, " %-50s ", "");
+            mvprintw(11, 19, " Used revive on %s", world.pc.p_inventory[2]->get_species());
+          }
+        }
+        break;
+      case '4':
+        if (world.pc.p_inventory[3] != NULL)
+        {
+          if (world.pc.p_inventory[3]->current_hp == 0)
+          {
+            world.pc.p_inventory[3]->current_hp = (int)(world.pc.p_inventory[3]->get_hp() / 2);
+            world.pc.inventory[REVIVE]--;
+            mvprintw(11, 19, " %-50s ", "");
+            mvprintw(11, 19, " Used revive on %s", world.pc.p_inventory[3]->get_species());
+          }
+        }
+        break;
+      case '5':
+        if (world.pc.p_inventory[4] != NULL)
+        {
+          if (world.pc.p_inventory[4]->current_hp == 0)
+          {
+            world.pc.p_inventory[4]->current_hp = (int)(world.pc.p_inventory[4]->get_hp() / 2);
+            world.pc.inventory[REVIVE]--;
+            mvprintw(11, 19, " %-50s ", "");
+            mvprintw(11, 19, " Used revive on %s", world.pc.p_inventory[4]->get_species());
+          }
+        }
+        break;
+      case '6':
+        if (world.pc.p_inventory[5] != NULL)
+        {
+          if (world.pc.p_inventory[5]->current_hp == 0)
+          {
+            world.pc.p_inventory[5]->current_hp = (int)(world.pc.p_inventory[5]->get_hp() / 2);
+            world.pc.inventory[REVIVE]--;
+            mvprintw(11, 19, " %-50s ", "");
+            mvprintw(11, 19, " Used revive on %s", world.pc.p_inventory[5]->get_species());
+          }
+        }
+        break;
+      default:
+        mvprintw(11, 19, " %-50s ", "");
+        mvprintw(11, 19, " Invalid Selection");
+        break;
+      }
+    }
+    break;
+  }
 }
 
 void io_battle(character *aggressor, character *defender)
@@ -838,6 +1576,9 @@ void io_handle_input(pair_t dest)
       /* Teleport the PC to a random place in the map.              */
       io_teleport_pc(dest);
       turn_not_consumed = 0;
+      break;
+    case 'm':
+      io_display_bag();
       break;
     case 'f':
       /* Fly to any map in the world.                                */

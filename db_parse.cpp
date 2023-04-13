@@ -83,7 +83,7 @@ void db_parse(bool print)
        strlen("/.poke327/pokedex/pokedex/data/csv/") + 1);
   prefix = (char *)malloc(i);
   strcpy(prefix, getenv("HOME"));
-  strcat(prefix, "/.poke327/pokedex/pokedex/data/csv/");
+  strcat(prefix, "/poke327/pokedex/pokedex/data/csv/");
 
   if (stat(prefix, &buf))
   {

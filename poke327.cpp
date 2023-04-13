@@ -1362,6 +1362,12 @@ void game_loop()
   pc *p;
   pair_t d;
 
+  world.pc.p_count++;
+
+  world.pc.inventory[REVIVE] = 2;
+  world.pc.inventory[POTION] = 2;
+  world.pc.inventory[POKEBALLS] = 2;
+
   while (!world.quit)
   {
     c = (character *)heap_remove_min(&world.cur_map->turn);
