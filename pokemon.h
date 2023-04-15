@@ -43,6 +43,7 @@ public:
     bool is_shiny() const;
     const char *get_move(int i) const;
     const int get_move_power(int i) const;
+    const int get_move_priority(int i) const;
     const int get_move_accuracy(int i) const;
     const int get_move_type(int i) const;
 };

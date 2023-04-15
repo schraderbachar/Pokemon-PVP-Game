@@ -166,6 +166,17 @@ const int pokemon::get_move_power(int i) const
         return 0;
     }
 }
+const int pokemon::get_move_priority(int i) const
+{
+    if (i < 4 && move_index[i])
+    {
+        return moves[move_index[i]].priority;
+    }
+    else
+    {
+        return 0;
+    }
+}
 
 const int pokemon::get_move_accuracy(int i) const
 {

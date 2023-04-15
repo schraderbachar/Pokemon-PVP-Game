@@ -1185,7 +1185,8 @@ void io_trainer_battle(character *defender)
   int npc_current_pokemon = 0;
   int check_int;
   int item_input;
-  int turn = 0;
+  int turn = (p->p_inventory[0]->get_move_priority(0) > world.pc.p_inventory[0]->get_move_priority(0)) ? 1 : ((p->p_inventory[0]->get_move_priority(0) == world.pc.p_inventory[0]->get_move_priority(0) && p->p_inventory[0]->get_speed() > world.pc.p_inventory[0]->get_speed()) ? 1 : 0);
+
   int temp_count;
 
   while (in_battle)
