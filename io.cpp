@@ -397,7 +397,7 @@ static void io_list_trainers()
 
 void io_pokemart()
 {
-  mvprintw(0, 0, "Welcome to the Pokemart.  Could I interest you in some Pokeballs?");
+  mvprintw(0, 0, "Welcome to the Pokemart.  Could I interest you in some Pokeballs? Your bag has been refilled with 2 of each.");
   world.pc.inventory[POTION] = 2;
   world.pc.inventory[REVIVE] = 2;
   world.pc.inventory[POKEBALLS] = 2;
