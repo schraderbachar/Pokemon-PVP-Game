@@ -98,6 +98,10 @@ const char *pokemon::get_species() const
 {
     return species[pokemon_species_index].identifier;
 }
+int pokemon::get_type() const
+{
+    return pokemon_types[pokemon_species_index].type_id;
+}
 
 int pokemon::get_hp() const
 {
@@ -168,6 +172,18 @@ const int pokemon::get_move_accuracy(int i) const
     if (i < 4 && move_index[i])
     {
         return moves[move_index[i]].accuracy;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+const int pokemon::get_move_type(int i) const
+{
+    if (i < 4 && move_index[i])
+    {
+        return moves[move_index[i]].type_id;
     }
     else
     {

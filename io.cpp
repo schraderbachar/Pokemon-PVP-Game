@@ -1187,6 +1187,7 @@ void io_trainer_battle(character *defender)
   int check_int;
   int item_input;
   int turn = 0;
+  int temp_count;
 
   while (in_battle)
   {
@@ -1204,8 +1205,8 @@ void io_trainer_battle(character *defender)
     mvprintw(14, 10, " %-60s ", "");
     mvprintw(15, 10, " %-60s ", "");
 
-    mvprintw(3, 10, "Trainer %c's pokemon %s %s:", p->symbol,
-             p->p_inventory[npc_current_pokemon]->is_shiny() ? "SHINY" : "", p->p_inventory[npc_current_pokemon]->get_species());
+    mvprintw(3, 10, "Trainer %c's pokemon %s%s:", p->symbol,
+             p->p_inventory[npc_current_pokemon]->is_shiny() ? "SHINY " : "", p->p_inventory[npc_current_pokemon]->get_species());
     mvprintw(4, 10, "HP: %d ATK: %d DEF: %d SPATK: %d SPDEF: % d SPEED %d %s ", p->p_inventory[npc_current_pokemon]->get_hp(), p->p_inventory[npc_current_pokemon]->get_atk(), p->p_inventory[npc_current_pokemon]->get_def(), p->p_inventory[npc_current_pokemon]->get_spatk(), p->p_inventory[npc_current_pokemon]->get_spdef(), p->p_inventory[npc_current_pokemon]->get_speed(), p->p_inventory[npc_current_pokemon]->get_gender_string());
 
     mvprintw(5, 10, "%s's moves: %s %s", p->p_inventory[npc_current_pokemon]->get_species(),
@@ -1213,8 +1214,8 @@ void io_trainer_battle(character *defender)
     mvprintw(6, 10, " Battle Options:");
     mvprintw(7, 10, " 1. Fight");
     mvprintw(8, 10, " 2. Bag");
-    mvprintw(10, 10, " 3. Switch Pokemon");
-    mvprintw(12, 10, " Current Pokemon: LVL %d %s - %d HP", world.pc.p_inventory[current_pokemon]->level, world.pc.p_inventory[current_pokemon]->get_species(), world.pc.p_inventory[current_pokemon]->current_hp);
+    mvprintw(9, 10, " 3. Switch Pokemon");
+    mvprintw(11, 10, " Current Pokemon: LVL %d %s - %d HP", world.pc.p_inventory[current_pokemon]->level, world.pc.p_inventory[current_pokemon]->get_species(), world.pc.p_inventory[current_pokemon]->current_hp);
     mvprintw(16, 10, " %-60s ", "");
 
     mvprintw(6, 38, " Moves:");
@@ -1286,7 +1287,6 @@ void io_trainer_battle(character *defender)
       refresh();
       getch();
       in_battle = 0;
-      delete p;
       break;
     }
     int npc_alive = 0;
@@ -1304,7 +1304,6 @@ void io_trainer_battle(character *defender)
       refresh();
       getch();
       in_battle = 0;
-      delete p;
       break;
     }
     selection = getch();
@@ -1550,7 +1549,6 @@ void io_trainer_battle(character *defender)
       break;
     case '1':
       // trainer battle
-
       if (world.pc.p_inventory[current_pokemon]->current_hp > 0)
       {
         mvprintw(18, 10, " %-60s ", "");
@@ -1572,13 +1570,14 @@ void io_trainer_battle(character *defender)
           move = 3;
           break;
         }
-        // redo this part for trainers
-        double crit = ((rand() % 255) < (p->p_inventory[npc_current_pokemon]->get_speed() / 2)) ? 1.5 : 1;
-        double npc_crit = ((rand() % 255) < (world.pc.p_inventory[current_pokemon]->get_speed() / 2)) ? 1.5 : 1;
+        double npc_crit = ((rand() % 255) < (p->p_inventory[npc_current_pokemon]->get_speed() / 2)) ? 1.5 : 1;
+        double crit = ((rand() % 255) < (world.pc.p_inventory[current_pokemon]->get_speed() / 2)) ? 1.5 : 1;
+        double npc_stab = (p->p_inventory[current_pokemon]->get_type() == p->p_inventory[current_pokemon]->get_move_type(0)) ? 1.5 : 1;
+        double stab = (world.pc.p_inventory[current_pokemon]->get_type() == world.pc.p_inventory[current_pokemon]->get_move_type(move)) ? 1.5 : 1;
 
-        int npc_damage = (int)((((((2 * p->p_inventory[npc_current_pokemon]->level) / 5) + 2) * p->p_inventory[npc_current_pokemon]->get_move_power(move) * p->p_inventory[npc_current_pokemon]->get_atk() / p->p_inventory[npc_current_pokemon]->get_def()) / 50 + 2) * npc_crit * (rand() % 16 + 85));
+        int npc_damage = (int)((((((2 * p->p_inventory[npc_current_pokemon]->level) / 5) + 2) * p->p_inventory[npc_current_pokemon]->get_move_power(move) * (p->p_inventory[npc_current_pokemon]->get_atk() / p->p_inventory[npc_current_pokemon]->get_def())) / 50 + 2) * npc_crit * (rand() % 16 + 85) * npc_stab * 1);
 
-        int damage = (int)((((((2 * world.pc.p_inventory[current_pokemon]->level) / 5) + 2) * world.pc.p_inventory[current_pokemon]->get_move_power(move) * world.pc.p_inventory[current_pokemon]->get_atk() / world.pc.p_inventory[current_pokemon]->get_def()) / 50 + 2) * crit * (rand() % 16 + 85));
+        int damage = (int)((((((2 * world.pc.p_inventory[current_pokemon]->level) / 5) + 2) * world.pc.p_inventory[current_pokemon]->get_move_power(move) * (world.pc.p_inventory[current_pokemon]->get_atk() / world.pc.p_inventory[current_pokemon]->get_def())) / 50 + 2) * crit * (rand() % 16 + 85) * stab * 1);
         if (turn == 0) // trainer
         {
           if (!((rand() % 100) < world.pc.p_inventory[current_pokemon]->get_move_accuracy(move)))
@@ -1594,31 +1593,37 @@ void io_trainer_battle(character *defender)
             mvprintw(18, 10, " %-60s ", "");
             mvprintw(18, 10, " %s did %d damage!", world.pc.p_inventory[current_pokemon]->get_species(), damage);
             turn = 1;
-            getch();
+
             if (p->p_inventory[npc_current_pokemon]->current_hp - damage <= 0)
             {
               mvprintw(18, 10, " %-60s ", "");
-              mvprintw(18, 10, " %s was defeated!", p->p_inventory[npc_current_pokemon]->get_species());
-              if (p->p_inventory[npc_current_pokemon++] && p->p_inventory[npc_current_pokemon++]->current_hp > 0)
+              mvprintw(18, 10, " %s was defeated! NPC has %d pokemon left. ", p->p_inventory[npc_current_pokemon]->get_species(), npc_alive - 1);
+              refresh();
+              getch();
+              p->p_inventory[npc_current_pokemon]->current_hp = 0;
+              temp_count = npc_current_pokemon + 1;
+              if (temp_count < npc_alive && p->p_inventory[temp_count]->current_hp > 0)
               {
                 npc_current_pokemon++;
+                temp_count = 0;
+                turn = 1;
               }
               else
               {
+                temp_count = 0;
                 mvprintw(18, 10, " %-60s ", "");
-                mvprintw(18, 10, " All of the trainers Pokemon are knocked out. You won.");
+                mvprintw(19, 10, " %-60s ", "");
+                mvprintw(18, 10, "All of the trainers Pokemon are knocked out. You won.");
                 refresh();
                 getch();
-                in_battle = 0;
-                delete p;
+                // in_battle = 0;
                 break;
               }
-              getch();
-              break;
             }
             else
             {
-              p->p_inventory[0]->current_hp -= damage;
+              p->p_inventory[npc_current_pokemon]->current_hp -= damage;
+              turn = 1;
             }
           }
         }
@@ -1642,28 +1647,32 @@ void io_trainer_battle(character *defender)
               if (world.pc.p_inventory[current_pokemon]->current_hp - npc_damage <= 0)
               {
                 mvprintw(18, 10, " %-60s ", "");
-                mvprintw(18, 10, " %s was defeated!", world.pc.p_inventory[current_pokemon]->get_species());
-                if (world.pc.p_inventory[current_pokemon++] && world.pc.p_inventory[current_pokemon++]->current_hp > 0)
+                mvprintw(18, 10, " %s was defeated! %d pokemon left", world.pc.p_inventory[current_pokemon]->get_species(), alive - 1);
+                refresh();
+                world.pc.p_inventory[current_pokemon]->current_hp = 0;
+                temp_count = current_pokemon + 1;
+                if (temp_count < alive && world.pc.p_inventory[temp_count]->current_hp > 0)
                 {
                   current_pokemon++;
+                  temp_count = 0;
+                  turn = 0;
                 }
+
                 else
                 {
                   mvprintw(18, 10, " %-60s ", "");
-                  mvprintw(18, 10, " All of the your Pokemon are knocked out. You flee.");
+                  mvprintw(18, 10, " All of your Pokemon are knocked out. You flee.");
+                  mvprintw(19, 10, "Go to a pokemart or pokecenter to revive them.");
                   refresh();
                   getch();
                   in_battle = 0;
-                  delete p;
                   break;
                 }
-                turn = 0;
-                getch();
-                break;
               }
               else
               {
                 world.pc.p_inventory[current_pokemon]->current_hp -= npc_damage;
+                turn = 0;
                 break;
               }
             }
@@ -1672,10 +1681,10 @@ void io_trainer_battle(character *defender)
           {
             mvprintw(18, 10, " %-60s ", "");
             mvprintw(18, 10, " All of the trainers Pokemon are knocked out. You won.");
+            p->defeated = 1;
             refresh();
-            getch();
             in_battle = 0;
-            delete p;
+            getch();
             break;
           }
         }
@@ -1693,15 +1702,26 @@ void io_battle(character *aggressor, character *defender)
 {
   npc *n = (npc *)((aggressor == &world.pc) ? defender : aggressor);
   io_display();
-  io_trainer_battle(n);
+  int alive = 0;
+  for (int i = 0; i < world.pc.p_count; i++)
+  {
+    if (world.pc.p_inventory[i]->current_hp > 0)
+    {
+      alive++;
+    }
+  }
+  if (alive > 0)
+  {
+    io_trainer_battle(n);
+  }
   refresh();
   getch();
 
-  n->defeated = 1;
-  if (n->ctype == char_hiker || n->ctype == char_rival)
-  {
-    n->mtype = move_wander;
-  }
+  // n->defeated = 1;
+  // if (n->ctype == char_hiker || n->ctype == char_rival)
+  // {
+  //   n->mtype = move_wander;
+  // }
 }
 uint32_t move_pc_dir(uint32_t input, pair_t dest)
 {
@@ -1766,6 +1786,8 @@ uint32_t move_pc_dir(uint32_t input, pair_t dest)
     else if ((dynamic_cast<npc *>(world.cur_map->cmap[dest[dim_y]][dest[dim_x]])))
     {
       io_battle(&world.pc, world.cur_map->cmap[dest[dim_y]][dest[dim_x]]);
+      mvprintw(0, 0, "here in \n");
+      refresh();
       // Not actually moving, so set dest back to PC position
       dest[dim_x] = world.pc.pos[dim_x];
       dest[dim_y] = world.pc.pos[dim_y];
