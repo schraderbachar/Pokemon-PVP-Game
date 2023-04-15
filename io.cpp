@@ -505,11 +505,8 @@ void io_encounter_pokemon()
     mvprintw(14, 10, " %-60s ", "");
     mvprintw(15, 10, " %-60s ", "");
 
-    mvprintw(4, 10, "%s%s%s: HP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s",
-             p->is_shiny() ? "*" : "", p->get_species(),
-             p->is_shiny() ? "*" : "", p->get_hp(), p->get_atk(),
-             p->get_def(), p->get_spatk(), p->get_spdef(),
-             p->get_speed(), p->get_gender_string());
+    mvprintw(4, 10, "%s%s: HP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s", p->is_shiny() ? "SHINY " : "", p->get_species(), p->get_hp(),
+             p->get_atk(), p->get_def(), p->get_spatk(), p->get_spdef(), p->get_speed(), p->get_gender_string());
     mvprintw(5, 10, "%s's moves: %s %s", p->get_species(),
              p->get_move(0), p->get_move(1));
     mvprintw(6, 10, " Battle Options:");
@@ -892,7 +889,9 @@ void io_encounter_pokemon()
           break;
         }
         double crit = ((rand() % 255) < (world.pc.p_inventory[current_pokemon]->get_speed() / 2)) ? 1.5 : 1;
-        int damage = (int)((((((2 * world.pc.p_inventory[current_pokemon]->level) / 5) + 2) * world.pc.p_inventory[current_pokemon]->get_move_power(move) * world.pc.p_inventory[current_pokemon]->get_atk() / world.pc.p_inventory[current_pokemon]->get_def()) / 50 + 2) * crit * (rand() % 16 + 85));
+        double stab = (world.pc.p_inventory[current_pokemon]->get_type() == world.pc.p_inventory[current_pokemon]->get_move_type(move)) ? 1.5 : 1;
+        float random = ((float)(rand() % 16) / 100) + 0.85;
+        int damage = (int)((((((2 * world.pc.p_inventory[current_pokemon]->level) / 5) + 2) * world.pc.p_inventory[current_pokemon]->get_move_power(move) * world.pc.p_inventory[current_pokemon]->get_atk() / world.pc.p_inventory[current_pokemon]->get_def()) / 50 + 2) * crit * random * stab * 1);
         if (!((rand() % 100) < world.pc.p_inventory[current_pokemon]->get_move_accuracy(move)))
         {
           mvprintw(18, 10, " %-60s ", "");
@@ -1207,7 +1206,7 @@ void io_trainer_battle(character *defender)
 
     mvprintw(3, 10, "Trainer %c's pokemon %s%s:", p->symbol,
              p->p_inventory[npc_current_pokemon]->is_shiny() ? "SHINY " : "", p->p_inventory[npc_current_pokemon]->get_species());
-    mvprintw(4, 10, "HP: %d ATK: %d DEF: %d SPATK: %d SPDEF: % d SPEED %d %s ", p->p_inventory[npc_current_pokemon]->get_hp(), p->p_inventory[npc_current_pokemon]->get_atk(), p->p_inventory[npc_current_pokemon]->get_def(), p->p_inventory[npc_current_pokemon]->get_spatk(), p->p_inventory[npc_current_pokemon]->get_spdef(), p->p_inventory[npc_current_pokemon]->get_speed(), p->p_inventory[npc_current_pokemon]->get_gender_string());
+    mvprintw(4, 10, "HP: %d ATK: %d DEF: %d SPATK: %d SPDEF: % d SPEED %d %s ", p->p_inventory[npc_current_pokemon]->current_hp, p->p_inventory[npc_current_pokemon]->get_atk(), p->p_inventory[npc_current_pokemon]->get_def(), p->p_inventory[npc_current_pokemon]->get_spatk(), p->p_inventory[npc_current_pokemon]->get_spdef(), p->p_inventory[npc_current_pokemon]->get_speed(), p->p_inventory[npc_current_pokemon]->get_gender_string());
 
     mvprintw(5, 10, "%s's moves: %s %s", p->p_inventory[npc_current_pokemon]->get_species(),
              p->p_inventory[npc_current_pokemon]->get_move(npc_current_pokemon), p->p_inventory[npc_current_pokemon]->get_move(1));
@@ -1572,18 +1571,20 @@ void io_trainer_battle(character *defender)
         }
         double npc_crit = ((rand() % 255) < (p->p_inventory[npc_current_pokemon]->get_speed() / 2)) ? 1.5 : 1;
         double crit = ((rand() % 255) < (world.pc.p_inventory[current_pokemon]->get_speed() / 2)) ? 1.5 : 1;
+        float random = ((float)(rand() % 16) / 100) + 0.85;
         double npc_stab = (p->p_inventory[current_pokemon]->get_type() == p->p_inventory[current_pokemon]->get_move_type(0)) ? 1.5 : 1;
         double stab = (world.pc.p_inventory[current_pokemon]->get_type() == world.pc.p_inventory[current_pokemon]->get_move_type(move)) ? 1.5 : 1;
 
-        int npc_damage = (int)((((((2 * p->p_inventory[npc_current_pokemon]->level) / 5) + 2) * p->p_inventory[npc_current_pokemon]->get_move_power(move) * (p->p_inventory[npc_current_pokemon]->get_atk() / p->p_inventory[npc_current_pokemon]->get_def())) / 50 + 2) * npc_crit * (rand() % 16 + 85) * npc_stab * 1);
+        int npc_damage = (int)((((((2 * p->p_inventory[npc_current_pokemon]->level) / 5) + 2) * p->p_inventory[npc_current_pokemon]->get_move_power(move) * (p->p_inventory[npc_current_pokemon]->get_atk() / p->p_inventory[npc_current_pokemon]->get_def())) / 50 + 2) * npc_crit * random * npc_stab * 1);
 
-        int damage = (int)((((((2 * world.pc.p_inventory[current_pokemon]->level) / 5) + 2) * world.pc.p_inventory[current_pokemon]->get_move_power(move) * (world.pc.p_inventory[current_pokemon]->get_atk() / world.pc.p_inventory[current_pokemon]->get_def())) / 50 + 2) * crit * (rand() % 16 + 85) * stab * 1);
+        int damage = (int)((((((2 * world.pc.p_inventory[current_pokemon]->level) / 5) + 2) * world.pc.p_inventory[current_pokemon]->get_move_power(move) * (world.pc.p_inventory[current_pokemon]->get_atk() / world.pc.p_inventory[current_pokemon]->get_def())) / 50 + 2) * crit * random * stab * 1);
         if (turn == 0) // trainer
         {
           if (!((rand() % 100) < world.pc.p_inventory[current_pokemon]->get_move_accuracy(move)))
           {
             mvprintw(18, 10, " %-60s ", "");
             mvprintw(18, 10, " %s missed!", p->p_inventory[0]->get_species());
+            refresh();
             turn = 1;
             getch();
             break;
@@ -1593,7 +1594,8 @@ void io_trainer_battle(character *defender)
             mvprintw(18, 10, " %-60s ", "");
             mvprintw(18, 10, " %s did %d damage!", world.pc.p_inventory[current_pokemon]->get_species(), damage);
             turn = 1;
-
+            refresh();
+            getch();
             if (p->p_inventory[npc_current_pokemon]->current_hp - damage <= 0)
             {
               mvprintw(18, 10, " %-60s ", "");
@@ -1635,6 +1637,7 @@ void io_trainer_battle(character *defender)
             {
               mvprintw(18, 10, " %-60s ", "");
               mvprintw(18, 10, " %s missed!", p->p_inventory[npc_current_pokemon]->get_species());
+              refresh();
               turn = 0;
               getch();
             }
@@ -1642,6 +1645,7 @@ void io_trainer_battle(character *defender)
             {
               mvprintw(18, 10, " %-60s ", "");
               mvprintw(18, 10, " %s did %d damage!", p->p_inventory[npc_current_pokemon]->get_species(), npc_damage);
+              refresh();
               turn = 0;
               getch();
               if (world.pc.p_inventory[current_pokemon]->current_hp - npc_damage <= 0)
@@ -1926,7 +1930,7 @@ void io_handle_input(pair_t dest)
       io_teleport_pc(dest);
       turn_not_consumed = 0;
       break;
-    case 'm':
+    case 'B':
       io_display_bag();
       break;
     case 'f':

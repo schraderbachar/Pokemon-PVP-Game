@@ -51,8 +51,8 @@
 #define PACER_SYMBOL 'p'
 #define SWIMMER_SYMBOL 'm'
 #define WANDERER_SYMBOL 'w'
-#define REVIVE 0
-#define POTION 1
+#define REVIVE 2
+#define POTION 2
 #define POKEBALLS 2
 
 #define mappair(pair) (m->map[pair[dim_y]][pair[dim_x]])
