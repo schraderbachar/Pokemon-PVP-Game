@@ -1,4 +1,46 @@
-commit 7f91cb593f319b243e311a559b039cd8740e975a (HEAD -> master, origin/master)
+commit a9a0db9b738f5ea46e6ee539b35bdf222ee50aea (HEAD -> master, origin/master)
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sat Apr 15 16:18:26 2023 -0500
+
+    added more messages to pokecenter
+
+commit 07beaac1c3d726b4ff71c1c71a5acd2e390093bb
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sat Apr 15 16:14:36 2023 -0500
+
+    added turn priority
+
+commit ec1deb57fee97aae0d8bbca9be6f6ae4ac95699b
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sat Apr 15 16:03:02 2023 -0500
+
+    more fixes and tune ups to battles
+
+commit af7b219482460dba90079c850716f67817674277
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Sat Apr 15 15:24:31 2023 -0500
+
+    trainer battles now word properly
+
+commit bad4ea733f56a62c70a82e6c070867c4d331bc02
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Thu Apr 13 18:27:37 2023 -0500
+
+    starting to get trainer battles
+
+commit a7a610c703ff22ee40b3bf9ff4cac94542cf6d68
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Thu Apr 13 15:11:52 2023 -0500
+
+    implemented bag
+
+commit b14ba59389397a6c10374ceb14266cb8bc25f09f
+Author: schraderbachar <44781569+schraderbachar@users.noreply.github.com>
+Date:   Wed Apr 12 14:00:42 2023 -0500
+
+    Update CHANGELOG.md
+
+commit 7f91cb593f319b243e311a559b039cd8740e975a
 Author: schraderbachar <jj.schraderbachar@icloud.com>
 Date:   Wed Apr 12 13:55:27 2023 -0500
 
