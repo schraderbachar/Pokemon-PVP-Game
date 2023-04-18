@@ -488,6 +488,7 @@ void io_encounter_pokemon()
   }
 
   p = new class pokemon(rand() % (maxl - minl + 1) + minl);
+  int turn = (p->get_move_priority(0) > world.pc.p_inventory[0]->get_move_priority(0)) ? 1 : ((p->get_move_priority(0) == world.pc.p_inventory[0]->get_move_priority(0) && p->get_speed() > world.pc.p_inventory[0]->get_speed()) ? 1 : 0);
 
   while (in_battle)
   {
@@ -505,7 +506,7 @@ void io_encounter_pokemon()
     mvprintw(14, 10, " %-60s ", "");
     mvprintw(15, 10, " %-60s ", "");
 
-    mvprintw(4, 10, "%s%s: HP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s", p->is_shiny() ? "SHINY " : "", p->get_species(), p->get_hp(),
+    mvprintw(4, 10, "%s%s: HP:%d ATK:%d DEF:%d SPATK:%d SPDEF:%d SPEED:%d %s", p->is_shiny() ? "SHINY " : "", p->get_species(), p->current_hp,
              p->get_atk(), p->get_def(), p->get_spatk(), p->get_spdef(), p->get_speed(), p->get_gender_string());
     mvprintw(5, 10, "%s's moves: %s %s", p->get_species(),
              p->get_move(0), p->get_move(1));
@@ -892,28 +893,64 @@ void io_encounter_pokemon()
         double stab = (world.pc.p_inventory[current_pokemon]->get_type() == world.pc.p_inventory[current_pokemon]->get_move_type(move)) ? 1.5 : 1;
         float random = ((float)(rand() % 16) / 100) + 0.85;
         int damage = (int)((((((2 * world.pc.p_inventory[current_pokemon]->level) / 5) + 2) * world.pc.p_inventory[current_pokemon]->get_move_power(move) * world.pc.p_inventory[current_pokemon]->get_atk() / world.pc.p_inventory[current_pokemon]->get_def()) / 50 + 2) * crit * random * stab * 1);
-        if (!((rand() % 100) < world.pc.p_inventory[current_pokemon]->get_move_accuracy(move)))
+
+        if (turn == 0)
         {
-          mvprintw(18, 10, " %-60s ", "");
-          mvprintw(18, 10, " %s missed!", p->get_species());
-          getch();
-        }
-        else
-        {
-          mvprintw(18, 10, " %-60s ", "");
-          mvprintw(18, 10, " %s did %d damage!", world.pc.p_inventory[current_pokemon]->get_species(), damage);
-          getch();
-          if (p->current_hp - damage <= 0)
+          if (!((rand() % 100) < world.pc.p_inventory[current_pokemon]->get_move_accuracy(move)))
           {
             mvprintw(18, 10, " %-60s ", "");
-            mvprintw(18, 10, " %s was defeated!", p->get_species());
+            mvprintw(18, 10, " %s missed!", p->get_species());
+            turn = 1;
             getch();
-            in_battle = 0;
-            break;
           }
           else
           {
-            p->current_hp -= damage;
+            mvprintw(18, 10, " %-60s ", "");
+            mvprintw(18, 10, " %s did %d damage!", world.pc.p_inventory[current_pokemon]->get_species(), damage);
+            getch();
+            if (p->current_hp - damage <= 0)
+            {
+              mvprintw(18, 10, " %-60s ", "");
+              mvprintw(18, 10, " %s was defeated!", p->get_species());
+              getch();
+              in_battle = 0;
+              break;
+            }
+            else
+            {
+              p->current_hp -= damage;
+              turn = 1;
+            }
+          }
+        }
+        else
+        {
+          if (!((rand() % 100) < p->get_move_accuracy(move)))
+          {
+            mvprintw(18, 10, " %-60s ", "");
+            mvprintw(18, 10, " %s missed!", p->get_species());
+            turn = 0;
+            getch();
+          }
+          else
+          {
+            mvprintw(18, 10, " %-60s ", "");
+            mvprintw(18, 10, " %s did %d damage!", p->get_species(), damage);
+            getch();
+            if (world.pc.p_inventory[current_pokemon]->current_hp - damage <= 0)
+            {
+              mvprintw(18, 10, " %-60s ", "");
+              mvprintw(18, 10, " %s was defeated!", world.pc.p_inventory[current_pokemon]->get_species());
+              world.pc.p_inventory[current_pokemon]->current_hp = 0;
+              getch();
+              in_battle = 0;
+              break;
+            }
+            else
+            {
+              world.pc.p_inventory[current_pokemon]->current_hp -= damage;
+              turn = 0;
+            }
           }
         }
       }
@@ -1617,6 +1654,7 @@ void io_trainer_battle(character *defender)
                 mvprintw(18, 10, " %-60s ", "");
                 mvprintw(19, 10, " %-60s ", "");
                 mvprintw(18, 10, "All of the trainers Pokemon are knocked out. You won.");
+                p->defeated = 1;
                 refresh();
                 getch();
                 // in_battle = 0;
