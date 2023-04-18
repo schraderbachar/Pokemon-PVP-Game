@@ -1,10 +1,23 @@
-commit c7b7af11f5eca14d25fef612e310bc159a03adbf (HEAD -> master)
+commit 9a457c902ad0eb389eacba19d1761076c2b06107 (HEAD -> master, origin/master)
+Merge: 139243a 84fbb3d
 Author: schraderbachar <jj.schraderbachar@icloud.com>
-Date:   Sat Apr 15 16:32:06 2023 -0500
+Date:   Tue Apr 18 13:12:15 2023 -0500
 
-    updated readme
+    Merge branch 'master' of https://github.com/schraderbachar/Pokemon-PVP-Game
 
-commit 3fbe8aa1583aac0c306fcbace60305752c746a97 (origin/master)
+commit 139243ad3de6bda249926a5743ce1f8c9bd7f20e
+Author: schraderbachar <jj.schraderbachar@icloud.com>
+Date:   Tue Apr 18 13:12:01 2023 -0500
+
+    added pokemon battle turns and some more bug fixes
+
+commit 84fbb3d772bea270f9ca95737fb5b85fee0349a0
+Author: schraderbachar <44781569+schraderbachar@users.noreply.github.com>
+Date:   Sat Apr 15 16:32:51 2023 -0500
+
+    Update CHANGELOG.md
+
+commit 3fbe8aa1583aac0c306fcbace60305752c746a97
 Author: schraderbachar <44781569+schraderbachar@users.noreply.github.com>
 Date:   Sat Apr 15 16:22:10 2023 -0500
 
